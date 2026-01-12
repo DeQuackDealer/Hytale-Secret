@@ -3,12 +3,15 @@ package com.yellowtale.rubidium.replay;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReferenceArray;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 
 public final class ReplayBuffer {
     
     private final UUID playerId;
-    private final ReplayFrame[] frames;
+    private final AtomicReferenceArray<ReplayFrame> frames;
     private final int capacity;
     
     private final AtomicInteger writeIndex;
@@ -16,56 +19,75 @@ public final class ReplayBuffer {
     private final AtomicLong totalFramesWritten;
     
     private final ReplayFramePool framePool;
+    private final ReadWriteLock lock;
     
     public ReplayBuffer(UUID playerId, int capacityFrames, ReplayFramePool framePool) {
         this.playerId = playerId;
         this.capacity = capacityFrames;
-        this.frames = new ReplayFrame[capacityFrames];
+        this.frames = new AtomicReferenceArray<>(capacityFrames);
         this.writeIndex = new AtomicInteger(0);
         this.size = new AtomicInteger(0);
         this.totalFramesWritten = new AtomicLong(0);
         this.framePool = framePool;
+        this.lock = new ReentrantReadWriteLock();
         
         for (int i = 0; i < capacityFrames; i++) {
-            frames[i] = framePool != null ? framePool.acquire() : new ReplayFrame();
+            frames.set(i, framePool != null ? framePool.acquire() : new ReplayFrame());
         }
     }
     
     public void write(Consumer<ReplayFrame> frameWriter) {
-        int index = writeIndex.getAndUpdate(i -> (i + 1) % capacity);
+        ReplayFrame newFrame = framePool != null ? framePool.acquire() : new ReplayFrame();
+        newFrame.reset();
+        newFrame.setPlayerId(playerId);
+        newFrame.setTimestamp(System.currentTimeMillis());
         
-        ReplayFrame frame = frames[index];
-        frame.reset();
-        frame.setPlayerId(playerId);
-        frame.setTimestamp(System.currentTimeMillis());
+        frameWriter.accept(newFrame);
         
-        frameWriter.accept(frame);
-        
-        int currentSize = size.get();
-        if (currentSize < capacity) {
-            size.incrementAndGet();
+        lock.writeLock().lock();
+        try {
+            int index = writeIndex.getAndUpdate(i -> (i + 1) % capacity);
+            
+            ReplayFrame oldFrame = frames.getAndSet(index, newFrame);
+            
+            if (framePool != null && oldFrame != null) {
+                framePool.release(oldFrame);
+            }
+            
+            int currentSize = size.get();
+            if (currentSize < capacity) {
+                size.incrementAndGet();
+            }
+            
+            totalFramesWritten.incrementAndGet();
+        } finally {
+            lock.writeLock().unlock();
         }
-        
-        totalFramesWritten.incrementAndGet();
     }
     
     public ReplayFrame[] snapshot(int maxFrames) {
-        int currentSize = Math.min(size.get(), maxFrames);
-        if (currentSize == 0) {
-            return new ReplayFrame[0];
+        lock.readLock().lock();
+        try {
+            int currentSize = Math.min(size.get(), maxFrames);
+            if (currentSize == 0) {
+                return new ReplayFrame[0];
+            }
+            
+            ReplayFrame[] result = new ReplayFrame[currentSize];
+            int currentWriteIndex = writeIndex.get();
+            
+            int startIndex = (currentWriteIndex - currentSize + capacity) % capacity;
+            
+            for (int i = 0; i < currentSize; i++) {
+                int bufferIndex = (startIndex + i) % capacity;
+                ReplayFrame frame = frames.get(bufferIndex);
+                result[i] = frame != null ? frame.copy() : new ReplayFrame();
+            }
+            
+            return result;
+        } finally {
+            lock.readLock().unlock();
         }
-        
-        ReplayFrame[] result = new ReplayFrame[currentSize];
-        int currentWriteIndex = writeIndex.get();
-        
-        int startIndex = (currentWriteIndex - currentSize + capacity) % capacity;
-        
-        for (int i = 0; i < currentSize; i++) {
-            int bufferIndex = (startIndex + i) % capacity;
-            result[i] = frames[bufferIndex].copy();
-        }
-        
-        return result;
     }
     
     public ReplaySegment toSegment(int tickRate, int captureRadius) {
@@ -102,10 +124,19 @@ public final class ReplayBuffer {
     }
     
     public void release() {
-        if (framePool != null) {
-            for (ReplayFrame frame : frames) {
-                framePool.release(frame);
+        lock.writeLock().lock();
+        try {
+            if (framePool != null) {
+                for (int i = 0; i < capacity; i++) {
+                    ReplayFrame frame = frames.get(i);
+                    if (frame != null) {
+                        framePool.release(frame);
+                        frames.set(i, null);
+                    }
+                }
             }
+        } finally {
+            lock.writeLock().unlock();
         }
     }
     
@@ -117,15 +148,27 @@ public final class ReplayBuffer {
     public boolean isEmpty() { return size.get() == 0; }
     
     public long getOldestTimestamp() {
-        if (isEmpty()) return 0;
-        int oldestIndex = (writeIndex.get() - size.get() + capacity) % capacity;
-        return frames[oldestIndex].getTimestamp();
+        lock.readLock().lock();
+        try {
+            if (isEmpty()) return 0;
+            int oldestIndex = (writeIndex.get() - size.get() + capacity) % capacity;
+            ReplayFrame frame = frames.get(oldestIndex);
+            return frame != null ? frame.getTimestamp() : 0;
+        } finally {
+            lock.readLock().unlock();
+        }
     }
     
     public long getNewestTimestamp() {
-        if (isEmpty()) return 0;
-        int newestIndex = (writeIndex.get() - 1 + capacity) % capacity;
-        return frames[newestIndex].getTimestamp();
+        lock.readLock().lock();
+        try {
+            if (isEmpty()) return 0;
+            int newestIndex = (writeIndex.get() - 1 + capacity) % capacity;
+            ReplayFrame frame = frames.get(newestIndex);
+            return frame != null ? frame.getTimestamp() : 0;
+        } finally {
+            lock.readLock().unlock();
+        }
     }
     
     public long getBufferedDurationMs() {

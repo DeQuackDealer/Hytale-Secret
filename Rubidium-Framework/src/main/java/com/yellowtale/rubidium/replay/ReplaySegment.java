@@ -1,5 +1,8 @@
 package com.yellowtale.rubidium.replay;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -13,7 +16,7 @@ public final class ReplaySegment {
     private static final int MAGIC = 0x52425831;
     private static final byte VERSION = 1;
     private static final int HEADER_SIZE = 64;
-    private static final int MAX_UNCOMPRESSED_SIZE = 1024 * 1024;
+    private static final int MAX_SEGMENT_BYTES = 16 * 1024 * 1024;
     
     private UUID playerId;
     private long startTimestamp;
@@ -82,19 +85,33 @@ public final class ReplaySegment {
     }
     
     public byte[] serialize() {
-        ByteBuffer uncompressed = ByteBuffer.allocate(MAX_UNCOMPRESSED_SIZE);
-        uncompressed.order(ByteOrder.BIG_ENDIAN);
+        ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
         
-        keyframe.serialize(uncompressed);
+        serializeFrameToStream(keyframe, dataStream);
+        int actualFrameCount = 1;
+        long actualEndTimestamp = keyframe.getTimestamp();
         
         for (ReplayDelta delta : deltas) {
-            delta.serialize(uncompressed);
+            int sizeBefore = dataStream.size();
+            serializeDeltaToStream(delta, dataStream);
+            
+            if (dataStream.size() > MAX_SEGMENT_BYTES) {
+                byte[] truncated = new byte[sizeBefore];
+                System.arraycopy(dataStream.toByteArray(), 0, truncated, 0, sizeBefore);
+                dataStream.reset();
+                dataStream.writeBytes(truncated);
+                break;
+            }
+            
+            actualFrameCount++;
         }
         
-        uncompressed.flip();
-        byte[] uncompressedData = new byte[uncompressed.remaining()];
-        uncompressed.get(uncompressedData);
+        if (actualFrameCount > 1 && !deltas.isEmpty()) {
+            ReplayFrame lastFrame = reconstructFrame(actualFrameCount - 1);
+            actualEndTimestamp = lastFrame.getTimestamp();
+        }
         
+        byte[] uncompressedData = dataStream.toByteArray();
         byte[] compressedData = compress(uncompressedData);
         
         ByteBuffer output = ByteBuffer.allocate(HEADER_SIZE + compressedData.length);
@@ -105,10 +122,10 @@ public final class ReplaySegment {
         output.putLong(playerId.getMostSignificantBits());
         output.putLong(playerId.getLeastSignificantBits());
         output.putLong(startTimestamp);
-        output.putLong(endTimestamp);
+        output.putLong(actualEndTimestamp);
         output.putInt(tickRate);
         output.putInt(captureRadius);
-        output.putInt(frameCount);
+        output.putInt(actualFrameCount);
         output.putInt(uncompressedData.length);
         output.putInt(compressedData.length);
         
@@ -122,6 +139,26 @@ public final class ReplaySegment {
         output.put(compressedData);
         
         return output.array();
+    }
+    
+    private void serializeFrameToStream(ReplayFrame frame, ByteArrayOutputStream stream) {
+        ByteBuffer buffer = ByteBuffer.allocate(512);
+        buffer.order(ByteOrder.BIG_ENDIAN);
+        int written = frame.serialize(buffer);
+        buffer.flip();
+        byte[] data = new byte[written];
+        buffer.get(data);
+        stream.writeBytes(data);
+    }
+    
+    private void serializeDeltaToStream(ReplayDelta delta, ByteArrayOutputStream stream) {
+        ByteBuffer buffer = ByteBuffer.allocate(256);
+        buffer.order(ByteOrder.BIG_ENDIAN);
+        int written = delta.serialize(buffer);
+        buffer.flip();
+        byte[] data = new byte[written];
+        buffer.get(data);
+        stream.writeBytes(data);
     }
     
     public static ReplaySegment deserialize(byte[] data) {

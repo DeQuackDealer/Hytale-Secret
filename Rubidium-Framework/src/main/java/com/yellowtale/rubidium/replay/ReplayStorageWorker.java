@@ -43,9 +43,9 @@ public final class ReplayStorageWorker {
     
     private final RubidiumLogger logger;
     private final StorageConfig config;
-    private final ExecutorService executor;
+    private final ExecutorService writeExecutor;
+    private final ScheduledExecutorService pruneExecutor;
     private final BlockingQueue<WriteTask> writeQueue;
-    private final BlockingQueue<PruneTask> pruneQueue;
     
     private final AtomicLong totalBytesWritten;
     private final AtomicLong totalSessionsWritten;
@@ -57,13 +57,20 @@ public final class ReplayStorageWorker {
     public ReplayStorageWorker(RubidiumLogger logger, StorageConfig config) {
         this.logger = logger;
         this.config = config;
-        this.executor = Executors.newFixedThreadPool(config.compressionWorkers(), r -> {
-            Thread t = new Thread(r, "ReplayStorage-Worker");
+        this.writeExecutor = Executors.newFixedThreadPool(
+            Math.max(1, config.compressionWorkers()), 
+            r -> {
+                Thread t = new Thread(r, "ReplayStorage-Writer");
+                t.setDaemon(true);
+                return t;
+            }
+        );
+        this.pruneExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "ReplayStorage-Pruner");
             t.setDaemon(true);
             return t;
         });
         this.writeQueue = new LinkedBlockingQueue<>(config.maxQueueSize());
-        this.pruneQueue = new LinkedBlockingQueue<>();
         this.totalBytesWritten = new AtomicLong(0);
         this.totalSessionsWritten = new AtomicLong(0);
         this.totalSessionsPruned = new AtomicLong(0);
@@ -81,25 +88,36 @@ public final class ReplayStorageWorker {
             logger.error("Failed to create replay storage directory", e);
         }
         
-        executor.submit(this::writeWorker);
-        executor.submit(this::pruneWorker);
+        for (int i = 0; i < config.compressionWorkers(); i++) {
+            writeExecutor.submit(this::writeWorker);
+        }
+        
+        pruneExecutor.scheduleAtFixedRate(
+            this::runPruneCycle,
+            1, 60, TimeUnit.SECONDS
+        );
         
         calculateStorageUsage();
         
-        logger.info("Replay storage worker started with {} workers", config.compressionWorkers());
+        logger.info("Replay storage worker started with {} write workers", config.compressionWorkers());
     }
     
     public void stop() {
         if (!running) return;
         running = false;
         
-        executor.shutdown();
+        writeExecutor.shutdown();
+        pruneExecutor.shutdown();
         try {
-            if (!executor.awaitTermination(30, TimeUnit.SECONDS)) {
-                executor.shutdownNow();
+            if (!writeExecutor.awaitTermination(30, TimeUnit.SECONDS)) {
+                writeExecutor.shutdownNow();
+            }
+            if (!pruneExecutor.awaitTermination(10, TimeUnit.SECONDS)) {
+                pruneExecutor.shutdownNow();
             }
         } catch (InterruptedException e) {
-            executor.shutdownNow();
+            writeExecutor.shutdownNow();
+            pruneExecutor.shutdownNow();
             Thread.currentThread().interrupt();
         }
         
@@ -112,7 +130,7 @@ public final class ReplayStorageWorker {
     }
     
     public void requestPrune(UUID playerId) {
-        pruneQueue.offer(new PruneTask(playerId));
+        pruneExecutor.submit(() -> prunePlayer(playerId));
     }
     
     private void writeWorker() {
@@ -131,24 +149,13 @@ public final class ReplayStorageWorker {
         }
     }
     
-    private void pruneWorker() {
-        while (running) {
-            try {
-                PruneTask task = pruneQueue.poll(1, TimeUnit.SECONDS);
-                if (task != null) {
-                    prunePlayer(task.playerId());
-                }
-                
-                if (pruneQueue.isEmpty()) {
-                    pruneExpiredSessions();
-                    enforceStorageLimits();
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            } catch (Exception e) {
-                logger.error("Error in prune worker", e);
-            }
+    private void runPruneCycle() {
+        if (!running) return;
+        try {
+            pruneExpiredSessions();
+            enforceStorageLimits();
+        } catch (Exception e) {
+            logger.error("Error in prune cycle", e);
         }
     }
     
