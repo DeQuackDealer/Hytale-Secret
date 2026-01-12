@@ -217,6 +217,107 @@ qolManager.enableFeature("lag-detection");
 
 ---
 
+## Moderator Replay System
+
+Rubidium includes a powerful replay recording system for anti-cheat purposes. It continuously captures player state at configurable FPS, storing data in efficient ring buffers with delta compression.
+
+### Features
+
+- **Customizable FPS** - Record at 5, 10, 20, or 60 FPS depending on your needs
+- **Ring Buffer Storage** - Memory-efficient circular buffers per player
+- **Delta Compression** - Only stores changes between frames (typically 90%+ compression)
+- **Async I/O** - All disk writes happen on background threads
+- **Auto-Pruning** - Automatic cleanup based on retention period and storage quotas
+- **Trigger-Based Recording** - Start recording on suspicious activity, combat, or reports
+- **TPS-Aware** - Automatically drops frames when server is under load
+
+### Configuration
+
+```java
+ModeratorReplayFeature replay = new ModeratorReplayFeature(logger, dataDir);
+replay.setConfig(new ModeratorReplayFeature.ReplayConfig(
+    20,                          // targetFps: frames per second
+    64,                          // captureRadius: blocks around player
+    Duration.ofMinutes(5),       // bufferDuration: rolling buffer size
+    Duration.ofSeconds(30),      // segmentDuration: chunk size for storage
+    false,                       // continuousMode: always record everyone
+    true,                        // recordOnSuspicion: anti-cheat triggers
+    true,                        // recordOnCombat: record during fights
+    true,                        // recordOnReport: record when reported
+    dataDir.resolve("replays"),  // storageDir
+    10L * 1024 * 1024 * 1024,    // maxStorageBytes: 10 GB total
+    512L * 1024 * 1024,          // maxStoragePerPlayerBytes: 512 MB per player
+    Duration.ofDays(7),          // retentionPeriod
+    2,                           // compressionWorkers
+    15.0                         // minTpsThreshold: pause if TPS drops below
+));
+```
+
+### Commands
+
+```
+/replay record <player> [reason]  - Start recording a player manually
+/replay stop <player>             - Stop recording a player
+/replay list [player]             - List active and saved sessions
+/replay info <session-id>         - Show session details
+/replay review <session-id>       - Load a replay for review
+/replay purge <player>            - Delete all replays for a player
+/replay status                    - Show system status and metrics
+/replay config <key> [value]      - View or modify configuration
+```
+
+### Integration with Anti-Cheat
+
+```java
+// Trigger recording when suspicious activity is detected
+antiCheatService.onViolation((player, violation) -> {
+    replayFeature.onSuspiciousActivity(player, violation.getReason());
+});
+
+// Trigger recording when combat starts
+combatService.onCombatStart((attacker, defender) -> {
+    replayFeature.onCombatStart(attacker, defender);
+});
+
+// Trigger recording when a player is reported
+reportService.onPlayerReported((reported, reporter, reason) -> {
+    replayFeature.onPlayerReport(reported, reporter, reason);
+});
+```
+
+### Data Captured Per Frame
+
+Each frame captures:
+- Position (x, y, z) with sub-block precision
+- Rotation (yaw, pitch)
+- Velocity vector
+- Movement state (sprinting, sneaking, swimming, flying, gliding)
+- Health and armor values
+- Status effects (as bitmask)
+- Held item slot and ID
+- Actions performed (attacks, block breaks, etc.)
+- Target entity for combat events
+
+### Storage Format
+
+Replays are stored in `.rbx` binary format:
+- **Segment Header** - Player UUID, timestamps, tick rate, checksum
+- **Keyframe** - Full player state (first frame)
+- **Deltas** - Bit-packed changes from previous frame
+- **Compression** - DEFLATE compression for ~90% size reduction
+
+### Performance Optimizations
+
+1. **Object Pooling** - `ReplayFramePool` reuses frame objects to reduce GC pressure
+2. **Ring Buffers** - Lock-free `ReplayBuffer` with atomic operations
+3. **Delta Encoding** - Only changed fields are stored (typically 2-10 bytes per frame)
+4. **Variable-Length Integers** - Timestamps and small values use VarInt encoding
+5. **Quantized Values** - Positions stored as fixed-point (1/4096 precision)
+6. **Background Compression** - All compression runs on dedicated worker threads
+7. **TPS Throttling** - Recording pauses automatically when server TPS drops
+
+---
+
 ## Core Systems
 
 ### Module System
@@ -517,6 +618,17 @@ src/main/java/com/yellowtale/rubidium/
 │   ├── QoLFeature.java   # Base feature class
 │   ├── QoLManager.java   # Feature registry
 │   └── QoLCommands.java  # /qol commands
+├── replay/               # Moderator Replay System
+│   ├── ReplayFrame.java           # Per-tick player state capture
+│   ├── ReplayDelta.java           # Delta-compressed frame changes
+│   ├── ReplaySegment.java         # Chunk of frames with compression
+│   ├── ReplaySession.java         # Full recording session
+│   ├── ReplayBuffer.java          # Lock-free ring buffer
+│   ├── ReplayFramePool.java       # Object pool for frames
+│   ├── ReplayStorageWorker.java   # Async compression & I/O
+│   ├── ReplayMetrics.java         # Performance metrics
+│   ├── ModeratorReplayFeature.java # QoL feature integration
+│   └── ReplayCommands.java        # /replay commands
 ├── devkit/               # Development tools
 └── optimization/         # Performance optimization utilities
 ```
