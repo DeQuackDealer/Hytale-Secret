@@ -129,6 +129,94 @@ Plugin installed successfully. Restart to activate.
 
 ---
 
+## Quality of Life (QoL) Features
+
+Rubidium includes a comprehensive suite of toggleable QoL features for server operators. Each feature can be independently enabled or disabled at runtime with persistent state.
+
+### Managing QoL Features
+
+```
+/qol list                    - List all features and their status
+/qol info <feature-id>       - Show feature details
+/qol enable <feature-id|all> - Enable a feature or all features
+/qol disable <feature-id|all> - Disable a feature or all features
+/qol toggle <feature-id>     - Toggle a feature on/off
+/qol reload                  - Reload all feature configurations
+```
+
+### Available Features
+
+| Feature ID | Name | Description |
+|------------|------|-------------|
+| `afk-detection` | AFK Detection | Detects inactive players with optional auto-kick |
+| `chat-formatting` | Chat Formatting | Color codes, mentions, customizable format |
+| `join-leave-messages` | Join/Leave Messages | Customizable player join/leave messages |
+| `motd` | MOTD & Tab List | Server MOTD and tab header/footer |
+| `command-cooldown` | Command Cooldowns | Rate limits commands to prevent spam |
+| `maintenance-mode` | Maintenance Mode | Restricts access with bypass permissions |
+| `staff-tools` | Staff Tools | Vanish, godmode, freeze, teleport |
+| `lag-detection` | Lag Detection | TPS/memory monitoring with alerts |
+| `auto-save` | Auto Save | Periodic world saves with announcements |
+| `player-stats` | Player Statistics | Tracks playtime and join counts |
+
+### Feature Configuration
+
+Each feature has a configurable record pattern:
+
+```java
+// Example: Configure AFK detection
+AfkDetectionFeature afk = qolManager.getFeature("afk-detection");
+afk.setConfig(new AfkDetectionFeature.AfkConfig(
+    Duration.ofMinutes(5),    // timeout before marking AFK
+    true,                      // kick AFK players
+    Duration.ofMinutes(30),    // kick after this AFK duration
+    "{player} is now AFK",     // AFK message
+    "{player} is no longer AFK", // return message
+    true                       // broadcast AFK status
+));
+```
+
+### Integrating with Core
+
+```java
+// Start the QoL tick loop (integrates with scheduler)
+qolManager.startTickLoop(scheduler);
+
+// Register default features
+qolManager.registerFeature(new AfkDetectionFeature(logger));
+qolManager.registerFeature(new ChatFormattingFeature(logger));
+qolManager.registerFeature(new LagDetectionFeature(logger));
+// ... register other features
+
+// Enable features
+qolManager.enableFeature("afk-detection");
+qolManager.enableFeature("lag-detection");
+```
+
+### Staff Tools Commands
+
+```
+/vanish                      - Toggle invisibility
+/godmode                     - Toggle invincibility
+/freeze <player>             - Freeze/unfreeze a player
+/tp <player>                 - Teleport to a player
+/spectate <player>           - Spectate a player (no target = stop)
+/staffmode                   - Show active staff modes
+```
+
+### Maintenance Mode Commands
+
+```
+/maintenance                 - Show maintenance status
+/maintenance on [reason]     - Enable maintenance mode
+/maintenance off             - Disable maintenance mode
+/maintenance add <player>    - Add player to maintenance bypass
+/maintenance remove <player> - Remove from bypass list
+/maintenance list            - Show bypass list
+```
+
+---
+
 ## Core Systems
 
 ### Module System
@@ -402,6 +490,7 @@ src/main/java/com/yellowtale/rubidium/
 │   ├── player/           # Player abstraction
 │   └── scheduler/        # Task scheduler interface
 ├── core/                 # Core framework implementation
+│   ├── access/           # Access control (whitelist, bans)
 │   ├── config/           # Configuration system
 │   ├── lifecycle/        # Lifecycle management
 │   ├── logging/          # Logging implementation
@@ -411,8 +500,24 @@ src/main/java/com/yellowtale/rubidium/
 │   ├── performance/      # Performance budgeting
 │   ├── scheduler/        # Scheduler implementation
 │   └── RubidiumCore.java # Main entry point
+├── integration/          # External integrations
+│   └── modtale/          # Modtale plugin marketplace
+├── qol/                  # Quality of Life features
+│   ├── features/         # Individual QoL features
+│   │   ├── AfkDetectionFeature.java
+│   │   ├── AutoSaveFeature.java
+│   │   ├── ChatFormattingFeature.java
+│   │   ├── CommandCooldownFeature.java
+│   │   ├── JoinLeaveMessagesFeature.java
+│   │   ├── LagDetectionFeature.java
+│   │   ├── MaintenanceModeFeature.java
+│   │   ├── MotdFeature.java
+│   │   ├── PlayerStatsFeature.java
+│   │   └── StaffToolsFeature.java
+│   ├── QoLFeature.java   # Base feature class
+│   ├── QoLManager.java   # Feature registry
+│   └── QoLCommands.java  # /qol commands
 ├── devkit/               # Development tools
-├── integration/          # Yellow Tale launcher integration
 └── optimization/         # Performance optimization utilities
 ```
 
