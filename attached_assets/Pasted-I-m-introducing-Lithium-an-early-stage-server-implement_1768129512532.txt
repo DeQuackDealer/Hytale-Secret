@@ -1,0 +1,36 @@
+I’m introducing Lithium, an early-stage server implementation for Hytale, written in C#.
+
+Lithium is not a finished server and will not replace the official Java server. The project is currently focused on building a modern, high-performance foundation for what will become a full server platform.
+
+A core goal of Lithium is to allow server developers to build mods and plugins in C# instead of Java, using the same language, tools, and type system as the game/server itself.
+
+🚀 Why C#?
+The long-term goal is to explore how far a modern C# stack can be pushed for a large-scale game server. Lithium is built around low-level C# features that are well-suited for this type of workload:
+
+SIMD: Hardware-accelerated math for physics, collisions, and world generation.
+Unsafe code & pointers: Used selectively to control memory and optimize critical paths.
+Zero-allocation networking: Span<T> and Memory<T> are used to process packets with minimal GC pressure.
+JIT & PGO: Profile-guided optimizations allow hot code paths to get faster over time.
+
+These are the building blocks of the engine that is being developed right now.
+
+🛠️ A unified server platform
+Lithium is being designed as a single, coherent ecosystem rather than a collection of disconnected tools.
+One language for everything — including server logic, tools, and mods.
+
+Integrated Dashboard: a built-in web interface (Blazor Server) to manage and monitor the server.
+Unified Architecture: the server core, database layer (MongoDB), and web interface share the same C# codebase.
+Modding & Plugins: server extensions will be written in C#, using the same APIs and runtime as the core engine.
+Discord Integration: native authentication and role synchronization planned from the start.
+
+🔮 Project vision
+Lithium aims to become a community-driven, open-source alternative with a focus on:
+
+Scalability: efficient memory and CPU usage for large player counts.
+Extensibility: a clean, strongly-typed API for mods and tooling.
+Transparency: a fully open codebase that anyone can audit, extend, or fork.
+
+🚧 Current status
+Lithium is in the building phase.
+
+Right now, development is focused on the low-level architecture: networking, memory management, world systems, and internal APIs. There is no playable server at this stage.

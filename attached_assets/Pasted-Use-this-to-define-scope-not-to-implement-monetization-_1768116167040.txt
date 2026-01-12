@@ -1,0 +1,319 @@
+Use this to define scope, not to implement monetization logic yet.
+
+📌 CONTEXT
+
+You are working on Yellow Tale (launcher) and Pond (server-side system).
+Some features are free, others are premium-tier, but all features must be architected cleanly so premium functionality can be enabled or disabled later without rewrites.
+
+Do NOT implement payments.
+Only design feature gates.
+
+⭐ YELLOW TALE — PREMIUM FEATURES (ARCHITECTURAL ONLY)
+Performance (Advanced)
+
+Intelligent CPU core allocation
+
+Adaptive RAM reservation based on system profiling
+
+Automatic background process suppression
+
+Advanced disk IO pre-warming
+
+Profile-based performance presets
+
+Diagnostics (Advanced)
+
+Historical performance tracking
+
+Frame pacing analysis
+
+Bottleneck detection (CPU vs GPU vs IO)
+
+Exportable diagnostic reports
+
+Crash correlation across sessions
+
+Mod Tooling (Advanced)
+
+Mod conflict detection
+
+Dependency auto-resolution
+
+Load-order optimization
+
+Per-server mod profiles
+
+Mod health checks
+
+Visual Processing (Legal, External)
+
+External frame upscaling pipeline
+
+Multiple scaling algorithms
+
+Presets per profile
+
+No injection, no runtime hooking
+
+Session & Networking
+
+Smart session orchestration
+
+Automatic NAT traversal attempts
+
+Relay routing (abstracted, optional)
+
+Session persistence & recovery
+
+Integration with Pond
+
+Server capability discovery
+
+Server-side performance hints
+
+Asset availability checks
+
+Cosmetic compatibility verification
+
+⭐ POND — PREMIUM FEATURES (ARCHITECTURAL ONLY)
+Server Performance
+
+Advanced tick scheduling
+
+Adaptive entity throttling
+
+Dynamic chunk activation
+
+Memory pooling & reuse
+
+Server load prediction
+
+Live Server Tooling
+
+Runtime plugin hot-loading
+
+Live configuration reloads
+
+Real-time performance dashboards
+
+Safe plugin sandboxing
+
+Cosmetics & Identity
+
+Server-approved cosmetic registry
+
+Temporary cosmetic overrides
+
+Creator cosmetic support
+
+Asset validation & scope control
+
+Server ↔ Launcher Integration
+
+Advertise supported features to Yellow Tale
+
+Accept launcher-provided asset manifests
+
+Validate cosmetic ownership
+
+Synchronize profiles (read-only)
+
+🧠 IMPORTANT
+
+All premium features must:
+
+be optional
+
+fail gracefully
+
+not block core gameplay
+
+not introduce pay-to-win mechanics
+
+🟡 PROMPT 2 — REPLIT AI ULTRA PROMPT: POND CORE BASE
+
+Paste this separately into Replit AI.
+
+🔧 PROJECT: Pond — Server-Side Modular System
+
+You are an expert server systems engineer.
+
+You are building Pond, a server-side modular platform designed to run alongside a moddable sandbox game.
+
+This system must be:
+
+high performance
+
+modular
+
+hot-reloadable
+
+stable under load
+
+legally safe
+
+game-agnostic
+
+🚫 HARD RULES
+
+DO NOT assume any game-specific APIs
+
+DO NOT inject into clients
+
+DO NOT require client-side mods
+
+DO NOT patch binaries
+
+DO NOT depend on Yellow Tale to function
+
+Pond must work independently, but be integratable later.
+
+🧱 TECH STACK
+
+Language: Java (preferred) or Rust
+
+Config: TOML or YAML
+
+Logging: Structured logs
+
+Architecture: Plugin-based, modular
+
+🗂️ REQUIRED PROJECT STRUCTURE
+pond/
+├─ core/
+│  ├─ server/            # lifecycle management
+│  ├─ plugins/           # plugin loader & sandbox
+│  ├─ scheduler/         # tick & task management
+│  ├─ performance/       # optimization systems
+│  ├─ assets/            # cosmetic & asset registry
+│  ├─ integration/       # Yellow Tale bridge (optional)
+│  ├─ config/
+│  ├─ telemetry/
+│  └─ util/
+│
+├─ plugins/
+│  └─ example-plugin/
+│
+└─ README.md
+
+⚙️ CORE SYSTEMS TO IMPLEMENT
+1️⃣ Server Lifecycle
+
+Start / stop / reload
+
+Graceful shutdown
+
+Crash recovery hooks
+
+2️⃣ Plugin System
+
+Plugin discovery
+
+Load / enable / disable at runtime
+
+Dependency resolution
+
+Version compatibility checks
+
+Fault isolation (plugin failure ≠ server crash)
+
+3️⃣ Scheduler & Performance Core
+
+Tick loop abstraction
+
+Task prioritization
+
+Adaptive throttling
+
+Entity & system budgeting
+
+Performance metrics exposure
+
+4️⃣ Asset & Cosmetic System (Server-Side)
+
+Cosmetic registry
+
+Asset metadata validation
+
+Scope control (session / server / event)
+
+Temporary availability
+
+Server approval rules
+
+⚠️ Do NOT implement rendering or client hooks
+Only manage availability & rules
+
+5️⃣ Yellow Tale Integration (Abstract)
+
+Optional integration module
+
+Read-only server capability export
+
+Accept asset manifests from launcher
+
+Validate cosmetic ownership
+
+Zero hard dependency
+
+6️⃣ Configuration System
+
+Versioned configs
+
+Live reload support
+
+Safe fallback defaults
+
+7️⃣ Telemetry & Observability
+
+Tick cost metrics
+
+Memory usage
+
+Plugin performance stats
+
+Structured logging
+
+🧪 ENGINEERING REQUIREMENTS
+
+Clear plugin lifecycle contracts
+
+Defensive programming
+
+Extensive documentation
+
+No hardcoded limits
+
+Designed for story & gameplay plugins
+
+🎯 DELIVERABLES
+
+Compiling core system
+
+Working plugin loader
+
+Example plugin
+
+Clean documentation
+
+🧠 DESIGN PHILOSOPHY
+
+Pond is:
+
+Paper-like in spirit
+
+Story-friendly
+
+Performance-first
+
+Extensible without rewrites
+
+If a feature compromises:
+
+stability
+
+legality
+
+long-term maintainability
+
+DO NOT implement it.

@@ -1,0 +1,32 @@
+# {{PLUGIN_NAME}} Configuration
+# Version: {{VERSION}}
+
+# General settings
+settings:
+  debug: false
+  language: en
+
+# Messages
+messages:
+  welcome: "Welcome to the server, %player%!"
+  goodbye: "Goodbye, %player%!"
+  noPermission: "You don't have permission to do that."
+
+# Performance tuning
+performance:
+  enableOptimizations: true
+  lowTpsThreshold: 18.0
+  autoReduceLoad: true
+
+# Yellow Tale integration
+yellowTale:
+  syncCosmetics: true
+  syncFriends: true
+  enableAnalytics: true
+
+# Database (if using)
+database:
+  type: sqlite
+  file: data.db
+  # For SQL Server:
+  # connectionString: "Server=localhost;Database={{PLUGIN_ID}};..."

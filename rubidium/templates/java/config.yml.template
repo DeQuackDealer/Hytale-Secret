@@ -1,0 +1,36 @@
+# {{PLUGIN_NAME}} Configuration
+# Version: {{VERSION}}
+
+# General settings
+settings:
+  debug: false
+  language: en
+
+# Messages
+messages:
+  welcome: "Welcome to the server, %player%!"
+  goodbye: "Goodbye, %player%!"
+  no_permission: "You don't have permission to do that."
+
+# Performance tuning
+performance:
+  enable_optimizations: true
+  low_tps_threshold: 18.0
+  auto_reduce_load: true
+
+# Yellow Tale integration
+yellowtale:
+  sync_cosmetics: true
+  sync_friends: true
+  enable_analytics: true
+
+# Database (if using)
+database:
+  type: sqlite
+  file: data.db
+  # For MySQL/PostgreSQL:
+  # host: localhost
+  # port: 3306
+  # database: {{PLUGIN_ID}}
+  # username: root
+  # password: ""

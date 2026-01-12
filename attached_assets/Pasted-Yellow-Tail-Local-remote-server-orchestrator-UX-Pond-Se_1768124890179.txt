@@ -1,0 +1,418 @@
+Yellow Tail = Local & remote server orchestrator + UX
+Pond = Server enhancement layer + plugin substrate
+Hytale Server = Black box (for now)
+
+Your goal before release is to build everything around the box, not inside it.
+
+🧱 LAYER 1 — CORE FOUNDATIONS (100% PRE-JAR SAFE)
+
+These are non-negotiable, and none require Hytale internals.
+
+1️⃣ Filesystem & Workspace Layout
+
+Design this NOW.
+
+yellow-tail/
+ ├─ profiles/
+ ├─ servers/
+ │   ├─ local/
+ │   ├─ remote/
+ ├─ pond/
+ │   ├─ core/
+ │   ├─ plugins/
+ │   ├─ assets/
+ ├─ cache/
+ │   ├─ assets/
+ │   ├─ mods/
+ ├─ logs/
+
+
+Features:
+
+Profile isolation
+
+Atomic updates
+
+Rollbacks
+
+Disk quotas
+
+Cleanup policies
+
+2️⃣ Profile System (User-Facing)
+
+Before any server exists.
+
+Create/edit/delete profiles
+
+Clone profiles
+
+Import/export profiles
+
+Version pinning
+
+Performance presets
+
+Mod packs per profile
+
+💡 Profiles should be pure data, no engine assumptions.
+
+3️⃣ Configuration Engine
+
+Shared by Pond + Yellow Tail.
+
+TOML/YAML/JSON schema
+
+Validation
+
+Hot reload support
+
+Defaults + overrides
+
+Per-profile overrides
+
+Per-world overrides
+
+This becomes your spine.
+
+⚙️ LAYER 2 — PROCESS & SERVER ORCHESTRATION
+
+Still no Hytale needed.
+
+4️⃣ Server Lifecycle Manager
+
+Yellow Tail owns this.
+
+Start/stop/restart servers
+
+Watchdog (crash recovery)
+
+Graceful shutdown
+
+Timeout detection
+
+Resource caps
+
+Works for:
+
+Local SP servers
+
+LAN servers
+
+Dedicated servers
+
+5️⃣ Java Process Supervisor
+
+Critical for Pond later.
+
+JVM flags generator
+
+GC tuning presets
+
+Heap monitoring
+
+Thread usage metrics
+
+Crash log capture
+
+Even without Hytale, this is fully buildable.
+
+6️⃣ Logging & Telemetry Pipeline
+
+Design once, reuse forever.
+
+Unified logging format
+
+Log levels
+
+Rotating logs
+
+Structured logs (JSON)
+
+Metrics hooks (CPU, RAM, tick time)
+
+Later:
+
+Pond feeds into this
+
+Yellow Tail visualizes it
+
+🧩 LAYER 3 — POND CORE (NO HYTALE API REQUIRED)
+
+This is HUGE and totally safe.
+
+7️⃣ Pond Plugin System (Abstract)
+
+Do not tie it to Hytale yet.
+
+Plugin loader
+
+Plugin lifecycle:
+
+load
+
+enable
+
+disable
+
+unload
+
+Dependency resolution
+
+Version constraints
+
+Sandboxing rules
+
+Failure isolation
+
+You’re building a meta-plugin system that later wraps Hytale’s.
+
+8️⃣ Pond Internal Event Bus
+
+Design your own event model now.
+
+Server lifecycle events
+
+Plugin events
+
+Asset events
+
+Performance events
+
+Custom events
+
+Later → you bridge Hytale events into this.
+
+9️⃣ Performance Optimization Layer (Abstract)
+
+This is key.
+
+You’re not optimizing Hytale yet — you’re optimizing server behavior patterns.
+
+Tick scheduling model
+
+Async task pool
+
+Rate limiting
+
+Backpressure system
+
+Memory pressure signals
+
+Plugin CPU budgets
+
+Later → Pond maps these to real server hooks.
+
+🎨 LAYER 4 — ASSETS, COSMETICS & CONTENT (SAFE)
+
+This is where your earlier ideas shine.
+
+🔟 Asset Registry System
+
+Before Hytale, design how assets are managed.
+
+Asset manifests
+
+Hashing
+
+Versioning
+
+Dependency graph
+
+Temporary vs persistent assets
+
+CDN-ready structure
+
+This supports:
+
+Skins
+
+Accessories
+
+UI packs
+
+Sound packs
+
+1️⃣1️⃣ Cosmetic Authorization Layer
+
+Very important legally.
+
+Server-approved cosmetics only
+
+Profile-bound cosmetics
+
+Session-scoped cosmetics
+
+Local-only cosmetics
+
+Server override rules
+
+This lets you:
+
+Upload cosmetics via Yellow Tail
+
+Enforce rules via Pond
+
+Avoid cheating accusations
+
+1️⃣2️⃣ Custom Content Designers (Offline)
+
+No Hytale needed.
+
+Skin editor
+
+Accessory editor
+
+Asset pack builder
+
+Metadata editor
+
+Validation tools
+
+These output server-compatible asset packs later.
+
+🌐 LAYER 5 — YELLOW TAIL ↔ POND COMMUNICATION
+
+Design the protocol now.
+
+1️⃣3️⃣ Control Protocol (Local)
+
+IPC or localhost HTTP.
+
+Start server
+
+Stop server
+
+Query status
+
+Push config
+
+Push assets
+
+Receive metrics
+
+Abstract it so later it works remotely too.
+
+1️⃣4️⃣ Capability Advertisement
+
+Server tells launcher what it supports.
+
+Example:
+
+supports:
+- pond.performance
+- pond.cosmetics
+- pond.assets.hotload
+
+
+This future-proofs everything.
+
+🧠 LAYER 6 — UX & DEV EXPERIENCE
+
+This is how you win adoption.
+
+1️⃣5️⃣ Mod Library & Marketplace (Offline First)
+
+Before CurseForge integration.
+
+Local mod catalog
+
+Version manager
+
+Conflict detection
+
+Enable/disable UI
+
+Dependency warnings
+
+Later → hook CurseForge or official repo.
+
+1️⃣6️⃣ Diagnostics & Debug Tools
+
+Free tier feature, btw.
+
+Live RAM graph
+
+Tick rate estimate
+
+Plugin CPU usage
+
+Error summaries
+
+Auto-suggestions
+
+This becomes your OptiFine moment.
+
+💰 LAYER 7 — PREMIUM FEATURES (DESIGNED, NOT LOCKED)
+
+You can design monetization now, enable later.
+
+Free
+
+Core launcher
+
+Pond base
+
+Local server integration
+
+Basic performance presets
+
+Mod management
+
+Cosmetics (local/server-approved)
+
+Premium Launcher (e.g. $0.99/month)
+
+Advanced diagnostics
+
+Smart JVM tuning
+
+Profile sync
+
+Experimental performance flags
+
+Early access features
+
+Premium Pond (e.g. $1.99/year)
+
+Advanced tick optimizations
+
+Plugin CPU budgets
+
+Hot-reload safety nets
+
+Priority task scheduling
+
+Server analytics
+
+No pay-to-win. All infra.
+
+⏳ WHAT YOU CANNOT DO YET (AND SHOULDN’T)
+
+Be explicit about this so you don’t waste time.
+
+❌ Hook Hytale internals
+❌ Assume tick methods
+❌ Depend on server API names
+❌ Client injection
+❌ Rendering hacks
+
+All of that comes after the jar.
+
+🧠 WHY THIS WORKS
+
+When hytaleserver.jar drops:
+
+You do NOT rewrite everything.
+
+You:
+
+write adapters
+
+bind events
+
+map lifecycle
+
+bridge APIs
+
+Everything else already exists.

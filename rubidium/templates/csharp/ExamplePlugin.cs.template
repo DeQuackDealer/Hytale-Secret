@@ -1,0 +1,129 @@
+using Microsoft.Extensions.Logging;
+using Rubidium.Api;
+using Rubidium.Api.Attributes;
+using Rubidium.Api.Events;
+using Rubidium.Api.Player;
+using Rubidium.Optimization;
+using Rubidium.Integration;
+
+namespace {{NAMESPACE}};
+
+[Plugin("{{PLUGIN_ID}}", "{{PLUGIN_NAME}}", "{{VERSION}}",
+    Author = "{{AUTHOR}}",
+    Description = "{{DESCRIPTION}}")]
+public class {{CLASS_NAME}} : RubidiumPlugin
+{
+    public override async Task OnLoadAsync()
+    {
+        Logger.LogInformation("Loading {{PLUGIN_NAME}}...");
+        await Task.CompletedTask;
+    }
+    
+    public override async Task OnEnableAsync()
+    {
+        SaveDefaultConfig();
+        Logger.LogInformation("{{PLUGIN_NAME}} v{{VERSION}} has been enabled!");
+        
+        RegisterEvents(this);
+        RegisterCommand(this);
+        
+        if (YellowTale.Premium.HasFeature(Guid.Empty, "advanced-analytics"))
+        {
+            Logger.LogInformation("Premium features enabled!");
+        }
+        
+        RunTaskTimer(PeriodicTask, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(60));
+        
+        await Task.CompletedTask;
+    }
+    
+    public override async Task OnDisableAsync()
+    {
+        Logger.LogInformation("{{PLUGIN_NAME}} has been disabled!");
+        await Task.CompletedTask;
+    }
+    
+    [EventListener(EventPriority.Normal)]
+    public async void OnPlayerJoin(PlayerJoinEvent e)
+    {
+        var welcomeMessage = Config.GetString("messages.welcome", "Welcome, %player%!");
+        e.Player.SendMessage(welcomeMessage.Replace("%player%", e.Player.Name));
+        
+        var cosmetics = await YellowTale.Cosmetics.GetPlayerCosmeticsAsync(e.Player.UniqueId);
+        if (cosmetics.Cape != null)
+        {
+            Logger.LogInformation("{Player} has cape: {Cape}", e.Player.Name, cosmetics.Cape);
+        }
+    }
+    
+    [EventListener(EventPriority.High)]
+    public void OnPlayerQuit(PlayerQuitEvent e)
+    {
+        YellowTale.Analytics.TrackPlayerAction(
+            e.Player.UniqueId,
+            "player_quit",
+            new { reason = e.Reason });
+    }
+    
+    [Command("{{PLUGIN_ID}}", Aliases = new[] { "{{PLUGIN_ID_SHORT}}" },
+        Description = "Main command for {{PLUGIN_NAME}}",
+        Permission = "{{PLUGIN_ID}}.use")]
+    public void MainCommand(ICommandSender sender, string[] args)
+    {
+        if (args.Length == 0)
+        {
+            sender.SendMessage($"{{PLUGIN_NAME}} v{{VERSION}} by {{AUTHOR}}");
+            sender.SendMessage("Use /{{PLUGIN_ID}} help for commands.");
+            return;
+        }
+        
+        switch (args[0].ToLower())
+        {
+            case "help":
+                sender.SendMessage("Available commands:");
+                sender.SendMessage("  /{{PLUGIN_ID}} reload - Reload configuration");
+                sender.SendMessage("  /{{PLUGIN_ID}} stats - Show server statistics");
+                break;
+                
+            case "reload":
+                if (!sender.HasPermission("{{PLUGIN_ID}}.reload"))
+                {
+                    sender.SendMessage("You don't have permission for this.");
+                    return;
+                }
+                _ = OnReloadAsync();
+                sender.SendMessage("Configuration reloaded!");
+                break;
+                
+            case "stats":
+                var perf = Optimization.Performance;
+                sender.SendMessage("Server Statistics:");
+                sender.SendMessage($"  TPS: {perf.TPS:F2}");
+                sender.SendMessage($"  Memory: {perf.MemoryUsed / 1024 / 1024}MB");
+                sender.SendMessage($"  Players: {perf.PlayerCount}");
+                sender.SendMessage($"  Entities: {perf.EntityCount}");
+                break;
+                
+            default:
+                sender.SendMessage("Unknown subcommand. Use /{{PLUGIN_ID}} help");
+                break;
+        }
+    }
+    
+    [Scheduled(DelayMs = 5000, PeriodMs = 60000, Async = true)]
+    public void ScheduledAnalytics()
+    {
+        var perf = Optimization.Performance;
+        YellowTale.Analytics.TrackPerformanceMetric("tps", perf.TPS);
+        YellowTale.Analytics.TrackPerformanceMetric("memory_used", perf.MemoryUsed);
+    }
+    
+    private void PeriodicTask()
+    {
+        if (Optimization.Performance.TPS < 18.0)
+        {
+            Logger.LogWarning("Low TPS detected, requesting reduced load...");
+            Optimization.TickOptimizer.RequestReducedLoad(100);
+        }
+    }
+}

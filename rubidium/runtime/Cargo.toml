@@ -1,0 +1,39 @@
+[package]
+name = "rubidium"
+version = "1.0.0"
+edition = "2021"
+description = "All-in-one server platform for Hytale - plugin development, optimization, and anticheat"
+authors = ["Yellow Tale Team"]
+license = "MIT"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.8"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+dashmap = "5"
+parking_lot = "0.12"
+libloading = "0.8"
+notify = "6"
+thiserror = "1"
+async-trait = "0.1"
+ahash = "0.8"
+
+[lib]
+name = "rubidium"
+path = "src/lib.rs"
+
+[[bin]]
+name = "rubidium-server"
+path = "src/main.rs"
+
+[features]
+default = ["anticheat", "optimization", "yellowtale"]
+anticheat = []
+optimization = []
+yellowtale = []
+hytale-api = []

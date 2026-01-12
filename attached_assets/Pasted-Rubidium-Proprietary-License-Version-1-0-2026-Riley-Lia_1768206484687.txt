@@ -1,0 +1,204 @@
+Rubidium Proprietary License
+
+Version 1.0 – © 2026 Riley Liang, operating under the alias “DeQuackDealer”
+
+1. Definitions
+
+“Software” refers exclusively to Rubidium, including but not limited to its server binaries (e.g., JAR files), plugins, libraries, modules, configuration systems, assets, cosmetic handling systems, performance optimizations, backend integrations, and accompanying documentation.
+
+“Author” refers to Riley Liang, operating under the alias DeQuackDealer, and any contributors explicitly authorized by the Author.
+
+“User” refers to any individual or legal entity installing, running, or interacting with the Software.
+
+“Server Operator” refers to any User running the Software in a server, hosting, or multiplayer environment.
+
+“Cosmetics” refers to any skins, accessories, visual overrides, metadata, or cosmetic-related assets made available through Rubidium or its official integrations.
+
+2. License Grant (Limited Use Only)
+
+The Author grants you a limited, non-exclusive, non-transferable, revocable license to:
+
+Install and run the Software for personal or server use
+
+Use the Software only in its original, unmodified form
+
+Access features provided through official distribution channels
+
+This license does not grant ownership of the Software or any component thereof.
+
+3. Restrictions (Strict)
+
+You may not, under any circumstances:
+
+Redistribute the Software, in whole or in part
+
+Including re-uploading JARs, binaries, installers, or mirrors
+
+Sell, sublicense, rent, lease, host as a service, bundle, or otherwise monetize the Software or access to it
+
+Including paid hosting plans, modpacks, or service offerings
+
+Unless explicitly authorized in writing by the Author
+
+Modify, fork, reverse-engineer, decompile, disassemble, or create derivative works of the Software
+
+Remove, bypass, or interfere with technical protection measures, including but not limited to:
+
+authentication systems
+
+license or entitlement checks
+
+cosmetic validation
+
+feature gating
+
+server-side or client-side integrity checks
+
+Rebrand, misrepresent, or claim ownership of the Software or any component
+
+Use the Software in violation of the Hytale End User License Agreement, Terms of Service, or Community Guidelines
+
+Any violation of this section results in immediate and automatic termination of this license.
+
+4. Server Usage Clarification
+
+Server Operators are permitted to run Rubidium on their servers.
+
+Server Operators do not gain the right to:
+
+redistribute Rubidium or its components
+
+bundle Rubidium with modpacks, installers, or launchers
+
+include Rubidium as part of paid hosting services or subscription offerings
+
+Any server using Rubidium must:
+
+use an official, unmodified build
+
+refrain from altering core binaries or modules
+
+not impersonate or claim affiliation with official Rubidium infrastructure
+
+5. Cosmetics & Digital Items
+
+All Cosmetics are licensed, not sold.
+
+Cosmetics remain the intellectual property of the Author and/or their respective creators.
+
+Users are granted a revocable, non-transferable right to display Cosmetics:
+
+on servers running Rubidium
+
+in environments explicitly supported by Rubidium
+
+Users may not:
+
+extract, rip, or datamine cosmetic assets
+
+resell, trade, or transfer cosmetics
+
+recreate, clone, or port cosmetics to other platforms or systems
+
+The Author reserves the right to:
+
+remove or disable Cosmetics
+
+revoke cosmetic access
+
+modify cosmetic behavior, availability, or validation at any time
+
+6. Online Services & Connectivity
+
+Certain features of the Software may require:
+
+online connectivity
+
+authentication
+
+backend or verification services
+
+The Author may, at their discretion:
+
+modify, suspend, or discontinue online services
+
+enforce rate limits or access restrictions
+
+disable features in response to abuse or license violations
+
+There is no guarantee of uptime, continuity, or feature permanence.
+
+7. Termination
+
+This license remains in effect until terminated.
+
+It terminates immediately and automatically if:
+
+any provision of this license is violated
+
+redistribution or monetization is attempted
+
+technical protection or integrity systems are interfered with
+
+Upon termination, you must:
+
+immediately cease all use of the Software
+
+delete all copies in your possession or control
+
+8. Disclaimer of Warranty
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND.
+
+The Author expressly disclaims all warranties, including but not limited to:
+
+merchantability
+
+fitness for a particular purpose
+
+non-infringement
+
+Use of the Software is entirely at your own risk.
+
+9. Limitation of Liability
+
+To the maximum extent permitted by applicable law, the Author shall not be liable for:
+
+data loss
+
+server instability or downtime
+
+account issues
+
+direct, indirect, incidental, or consequential damages
+arising from the use or inability to use the Software
+
+10. Governing Law
+
+This license shall be governed by and interpreted under the laws of the jurisdiction determined by the Author, without regard to conflict of law principles.
+
+11. No Implied Rights
+
+All rights not explicitly granted in this license are reserved by the Author.
+
+12. Contact & Permissions
+
+For inquiries regarding:
+
+redistribution rights
+
+commercial use
+
+integrations
+
+partnerships
+
+Explicit written permission from the Author is required.
+
+TL;DR (Non-binding Summary)
+
+You can run Rubidium.
+You cannot redistribute it.
+You cannot fork or modify it.
+You cannot resell it or bundle it.
+Cosmetics are licensed, not owned.

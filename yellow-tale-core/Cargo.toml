@@ -1,0 +1,24 @@
+[package]
+name = "yellow-tale-core"
+version = "0.1.0"
+edition = "2021"
+description = "Shared core library for Yellow Tale platform"
+license = "MIT"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.8"
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+sha2 = "0.10"
+hex = "0.4"
+thiserror = "1"
+tracing = "0.1"
+tokio = { version = "1", features = ["full"] }
+async-trait = "0.1"
+
+[features]
+default = []
+desktop = []
+server = []

@@ -1,0 +1,19 @@
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    libssl3 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY server-binary/yellow-tale-server /app/yellow-tale-server
+
+RUN chmod +x /app/yellow-tale-server
+
+ENV RUST_LOG=info
+ENV PORT=8080
+
+EXPOSE 8080
+
+CMD ["/app/yellow-tale-server"]

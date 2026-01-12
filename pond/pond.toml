@@ -1,0 +1,31 @@
+[server]
+name = "Pond Server"
+port = 25565
+max_players = 100
+tick_rate = 20
+description = "A modular Hytale server powered by Pond"
+
+[plugins]
+directory = "plugins"
+auto_load = true
+hot_reload = true
+sandbox_enabled = true
+
+[performance]
+tick_budget_ms = 50.0
+adaptive_throttling = true
+max_entities_per_tick = 100
+max_chunk_updates_per_tick = 50
+memory_pool_size_mb = 256
+
+[assets]
+max_cosmetic_size_mb = 5
+allowed_types = ["skin", "cape", "hat", "particle", "emote"]
+require_approval = true
+cache_directory = "cache/assets"
+
+[integration]
+enabled = true
+launcher_api_port = 25566
+advertise_capabilities = true
+accept_asset_manifests = true

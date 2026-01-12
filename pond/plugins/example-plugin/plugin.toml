@@ -1,0 +1,10 @@
+[plugin]
+id = "example-plugin"
+name = "Example Plugin"
+version = "1.0.0"
+author = "Yellow Tale Team"
+description = "A sample plugin demonstrating Pond's plugin system"
+api_version = "1.0.0"
+
+[[dependencies]]
+# No dependencies for example plugin

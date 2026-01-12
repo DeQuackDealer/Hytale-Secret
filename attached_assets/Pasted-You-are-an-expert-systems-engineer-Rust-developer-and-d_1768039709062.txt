@@ -1,0 +1,301 @@
+You are an expert systems engineer, Rust developer, and desktop application architect.
+
+You are building a native desktop launcher and orchestration platform, NOT a website and NOT a browser-based app.
+
+This project must be future-proof, legally safe, high-performance, and game-agnostic.
+
+🚫 ABSOLUTE HARD RULES (DO NOT VIOLATE)
+
+DO NOT build a web application
+
+DO NOT rely on browser-based rendering
+
+DO NOT use Electron
+
+DO NOT embed Chromium
+
+DO NOT assume any game APIs
+
+DO NOT assume any mod loader APIs
+
+DO NOT inject into game memory
+
+DO NOT patch binaries
+
+DO NOT hook rendering or input
+
+DO NOT override official mod systems
+
+The game is treated as a black-box executable.
+
+🎯 PROJECT GOAL
+
+Build Yellow Tale, a high-performance native launcher and orchestration layer that sits above an officially-moddable game.
+
+Yellow Tale does NOT replace modding.
+It enhances orchestration, performance preparation, caching, diagnostics, and UX.
+
+Think:
+
+Steam + Lunar Client + Paper-style philosophy
+But without touching game internals.
+
+🧱 REQUIRED TECH STACK
+Backend (MANDATORY)
+
+Language: Rust
+
+Role: ALL system logic, performance tooling, file IO, networking, diagnostics
+
+Frontend (MANDATORY)
+
+Language: TypeScript
+
+Framework: Tauri UI (React or Svelte acceptable)
+
+Role: UI ONLY (no system logic)
+
+IPC
+
+JSON-based IPC using Tauri commands
+
+Strictly versioned schemas
+
+Config
+
+TOML files
+
+Versioned & migratable
+
+🗂️ REQUIRED PROJECT STRUCTURE
+yellow-tale/
+├─ core/
+│  ├─ launcher/          # process lifecycle control
+│  ├─ profiles/          # profile configs & migration
+│  ├─ mods/              # generic mod orchestration
+│  ├─ cache/             # deduplicated content cache
+│  ├─ performance/       # pre-launch optimisation
+│  ├─ diagnostics/       # read-only metrics
+│  ├─ sessions/          # session orchestration (not VPN)
+│  ├─ ipc/               # UI ↔ core interface
+│  ├─ telemetry/         # logs & metrics
+│  └─ util/
+│
+├─ ui/
+│  ├─ pages/
+│  ├─ components/
+│  ├─ services/
+│  └─ state/
+│
+├─ config/
+│  └─ defaults.toml
+│
+└─ README.md
+
+⚙️ CORE SYSTEMS TO IMPLEMENT
+1️⃣ Game Launcher (Generic)
+
+User selects executable
+
+Store path per profile
+
+Launch process with:
+
+env vars
+
+working dir
+
+args
+
+Track PID
+
+Detect crashes & exits
+
+Clean shutdown handling
+
+NO game-specific assumptions.
+
+2️⃣ Profile System
+
+Multiple user profiles
+
+Each profile contains:
+
+executable path
+
+enabled mods
+
+performance preferences
+
+session preferences
+
+Profiles stored as versioned TOML
+
+Migration support for future schema changes
+
+3️⃣ Mod Orchestration (NOT a loader)
+
+Treat mods as opaque packages
+
+Support:
+
+install
+
+remove
+
+enable / disable
+
+version pinning
+
+Dependency graph resolution (generic)
+
+Per-profile mod sets
+
+Compatible with official mod systems without replacing them
+
+4️⃣ Smart Cache System
+
+Content-addressed storage (hash-based)
+
+Deduplication across profiles
+
+Background cache warming
+
+Integrity verification
+
+LRU eviction strategy
+
+5️⃣ Performance Preparation (LEGAL & SAFE)
+
+Implement ONLY pre-launch optimisations:
+
+Process priority tuning
+
+CPU core affinity
+
+RAM cleanup before launch
+
+Disk IO warm-up
+
+Optional background task suppression
+
+⚠️ NO runtime injection
+⚠️ NO hooking
+⚠️ NO cheating behavior
+
+6️⃣ Diagnostics (Read-Only)
+
+CPU usage
+
+GPU usage
+
+RAM usage
+
+Disk IO
+
+Frame-time variance (if observable externally)
+
+Exportable logs
+
+Expose all metrics via IPC.
+
+7️⃣ Session Orchestration (Not a VPN)
+
+Session broker client
+
+Invite code generation
+
+Session lifecycle tracking
+
+Abstracted P2P attempt layer
+
+Relay interface (stub, no infra assumptions)
+
+This is connection orchestration, NOT tunneling.
+
+8️⃣ IPC API
+
+Strict JSON schema
+
+Versioned commands
+
+Error-first responses
+
+UI communicates ONLY via IPC
+
+No filesystem access from UI
+
+9️⃣ UI REQUIREMENTS
+
+Native desktop UI (Tauri)
+
+Pages:
+
+Play
+
+Profiles
+
+Mods
+
+Performance
+
+Diagnostics
+
+Sessions
+
+Settings
+
+UI is a control panel, NOT a renderer
+
+No web-only APIs
+
+🧪 ENGINEERING REQUIREMENTS
+
+Clear module boundaries
+
+Strong documentation
+
+Comments explaining WHY, not just WHAT
+
+Designed for future game API integration
+
+No hardcoded assumptions
+
+📦 DELIVERABLES
+
+Fully compiling Rust backend
+
+Working Tauri UI
+
+IPC contract documented
+
+Default configs
+
+README explaining architecture decisions
+
+🧠 DESIGN PHILOSOPHY (IMPORTANT)
+
+This project must survive:
+
+game updates
+
+mod loader changes
+
+engine rewrites
+
+legal scrutiny
+
+If a feature risks legality, stability, or long-term survival:
+DO NOT IMPLEMENT IT
+
+Final Instruction
+
+Build this as if:
+
+the game already supports mods
+
+the game APIs are unknown
+
+the launcher must last years
+
+performance and UX are the value

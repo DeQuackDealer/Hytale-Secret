@@ -1,0 +1,29 @@
+[package]
+name = "pond"
+version = "0.1.0"
+edition = "2021"
+description = "Server-side modular platform for Hytale servers"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.8"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+dashmap = "5"
+parking_lot = "0.12"
+libloading = "0.8"
+notify = "6"
+thiserror = "1"
+async-trait = "0.1"
+
+[lib]
+name = "pond"
+path = "src/lib.rs"
+
+[[bin]]
+name = "pond-server"
+path = "src/main.rs"

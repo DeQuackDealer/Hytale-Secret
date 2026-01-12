@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# Gradle wrapper script
+# Downloads and runs Gradle automatically
+
+GRADLE_VERSION="8.5"
+GRADLE_DIR="$HOME/.gradle/wrapper/dists/gradle-${GRADLE_VERSION}-bin"
+GRADLE_ZIP="gradle-${GRADLE_VERSION}-bin.zip"
+GRADLE_URL="https://services.gradle.org/distributions/${GRADLE_ZIP}"
+
+if [ ! -d "$GRADLE_DIR" ]; then
+    mkdir -p "$GRADLE_DIR"
+    echo "Downloading Gradle ${GRADLE_VERSION}..."
+    curl -L "$GRADLE_URL" -o "$GRADLE_DIR/$GRADLE_ZIP"
+    unzip -q "$GRADLE_DIR/$GRADLE_ZIP" -d "$GRADLE_DIR"
+fi
+
+GRADLE_HOME="$GRADLE_DIR/gradle-${GRADLE_VERSION}"
+exec "$GRADLE_HOME/bin/gradle" "$@"

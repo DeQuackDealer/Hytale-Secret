@@ -1,0 +1,130 @@
+package {{PACKAGE}};
+
+import com.yellowtale.rubidium.api.*;
+import com.yellowtale.rubidium.annotations.*;
+import com.yellowtale.rubidium.api.event.*;
+import com.yellowtale.rubidium.api.event.player.*;
+import com.yellowtale.rubidium.api.player.*;
+import com.yellowtale.rubidium.optimization.*;
+import com.yellowtale.rubidium.integration.*;
+
+import java.util.concurrent.TimeUnit;
+
+@Plugin(
+    id = "{{PLUGIN_ID}}",
+    name = "{{PLUGIN_NAME}}",
+    version = "{{VERSION}}",
+    author = "{{AUTHOR}}",
+    description = "{{DESCRIPTION}}"
+)
+public class {{CLASS_NAME}} extends RubidiumPlugin {
+    
+    @Override
+    public void onLoad() {
+        getLogger().info("Loading {{PLUGIN_NAME}}...");
+    }
+    
+    @Override
+    public void onEnable() {
+        saveDefaultConfig();
+        getLogger().info("{{PLUGIN_NAME}} v{{VERSION}} has been enabled!");
+        
+        registerEvents(this);
+        
+        if (getYellowTale().getPremium().hasFeature(null, "advanced-analytics")) {
+            getLogger().info("Premium features enabled!");
+        }
+        
+        getScheduler().runTaskTimer(
+            this,
+            this::periodicTask,
+            5, 60,
+            TimeUnit.SECONDS
+        );
+    }
+    
+    @Override
+    public void onDisable() {
+        getLogger().info("{{PLUGIN_NAME}} has been disabled!");
+    }
+    
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        String welcomeMessage = getConfig().getString("messages.welcome", "Welcome, %player%!");
+        player.sendMessage(welcomeMessage.replace("%player%", player.getName()));
+        
+        getYellowTale().getCosmetics().getPlayerCosmetics(player.getUniqueId())
+            .thenAccept(cosmetics -> {
+                if (cosmetics.getCape() != null) {
+                    getLogger().info(player.getName() + " has cape: " + cosmetics.getCape());
+                }
+            });
+    }
+    
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        getYellowTale().getAnalytics().trackPlayerAction(
+            event.getPlayer().getUniqueId(),
+            "player_quit",
+            event.getReason()
+        );
+    }
+    
+    @Command(
+        name = "{{PLUGIN_ID}}",
+        aliases = {"{{PLUGIN_ID_SHORT}}"},
+        description = "Main command for {{PLUGIN_NAME}}",
+        permission = "{{PLUGIN_ID}}.use"
+    )
+    public void mainCommand(CommandSender sender, String[] args) {
+        if (args.length == 0) {
+            sender.sendMessage("{{PLUGIN_NAME}} v{{VERSION}} by {{AUTHOR}}");
+            sender.sendMessage("Use /{{PLUGIN_ID}} help for commands.");
+            return;
+        }
+        
+        switch (args[0].toLowerCase()) {
+            case "help":
+                sender.sendMessage("Available commands:");
+                sender.sendMessage("  /{{PLUGIN_ID}} reload - Reload configuration");
+                sender.sendMessage("  /{{PLUGIN_ID}} stats - Show server statistics");
+                break;
+                
+            case "reload":
+                if (!sender.hasPermission("{{PLUGIN_ID}}.reload")) {
+                    sender.sendMessage("You don't have permission for this.");
+                    return;
+                }
+                onReload();
+                sender.sendMessage("Configuration reloaded!");
+                break;
+                
+            case "stats":
+                OptimizationContext.ServerPerformance perf = getOptimization().getServerPerformance();
+                sender.sendMessage("Server Statistics:");
+                sender.sendMessage("  TPS: " + String.format("%.2f", perf.getTPS()));
+                sender.sendMessage("  Memory: " + (perf.getMemoryUsed() / 1024 / 1024) + "MB");
+                sender.sendMessage("  Players: " + perf.getPlayerCount());
+                sender.sendMessage("  Entities: " + perf.getEntityCount());
+                break;
+                
+            default:
+                sender.sendMessage("Unknown subcommand. Use /{{PLUGIN_ID}} help");
+        }
+    }
+    
+    @Scheduled(delay = 5000, period = 60000, async = true)
+    public void scheduledAnalytics() {
+        OptimizationContext.ServerPerformance perf = getOptimization().getServerPerformance();
+        getYellowTale().getAnalytics().trackPerformanceMetric("tps", perf.getTPS());
+        getYellowTale().getAnalytics().trackPerformanceMetric("memory_used", perf.getMemoryUsed());
+    }
+    
+    private void periodicTask() {
+        if (getOptimization().getServerPerformance().getTPS() < 18.0) {
+            getLogger().warn("Low TPS detected, requesting reduced load...");
+            getOptimization().getTickOptimizer().requestReducedLoad(100);
+        }
+    }
+}

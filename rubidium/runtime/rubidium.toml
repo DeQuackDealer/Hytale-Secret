@@ -1,0 +1,77 @@
+[server]
+name = "Rubidium Server"
+port = 25565
+max_players = 100
+tick_rate = 20
+description = "A modular Hytale server powered by Rubidium"
+
+[plugins]
+directory = "plugins"
+auto_load = true
+hot_reload = true
+sandbox_enabled = true
+
+[performance]
+tick_budget_ms = 50.0
+adaptive_throttling = true
+max_entities_per_tick = 100
+max_chunk_updates_per_tick = 50
+memory_pool_size_mb = 256
+
+[assets]
+max_cosmetic_size_mb = 5
+allowed_types = ["skin", "cape", "hat", "particle", "emote"]
+require_approval = true
+cache_directory = "cache/assets"
+
+[integration]
+enabled = true
+launcher_api_port = 25566
+advertise_capabilities = true
+accept_asset_manifests = true
+
+[anticheat]
+enabled = true
+sample_rate = 0.25
+log_violations = true
+auto_kick_threshold = 10
+findings_ring_size = 1000
+
+[anticheat.movement]
+enabled = true
+max_speed = 10.0
+max_acceleration = 50.0
+gravity_tolerance = 0.1
+fly_detection = true
+teleport_threshold = 20.0
+sample_window_ms = 1000
+
+[anticheat.combat]
+enabled = true
+max_cps = 20
+max_reach = 4.5
+hit_consistency_threshold = 0.95
+swing_direction_check = true
+killaura_detection = true
+sample_window_ms = 2000
+
+[anticheat.packet]
+enabled = true
+max_packets_per_second = 500
+keepalive_variance_threshold = 2.0
+malformed_packet_action = "Flag"
+duplicate_packet_threshold = 10
+
+[features]
+lazy_asset_loading = true
+adaptive_scheduling = true
+world_heatmaps = true
+session_management = true
+
+[yellowtale]
+enabled = true
+api_endpoint = "https://api.yellowtale.com"
+sync_cosmetics = true
+sync_friends = true
+sync_premium = true
+analytics_enabled = true

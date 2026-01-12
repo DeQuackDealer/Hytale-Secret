@@ -1,0 +1,56 @@
+# Yellow Tale Default Configuration
+# Version: 1.0.0
+# 
+# This file contains the default settings for Yellow Tale.
+# Copy this file to your config directory and modify as needed.
+
+schema_version = "1.0.0"
+
+# Path to the Hytale executable (optional - can be set per-profile)
+# default_game_path = "C:\\Program Files\\Hytale\\Hytale.exe"
+
+[cache]
+# Maximum cache size in bytes (default: 10 GB)
+max_size_bytes = 10737418240
+
+# Enable background cache warming for faster launches
+enable_warming = true
+
+# Verify file integrity when accessing cached content
+verify_integrity = true
+
+[performance]
+# Default process priority: low, normal, high, realtime
+default_priority = "normal"
+
+# Clear RAM caches before launching the game
+clear_ram_default = false
+
+# Pre-read game files to warm disk cache
+warm_disk_default = true
+
+[session]
+# Preferred connection method: p2p, relay, hybrid
+preferred_method = "hybrid"
+
+# Maximum relay server hops allowed
+max_relay_hops = 3
+
+# P2P connection timeout in seconds
+p2p_timeout_secs = 10
+
+# Relay server addresses (add your own or community servers here)
+relay_servers = []
+
+[telemetry]
+# Log level: trace, debug, info, warn, error
+log_level = "info"
+
+# Write logs to file
+log_to_file = true
+
+# Maximum log file size in MB
+max_log_size_mb = 50
+
+# Number of old log files to retain
+log_retention = 5

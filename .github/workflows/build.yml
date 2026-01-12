@@ -1,0 +1,464 @@
+name: Build Yellow Tale Platform
+
+on:
+  push:
+    branches: [main, master]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  lint-rust:
+    name: Lint Rust Code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: server
+      
+      - name: Check formatting (server)
+        run: cd server && cargo fmt --check
+      
+      - name: Clippy (server)
+        run: cd server && cargo clippy -- -D warnings
+
+  lint-website:
+    name: Lint Website
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: website/package-lock.json
+      
+      - name: Install dependencies
+        run: cd website && npm ci
+      
+      - name: TypeScript check
+        run: cd website && npx tsc --noEmit
+      
+      - name: ESLint check
+        run: cd website && npm run lint || true
+
+  test-server:
+    name: Test API Server
+    runs-on: ubuntu-latest
+    needs: lint-rust
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: yellowtale_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: server
+      
+      - name: Run tests
+        env:
+          DATABASE_URL: postgres://test:test@localhost:5432/yellowtale_test
+        run: cd server && cargo test --release
+
+  build-server:
+    name: Build API Server
+    runs-on: ubuntu-latest
+    needs: test-server
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: server
+      
+      - name: Build server
+        run: cd server && cargo build --release
+      
+      - name: Upload server artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: yellow-tale-server-linux
+          path: server/target/release/yellow-tale-server
+          retention-days: 30
+
+  build-server-windows:
+    name: Build API Server (Windows)
+    runs-on: windows-latest
+    needs: lint-rust
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: server
+      
+      - name: Build server
+        run: cd server && cargo build --release
+      
+      - name: Upload server artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: yellow-tale-server-windows
+          path: server/target/release/yellow-tale-server.exe
+          retention-days: 30
+
+  build-desktop-windows:
+    name: Build Desktop (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: yellow-tale-app/package-lock.json
+      
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: yellow-tale-app/src-tauri
+      
+      - name: Install dependencies
+        run: cd yellow-tale-app && npm ci
+      
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: yellow-tale-app
+          tauriScript: npm run tauri
+      
+      - name: Upload Windows installer (MSI)
+        uses: actions/upload-artifact@v4
+        with:
+          name: yellow-tale-windows-msi
+          path: yellow-tale-app/src-tauri/target/release/bundle/msi/*.msi
+          retention-days: 30
+          if-no-files-found: ignore
+      
+      - name: Upload Windows installer (NSIS)
+        uses: actions/upload-artifact@v4
+        with:
+          name: yellow-tale-windows-exe
+          path: yellow-tale-app/src-tauri/target/release/bundle/nsis/*.exe
+          retention-days: 30
+          if-no-files-found: ignore
+
+  build-desktop-linux:
+    name: Build Desktop (Linux)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+      
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: yellow-tale-app/package-lock.json
+      
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: yellow-tale-app/src-tauri
+      
+      - name: Install dependencies
+        run: cd yellow-tale-app && npm ci
+      
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: yellow-tale-app
+          tauriScript: npm run tauri
+      
+      - name: Upload Linux DEB
+        uses: actions/upload-artifact@v4
+        with:
+          name: yellow-tale-linux-deb
+          path: yellow-tale-app/src-tauri/target/release/bundle/deb/*.deb
+          retention-days: 30
+          if-no-files-found: ignore
+      
+      - name: Upload Linux AppImage
+        uses: actions/upload-artifact@v4
+        with:
+          name: yellow-tale-linux-appimage
+          path: yellow-tale-app/src-tauri/target/release/bundle/appimage/*.AppImage
+          retention-days: 30
+          if-no-files-found: ignore
+
+  build-desktop-macos:
+    name: Build Desktop (macOS)
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        include:
+          - target: aarch64-apple-darwin
+            name: arm64
+          - target: x86_64-apple-darwin
+            name: x64
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: yellow-tale-app/package-lock.json
+      
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: yellow-tale-app/src-tauri
+      
+      - name: Install dependencies
+        run: cd yellow-tale-app && npm ci
+      
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: yellow-tale-app
+          tauriScript: npm run tauri
+          args: --target ${{ matrix.target }}
+      
+      - name: Upload macOS DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: yellow-tale-macos-${{ matrix.name }}-dmg
+          path: yellow-tale-app/src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg
+          retention-days: 30
+          if-no-files-found: ignore
+
+  build-rubidium:
+    name: Build Rubidium Server Platform
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Java 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '25-ea'
+      
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+      
+      - name: Build Rubidium
+        run: |
+          if [ -d "rubidium" ]; then
+            cd rubidium && ./gradlew shadowJar
+          else
+            echo "Rubidium directory not found, skipping"
+          fi
+      
+      - name: Upload Rubidium artifact
+        if: success() && hashFiles('rubidium/build/libs/*.jar') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: rubidium-server
+          path: rubidium/build/libs/*-all.jar
+          retention-days: 30
+
+  build-website:
+    name: Build Website
+    runs-on: ubuntu-latest
+    needs: lint-website
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: website/package-lock.json
+      
+      - name: Install dependencies
+        run: cd website && npm ci
+      
+      - name: Build website
+        run: cd website && npm run build
+      
+      - name: Upload website artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: website-dist
+          path: website/dist
+          retention-days: 30
+
+  docker-server:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: build-server
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download server artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: yellow-tale-server-linux
+          path: ./server-binary
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}/api-server
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+      
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.server
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  release:
+    name: Create Release
+    needs: [build-desktop-windows, build-desktop-linux, build-desktop-macos, build-server, build-website]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      
+      - name: List artifacts
+        run: find artifacts -type f
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/**/*.msi
+            artifacts/**/*.exe
+            artifacts/**/*.deb
+            artifacts/**/*.AppImage
+            artifacts/**/*.dmg
+            artifacts/**/yellow-tale-server
+            artifacts/**/yellow-tale-server.exe
+          draft: true
+          prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
+          generate_release_notes: true
+          fail_on_unmatched_files: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy-website:
+    name: Deploy Website to GitHub Pages
+    needs: build-website
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download website artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: website-dist
+          path: dist
+      
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+      
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

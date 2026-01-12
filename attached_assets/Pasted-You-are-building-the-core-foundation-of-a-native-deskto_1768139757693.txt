@@ -1,0 +1,115 @@
+You are building the core foundation of a native desktop launcher and optimisation platform called Yellow Tale, alongside a server-side ecosystem called Rubidium.
+
+IMPORTANT CONSTRAINTS:
+
+You DO NOT have access to hytaleserver.jar
+
+You MUST NOT assume any Hytale-specific APIs
+
+You MUST NOT build a website or web-based UI
+
+This is NOT a frontend-heavy project
+
+The goal is to build everything possible BEFORE server internals exist, while cleanly stubbing future integrations.
+
+TECH STACK REQUIREMENTS
+
+Primary language: Rust (preferred for performance and safety)
+
+Optional secondary language: Java (ONLY for future server integration)
+
+UI: native desktop (Tauri, egui, or equivalent lightweight native UI)
+
+Architecture: modular, service-based
+
+CORE PRINCIPLES
+
+Performance-first
+
+Server-authoritative design
+
+Strict ToS safety
+
+Feature flags for all advanced systems
+
+Clean separation between:
+
+launcher
+
+optimiser
+
+hosting tools
+
+cosmetics
+
+IMPLEMENT NOW (FULL IMPLEMENTATION)
+
+Implement the following systems fully, without assuming any game internals:
+
+CPU core affinity manager
+
+Adaptive process priority controller
+
+Memory pressure optimiser
+
+Disk IO asset cache with deduplication
+
+Asset and shader pre-warming system
+
+Frame-time stability monitor
+
+Background process suppression
+
+Hardware-aware optimisation presets
+
+Local world hosting wrapper
+
+NAT detection and hosting advisor
+
+Save snapshot and rollback system
+
+Mod dependency resolver
+
+Generic asset CDN fetcher
+
+Content profile manager
+
+Cosmetic preview engine
+
+Local-only cosmetic injection layer (singleplayer only, auto-disabled in multiplayer)
+
+FUTURE SYSTEMS (DO NOT IMPLEMENT — TODO ONLY)
+
+Create clear interfaces, documentation, and TODO stubs for:
+
+Server-side tick optimisation
+
+Network packet batching
+
+Rubidium cosmetic authority
+
+Dynamic server load shedding
+
+These must be placed in a /todo or /future module with:
+
+interface definitions
+
+comments explaining required server hooks
+
+no implementation logic
+
+OUTPUT REQUIREMENTS
+
+Clean project structure
+
+Extensive inline documentation
+
+Clear separation of concerns
+
+Configuration via local files (not remote)
+
+No hardcoded game logic
+
+This codebase must be future-proof, legal, and ready to integrate server internals once available.
+
+Begin by scaffolding the full project, then implement each module incrementally.
