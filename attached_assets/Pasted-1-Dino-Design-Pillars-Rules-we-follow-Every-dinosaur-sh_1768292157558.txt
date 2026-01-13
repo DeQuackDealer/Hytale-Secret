@@ -1,0 +1,202 @@
+1) Dino Design Pillars (Rules we follow)
+Every dinosaur should:
+have a role (not just a skin)
+
+
+be tied to a territory/biome
+
+
+have a behavior pattern players can learn
+
+
+create choices (risk/reward, preparation, tools, travel)
+
+
+support either: hunting, fear, capture, economy, or events
+
+
+
+2) Dino Categories (the main roster structure)
+A) Herbivores (Herd Wildlife)
+Purpose:
+world feels alive
+
+
+primary food/material source
+
+
+“safe-ish” targets
+
+
+stampede hazards
+
+
+Examples:
+small: quick prey
+
+
+medium: herd defense
+
+
+large: tanky & valuable
+
+
+
+B) Pack Predators
+Purpose:
+create fear + teamwork requirement
+
+
+punish careless travel
+
+
+night danger synergy
+
+
+Behaviors:
+flanking
+
+
+bait response
+
+
+chase + retreat loops
+
+
+
+C) Apex Predators
+Purpose:
+territory boss vibes
+
+
+high rewards
+
+
+forces compound defenses to matter
+
+
+Behaviors:
+long patrol routes
+
+
+roar “zone warning”
+
+
+aggro through weak structures (break blocks)
+
+
+
+D) Flyers
+Purpose:
+air danger
+
+
+disrupt camps / convoys
+
+
+create vertical threats
+
+
+
+E) Aquatic / Swamp Threats
+Purpose:
+makes water travel dangerous
+
+
+supports swamp territory identity
+
+
+
+F) Cave / Underground Threats
+Purpose:
+stop underground safety exploit
+
+
+protect mining loop
+
+
+
+G) Legendary / Event Dinos
+Purpose:
+server hype
+
+
+chaos storm content
+
+
+guild-level goals
+
+
+
+3) Territories & Dino Zones (how the world stays readable)
+Each region should advertise what lives there:
+Grasslands / Valley = early herbivores + small predators
+
+
+Dense Jungle = pack predators + rare dinos
+
+
+Swamp = aquatic ambush dinos
+
+
+Highlands / Cliffs = flyers
+
+
+Caves = underground threats
+
+
+Storm-Scarred Zone = apex + event spawns
+
+
+This lets players plan expeditions instead of wandering randomly.
+
+4) Behavior Systems (core mechanics)
+Instead of designing 40 dinos fully, we design 6–8 shared behavior templates:
+Herd AI (flee, defend young, stampede)
+
+
+Ambush predator AI (wait, burst attack, retreat)
+
+
+Pack AI (surround + coordinate)
+
+
+Territorial AI (patrol + roar warning)
+
+
+Scavenger AI (attracted to corpses/campfires)
+
+
+Cave hunter AI (sound/torch attraction)
+
+
+Storm frenzy AI (Chaos Windows aggression buff)
+
+
+
+5) Capture System Tie-In (high level)
+Every dino should have:
+Temperament
+
+
+Passive / Skittish / Aggressive / Territorial / Apex
+
+
+Capture Difficulty
+
+
+Easy / Medium / Hard / Extreme
+
+
+Transport Class
+
+
+Small / Medium / Large / Massive
+
+
+This matters more than crafting right now.
+
+
+
+
+

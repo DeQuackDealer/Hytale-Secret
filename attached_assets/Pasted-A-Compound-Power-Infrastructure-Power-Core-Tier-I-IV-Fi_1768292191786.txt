@@ -1,0 +1,321 @@
+A) Compound Power Infrastructure
+Power Core (Tier I–IV)
+
+
+Field Generator
+
+
+Industrial Generator
+
+
+Nuclear Reactor
+
+
+Fusion Reactor
+
+
+Power Control Center
+
+
+Emergency Generator
+
+
+Power Monitor
+
+
+(Optional later) Power Zone Anchors
+
+
+
+B) Perimeter Containment
+Tier I Barbed Perimeter Fence
+
+
+Tier II Electrified Fence
+
+
+Tier III Reinforced Electric Fence
+
+
+Tier IV Containment-Grade Fence
+
+
+Fence Gate (Tier I–IV) (Reinforced Fence Gate set)
+
+
+
+C) Surveillance
+Cameras (Tiered set)
+Static Camera
+
+
+Rotating Camera
+
+
+Night Vision Camera
+
+
+Thermal Camera
+
+
+(Optional later) Camera Console / Monitor Station (if you want a physical “view station” block)
+
+
+
+D) Detection / Sensors
+Sensors (Tiered set)
+Motion Sensor
+
+
+Sound Sensor
+
+
+Fence Breach Sensor
+
+
+Thermal Sensor
+
+
+
+E) Alerts & Signals
+Alarm Siren
+
+
+Warning Beacon Light
+
+
+Alert Panel
+
+
+
+F) Access Control
+Powered Doors (Tier I–IV)
+Powered Reinforced Door (Tier I)
+
+
+Powered Reinforced Door (Tier II)
+
+
+Powered Reinforced Door (Tier III)
+
+
+Powered Reinforced Door (Tier IV)
+
+
+Locks / Readers
+Keypad Lock
+
+
+Keycard Reader
+
+
+Biometric Scanner
+
+
+Lockdown Controller
+
+
+
+G) Lighting (Security / Utility)
+Security Light
+
+
+Flood Light
+
+
+Spotlight
+
+
+
+H) Defensive Weapons
+Ballistic Turret
+
+
+Tranq Turret
+
+
+Stun Turret
+
+
+Sonic Repeller Tower
+
+
+
+I) Compound Machines (V1)
+Repair / Maintenance Station
+
+
+Ammo Locker
+
+
+Storage Locker
+
+
+
+J) Machines (Phase 2 / Later)
+Research Terminal
+
+
+DNA Sample Storage (Powered Freezer)
+
+
+Incubator / Containment Pod
+
+
+Signal Tower (sensor range + minimap intel)
+
+
+NPC Hiring / Payroll / Management Console
+
+
+Vehicle / Expedition Management Terminal
+
+
+
+Items (Weapons & Combat Gear) — Master List v1
+1) 🔫 Firearms (Player Weapons)
+Pistols
+9mm Sidearm
+
+
+Heavy Pistol (.45 / Hand Cannon style)
+
+
+SMGs
+Compact SMG
+
+
+Tactical SMG
+
+
+Rifles
+Assault Rifle
+
+
+DMR (semi-auto)
+
+
+Bolt-Action Rifle (long range)
+
+
+Shotguns
+Pump Shotgun
+
+
+Combat Shotgun
+
+
+Heavy / Special
+LMG (later or high tier)
+
+
+Flare Gun (utility)
+
+
+
+2) 🧪 Tranq / Capture Weapons (Core JurassicTale identity)
+Tranq Pistol
+
+
+Tranq Rifle
+
+
+Dart Gun (high accuracy)
+
+
+Net Launcher (short range capture tool)
+
+
+Bola (anti-small/medium targets)
+
+
+Tranquilizer Darts (Ammo Type)
+
+
+
+3) 🔪 Melee Weapons (Tools + survival combat)
+Survival Knife (starter)
+
+
+Hunting Knife
+
+
+Combat Knife
+
+
+Machete (jungle clearing + combat)
+
+
+Baton / Stun Baton
+
+
+Spear (primitive option)
+
+
+
+4) 💣 Throwable / Tactical Items
+Frag Grenade (rare / later)
+
+
+Smoke Grenade (raid + escape)
+
+
+Flashbang (PvP/raid tool)
+
+
+Noise Maker / Decoy (lures dinos + players)
+
+
+Flare (visibility + scare wildlife)
+
+
+
+
+5) 🧰 Raid Tools (Breach Items)
+Lockpick Kit
+
+
+Fence Cutter / Bolt Cutter
+
+
+Hacking Tool (later / high tier)
+
+
+Breach Charges (rare)
+
+
+Door Jammer (prevents closing during raid)
+
+
+
+6) 🛡️ Defense Items (Turret Support)
+Turret Ammo Box
+
+
+Turret Repair Kit
+
+
+EMP Charge (optional / later)
+
+
+
+7) 🎒 Core Survival Utility (Needed early)
+Bandage
+
+
+Medkit
+
+
+Painkillers / Stims (optional)
+
+
+Antidote (for venom/poison dinos)
+
+
+Water Bottle / Canteen
+
+
+Rations / Food Pack
+
+
+

@@ -1,0 +1,103 @@
+Game Title
+JurassicTale
+(Internal Codename: Project Extinction)
+High Concept / One-Liner
+JurassicTale is a Hytale-based fantasy adventure survival MMO where players build and defend compounds in a dinosaur-filled Exclusion Zone, balancing exploration, progression, and high-stakes storm events.
+Elevator Pitch
+JurassicTale is a persistent multiplayer open-world experience built on Hytale. Players begin at a safe research compound hub and venture into the Exclusion Zone—an expansive wilderness filled with dinosaurs, ruins, rival outposts, and unpredictable dangers. Players can establish their own compounds, expand infrastructure through tiered power cores, hire NPCs for security and operations, trade and form partnerships, and face optional high-stakes PvPvE “Chaos Windows” that enable raids and world instability. The game emphasizes discovery and player-driven stories while avoiding high-barrier survival complexity.
+Core Player Fantasy
+Explore a massive prehistoric wilderness and uncover dangerous territories
+
+
+Build a secure outpost and expand into a powerful compound
+
+
+Hunt and potentially capture dinosaurs as rare trophies/assets
+
+
+Survive storms, sabotage, and evolving threats
+
+
+Become a legend of the Exclusion Zone through long-term progression
+
+
+Target Audience
+Hytale fans seeking a deeper server experience than classic Minecraft modes
+
+
+Players who enjoy survival + base building + MMO progression
+
+
+Creators/streamers who want repeatable content loops (events, raids, expeditions)
+
+
+Casual adventurers (PvE focused) + competitive players (PvPvE during events)
+
+
+Genre / Tags
+Adventure Survival MMO (PvPvE)
+
+
+Open World
+
+
+Base Building / Compound Management
+
+
+Economy / Trading
+
+
+Events / Live Ops
+
+
+Design Pillars
+Adventure-First
+
+ The world should feel exciting, magical, and cinematic—not grindy or punishing.
+
+
+Compounds Are the Spine
+
+ A player’s compound is their identity, progression path, and strategic advantage.
+
+
+Simple to Learn, Deep to Master
+
+ New players can build quickly; advanced players optimize zones, defenses, and operations.
+
+
+Danger is Optional but Meaningful
+
+ PvP and raids primarily occur during Chaos Windows—risk is high but predictable.
+
+
+Anti-Monopoly by Design
+
+ Large operations become harder to manage through NPC payroll pressures and sabotage risk.
+
+
+World Integrity Matters
+
+ The Exclusion Zone stays visually pristine via building limitations outside compounds and/or erosion/reset mechanics.
+
+
+Key Differentiators
+Tiered power core progression (Field → Industrial → Nuclear → Fusion)
+
+
+Wireless Power Grid + Zones system (easy onboarding, strategic depth)
+
+
+Dinosaurs can threaten weak structures (prevents “dirt hut meta”)
+
+
+Chaos Storm Events introduce PvPvE raids, instability, and cinematic moments
+
+
+NPC payroll + scaling sabotage creates natural balance against server domination
+
+
+Temporary camps for long-range expeditions + dangerous nights for immersion
+
+
+

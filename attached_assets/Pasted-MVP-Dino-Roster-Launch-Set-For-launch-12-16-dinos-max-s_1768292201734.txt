@@ -1,0 +1,135 @@
+MVP Dino Roster (Launch Set)
+For launch, 12–16 dinos max so it’s realistic.
+Herbivores (5)
+Small prey herbivore (starter hunting)
+
+
+Fast mid herbivore (chase)
+
+
+Medium herd defender (risk)
+
+
+Large tank herbivore (high reward)
+
+
+Rare peaceful giant (prestige)
+
+
+Predators (5)
+Small predator (starter threat)
+
+
+Pack predator (core danger loop)
+
+
+Night predator (stalking behavior)
+
+
+Ambush predator (jungle jump scare)
+
+
+Apex predator (territory boss)
+
+
+Flyers (2)
+Small flyer (annoyance / camp raids)
+
+
+Large flyer (high danger / event spawn)
+
+
+Swamp / Aquatic (2)
+Swamp ambush predator
+
+
+River/water predator
+
+
+Cave threats (2)
+Cave pack hunter
+
+
+Burrower/insect swarm (non-dino is fine)
+
+1) Territory / Zone Types
+Grasslands / Valley (Starter Zone)
+
+
+Dense Jungle (Mid Zone)
+
+
+Swamp / Riverlands
+
+
+Highlands / Cliffs
+
+
+Caves / Underground
+
+
+Storm-Scarred Zone (High Risk / Endgame)
+
+
+
+2) MVP Launch Roster (12–16 dinos)
+🟩 Herbivores (Food / materials / world life)
+Dryosaurus (starter prey / fast herbivore) – Grasslands
+
+
+Parasaurolophus (herd mid-tier) – Grasslands / Jungle edge
+
+
+Stegosaurus (defensive herbivore) – Jungle edge
+
+
+Triceratops (high-value tank herbivore) – Grasslands / Highlands
+
+
+Brachiosaurus (rare peaceful giant / prestige sighting) – Deep Jungle
+
+
+
+🟥 Predators (core danger / raids on camps)
+Dilophosaurus (starter predator) – Jungle edge
+
+
+Velociraptor (pack predator) – Dense Jungle
+
+
+Allosaurus (territorial predator) – Highlands
+
+
+Carnotaurus (fast ambush predator) – Jungle / open clearings
+
+
+Tyrannosaurus Rex (T-Rex) (apex predator / territory boss) – Storm Zone
+
+
+
+🟦 Flyers (travel disruption / camp danger)
+Pteranodon (common flyer) – Cliffs / coast
+
+
+Quetzalcoatlus (rare large flyer / high threat) – Highlands / Storm Zone
+
+
+
+🟪 Swamp / Aquatic threats (prevents water being “safe”)
+Spinosaurus (swamp apex / river boss) – Swamp / Riverlands
+
+
+Deinosuchus (ambush crocodilian) – Swamp / Riverbanks
+
+
+
+⬛ Caves / Underground threats (stops underground base exploit)
+Troodon (cave hunter / night predator) – Caves
+
+
+Utahraptor (rare heavy pack threat underground) – Deep Caves
+
+
+
+
+
