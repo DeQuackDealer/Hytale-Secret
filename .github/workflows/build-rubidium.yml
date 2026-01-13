@@ -1,0 +1,90 @@
+name: Build Rubidium
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'Rubidium-Framework/**'
+      - '.github/workflows/build-rubidium.yml'
+  pull_request:
+    branches: [ main, master ]
+    paths:
+      - 'Rubidium-Framework/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Java 25
+      uses: actions/setup-java@v4
+      with:
+        java-version: '25-ea'
+        distribution: 'temurin'
+        
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
+      
+    - name: Make gradlew executable
+      run: chmod +x Rubidium-Framework/gradlew
+      working-directory: .
+      
+    - name: Create libs directory
+      run: mkdir -p Rubidium-Framework/libs
+      
+    - name: Build with Gradle
+      run: ./gradlew shadowJar --no-daemon
+      working-directory: Rubidium-Framework
+      
+    - name: Rename to rubidium.jar
+      run: |
+        cd Rubidium-Framework/build/libs
+        mv Rubidium-*.jar rubidium.jar 2>/dev/null || mv *.jar rubidium.jar 2>/dev/null || true
+        
+    - name: Upload rubidium.jar artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: rubidium
+        path: Rubidium-Framework/build/libs/rubidium.jar
+        if-no-files-found: error
+        
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: rubidium
+        
+    - name: Get version
+      id: version
+      run: echo "version=$(date +'%Y.%m.%d')-$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_OUTPUT
+      
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: v${{ steps.version.outputs.version }}
+        name: Rubidium ${{ steps.version.outputs.version }}
+        body: |
+          Automated release of Rubidium Framework
+          
+          **Changes in this build:**
+          - Commit: ${{ github.sha }}
+          - Branch: ${{ github.ref_name }}
+          
+          **Installation:**
+          1. Download `rubidium.jar`
+          2. Place in your Hytale server's `plugins/` folder
+          3. Restart the server
+        files: rubidium.jar
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -2,6 +2,8 @@ package rubidium.api.player;
 
 public interface CommandSender {
     
+    String getName();
+    
     void sendMessage(String message);
     
     void sendMessage(String... messages);
@@ -10,5 +12,5 @@ public interface CommandSender {
     
     boolean isPlayer();
     
-    String getName();
+    boolean isConsole();
 }
