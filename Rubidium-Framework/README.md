@@ -629,9 +629,262 @@ src/main/java/com/yellowtale/rubidium/
 │   ├── ReplayMetrics.java         # Performance metrics
 │   ├── ModeratorReplayFeature.java # QoL feature integration
 │   └── ReplayCommands.java        # /replay commands
+├── voice/                # Voice Chat System
+│   ├── VoiceChatManager.java    # Core voice management
+│   ├── VoiceChannel.java        # Channel definitions
+│   ├── VoiceState.java          # Player voice state
+│   ├── VoiceConfig.java         # Voice configuration
+│   ├── ProximityManager.java    # 3D spatial audio
+│   └── VoiceMetrics.java        # Performance metrics
+├── waypoints/            # Waypoint System
+│   ├── WaypointManager.java     # Waypoint CRUD operations
+│   ├── Waypoint.java            # Waypoint entity
+│   ├── WaypointCategory.java    # Built-in categories
+│   ├── WaypointIcon.java        # Icon definitions
+│   ├── WaypointConfig.java      # Configuration
+│   └── NavigationData.java      # Navigation calculations
+├── party/                # Party System
+│   ├── PartyManager.java        # Party lifecycle management
+│   ├── Party.java               # Party entity
+│   ├── PartySettings.java       # Configurable settings
+│   └── PartyInvite.java         # Invite handling
+├── economy/              # Economy System
+│   ├── EconomyManager.java      # Balance & transactions
+│   ├── Currency.java            # Multi-currency support
+│   ├── Account.java             # Player accounts
+│   ├── Transaction.java         # Transaction records
+│   └── EconomyConfig.java       # Configuration
+├── permissions/          # Permission System
+│   ├── PermissionManager.java   # Permission checks & roles
+│   ├── Role.java                # Role definitions
+│   ├── Permission.java          # Permission nodes
+│   ├── PermissionValue.java     # TRUE/FALSE/UNDEFINED
+│   ├── PermissionContext.java   # Context-based permissions
+│   ├── PlayerPermissions.java   # Per-player data
+│   └── PermissionGrant.java     # Direct permission grants
 ├── devkit/               # Development tools
 └── optimization/         # Performance optimization utilities
 ```
+
+---
+
+## Voice Chat System
+
+Rubidium includes a full-featured voice chat system with proximity audio and channel support.
+
+### Features
+
+- **Proximity Chat** - 3D spatial audio that attenuates with distance
+- **Channels** - Global, party, team, and private voice channels
+- **Admin Controls** - Server mute, priority speaker, and moderation
+- **Quality Settings** - Opus codec with configurable bitrate (16-128 kbps)
+
+### Commands
+
+```
+/voice toggle               - Enable/disable voice chat
+/voice mute                 - Mute your microphone
+/voice deafen               - Deafen yourself
+/voice volume <0-200>       - Set output volume
+/voice channel join <name>  - Join a voice channel
+/voice channel leave        - Leave current channel
+/voice admin mute <player>  - Server mute a player
+```
+
+### Integration
+
+```java
+// Party voice chat auto-join
+partyManager.onPartyCreated((party) -> {
+    VoiceChannel channel = voiceChat.createChannel("party-" + party.getId(), ChannelType.PARTY);
+    party.setVoiceChannel(channel);
+});
+```
+
+---
+
+## Waypoint System
+
+A comprehensive waypoint and navigation system for players.
+
+### Features
+
+- **Personal Waypoints** - Private markers saved per-player
+- **Sharing** - Share waypoints with party, team, or everyone
+- **Categories** - Home, death, spawn, dungeon, resource, quest, shop, custom
+- **Navigation** - Distance, direction, compass integration
+- **Visual Beams** - Configurable light beams at waypoint locations
+
+### Commands
+
+```
+/waypoint create <name>     - Create waypoint at current location
+/waypoint delete <name>     - Delete a waypoint
+/waypoint list              - List your waypoints
+/waypoint goto <name>       - Set as navigation target
+/waypoint share <name> <player> - Share with another player
+/wp <name>                  - Shorthand for navigation
+```
+
+### Built-in Categories
+
+| Category | Icon | Color | Use Case |
+|----------|------|-------|----------|
+| HOME | House | Green | Player bases |
+| DEATH | Skull | Red | Death locations |
+| SPAWN | Star | Blue | Spawn points |
+| POI | Flag | Yellow | Points of interest |
+| DUNGEON | Cave | Purple | Dungeons |
+| RESOURCE | Pickaxe | Orange | Mining spots |
+| QUEST | Quest | Pink | Quest objectives |
+| SHOP | Shop | Cyan | Shops |
+
+---
+
+## Party System
+
+A party/group coordination system for multiplayer gameplay.
+
+### Features
+
+- **Party Management** - Create, invite, kick, promote, transfer leadership
+- **XP Sharing** - Configurable XP distribution among nearby members
+- **Loot Distribution** - Free-for-all, round-robin, need-before-greed, leader decides
+- **Friendly Fire** - Configurable damage between party members
+- **Integration** - Voice chat and waypoint sharing for party members
+
+### Commands
+
+```
+/party create [name]        - Create a new party
+/party invite <player>      - Invite a player
+/party accept               - Accept party invite
+/party leave                - Leave your party
+/party kick <player>        - Kick a member
+/party promote <player>     - Promote to moderator
+/party settings             - View/modify party settings
+/p <message>                - Send party chat message
+```
+
+### Settings
+
+```java
+PartySettings settings = PartySettings.defaults()
+    .withMaxMembers(8)
+    .withShareXP(true)
+    .withFriendlyFire(false)
+    .withLootDistribution(LootDistribution.NEED_BEFORE_GREED)
+    .withVoiceChat(true)
+    .withWaypointSharing(true);
+```
+
+---
+
+## Economy System
+
+A multi-currency economy system with ACID-compliant transactions.
+
+### Features
+
+- **Multi-Currency** - Support for multiple currency types (gold, gems, tokens)
+- **Secure Transactions** - Thread-safe with deadlock prevention
+- **Account System** - Player, shop, guild, and escrow accounts
+- **Transaction Logging** - Complete audit trail for all transactions
+- **Formatting** - Customizable currency display formats
+
+### Commands
+
+```
+/balance [player]           - Check balance
+/pay <player> <amount>      - Send money to player
+/eco give <player> <amount> - Give money (admin)
+/eco take <player> <amount> - Take money (admin)
+/eco history <player>       - View transaction history
+```
+
+### Integration
+
+```java
+// Check balance
+long balance = economy.getBalance(playerId, "gold");
+
+// Transfer money
+Transaction tx = economy.transfer(from, to, "gold", 100, "Payment for sword");
+if (tx.isSuccessful()) {
+    player.sendMessage("Payment sent!");
+}
+
+// Quest reward
+economy.deposit(playerId, "gold", 500, "Quest: Dragon Slayer completed");
+```
+
+---
+
+## Permission System
+
+A hierarchical role-based permission system with caching.
+
+### Features
+
+- **Hierarchical Roles** - Role inheritance with priority ordering
+- **Wildcard Support** - Use `*` for all permissions
+- **Context-Based** - Permissions can be world or server specific
+- **Temporary Permissions** - Time-limited permission grants
+- **Prefix/Suffix** - Customizable chat prefixes and suffixes
+- **Caching** - O(1) cached permission lookups
+
+### Built-in Roles
+
+| Role | Priority | Prefix | Inherits From |
+|------|----------|--------|---------------|
+| Default | 0 | - | - |
+| VIP | 100 | `[VIP]` | Default |
+| Moderator | 500 | `[MOD]` | VIP |
+| Admin | 1000 | `[ADMIN]` | Moderator |
+
+### Commands
+
+```
+/perm check <player> <perm> - Check if player has permission
+/perm set <player> <perm> <true|false> - Set player permission
+/role add <player> <role>   - Add role to player
+/role remove <player> <role> - Remove role from player
+/role setprimary <player> <role> - Set primary role
+```
+
+### Integration
+
+```java
+// Check permission
+if (permissions.hasPermission(playerId, "economy.shop.create")) {
+    // Allow shop creation
+}
+
+// Get prefix for chat
+String prefix = permissions.getPrefix(playerId);
+String formatted = prefix + playerName + ": " + message;
+
+// Add temporary permission
+permissions.setPermission(playerId, "fly.enabled", true, Duration.ofHours(1));
+```
+
+---
+
+## Documentation
+
+Comprehensive AI-readable documentation is available in `/rubidium/documentation/`:
+
+- **INDEX.md** - Documentation navigation and overview
+- **ARCHITECTURE.md** - System architecture and design patterns
+- **VOICE_CHAT.md** - Voice chat system reference
+- **WAYPOINTS.md** - Waypoint system reference
+- **PARTY_SYSTEM.md** - Party system reference
+- **ECONOMY.md** - Economy system reference
+- **TELEPORTATION.md** - Teleportation system reference
+- **CHAT_SYSTEM.md** - Chat system reference
+- **PERMISSIONS.md** - Permission system reference
+- **COMMANDS.md** - Complete command reference
+- **API_REFERENCE.md** - Full API documentation
 
 ---
 
