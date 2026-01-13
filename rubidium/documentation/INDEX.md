@@ -15,6 +15,7 @@
 ├── TELEPORTATION.md            # Warps, homes, and teleportation
 ├── CHAT_SYSTEM.md              # Advanced chat with channels and filters
 ├── PERMISSIONS.md              # Role-based permission system
+├── PERFORMANCE.md              # Performance optimization system
 ├── COMMANDS.md                 # Command reference
 └── API_REFERENCE.md            # Complete API reference
 ```
@@ -130,5 +131,6 @@ graph TD
 - **Teleportation**: See [TELEPORTATION.md](TELEPORTATION.md)
 - **Chat System**: See [CHAT_SYSTEM.md](CHAT_SYSTEM.md)
 - **Permissions**: See [PERMISSIONS.md](PERMISSIONS.md)
+- **Performance**: See [PERFORMANCE.md](PERFORMANCE.md)
 - **API Reference**: See [API_REFERENCE.md](API_REFERENCE.md)
 - **Command Reference**: See [COMMANDS.md](COMMANDS.md)

@@ -870,6 +870,66 @@ permissions.setPermission(playerId, "fly.enabled", true, Duration.ofHours(1));
 
 ---
 
+## Performance Optimization
+
+Intelligent resource management to maintain server stability under varying load.
+
+### Features
+
+- **TPS Limiting** - Stable, predictable tick rate (default: 20 TPS, 5 TPS when empty)
+- **Dynamic View Radius** - Automatically adjusts based on CPU/memory pressure
+- **Smart Garbage Collection** - Triggers GC at optimal times (chunk unloads, low pressure)
+- **Pressure Detection** - Monitors heap usage, GC time, and TPS fluctuations
+
+### Configuration
+
+```java
+PerformanceConfig config = PerformanceConfig.builder()
+    .targetTps(20)                    // Normal TPS
+    .emptyServerTps(5)                // TPS when no players
+    .defaultViewRadius(10)            // Normal view distance
+    .minimumViewRadius(4)             // Emergency minimum
+    .memoryPressureThreshold(0.85)    // 85% heap = pressure
+    .chunkUnloadThreshold(100)        // Chunks to trigger GC
+    .build();
+```
+
+### Integration
+
+```java
+PerformanceManager perf = new PerformanceManager(logger);
+perf.setConfig(config);
+perf.start();
+
+// In tick loop
+perf.recordTick(tickTimeNanos);
+perf.updatePlayerCount(onlinePlayers.size());
+perf.updateChunkCount(loadedChunks);
+
+// React to changes
+perf.onViewRadiusChange(radius -> {
+    for (Player p : players) p.setViewDistance(radius);
+});
+
+// Check status
+PerformanceMetrics metrics = perf.getMetrics();
+if (metrics.isHealthy()) {
+    // All good
+} else {
+    logger.warn("Status: {}", metrics.getStatusSummary());
+}
+```
+
+### Server States
+
+| State | Description | Actions |
+|-------|-------------|---------|
+| NORMAL | Healthy operation | Full view radius, 20 TPS |
+| DEGRADED | Resource pressure | Reduced view radius |
+| EMPTY | No players | 5 TPS, trigger GC |
+
+---
+
 ## Documentation
 
 Comprehensive AI-readable documentation is available in `/rubidium/documentation/`:
@@ -883,6 +943,7 @@ Comprehensive AI-readable documentation is available in `/rubidium/documentation
 - **TELEPORTATION.md** - Teleportation system reference
 - **CHAT_SYSTEM.md** - Chat system reference
 - **PERMISSIONS.md** - Permission system reference
+- **PERFORMANCE.md** - Performance optimization reference
 - **COMMANDS.md** - Complete command reference
 - **API_REFERENCE.md** - Full API documentation
 
