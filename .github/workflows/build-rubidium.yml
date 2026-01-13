@@ -33,8 +33,72 @@ jobs:
       run: chmod +x Rubidium-Framework/gradlew
       working-directory: .
       
-    - name: Create libs directory
-      run: mkdir -p Rubidium-Framework/libs
+    - name: Create libs directory and stub HytaleServer.jar
+      run: |
+        mkdir -p Rubidium-Framework/libs
+        # Create stub Hytale classes for CI compilation
+        mkdir -p temp_hytale/com/hypixel/hytale/server
+        mkdir -p temp_hytale/com/hypixel/hytale/api/player
+        mkdir -p temp_hytale/com/hypixel/hytale/api/event
+        mkdir -p temp_hytale/com/hypixel/hytale/api/entity
+        mkdir -p temp_hytale/com/hypixel/hytale/api/world
+        
+        cat > temp_hytale/com/hypixel/hytale/server/HytaleServer.java << 'EOF'
+        package com.hypixel.hytale.server;
+        public class HytaleServer {
+            public static HytaleServer getInstance() { return null; }
+            public void broadcast(String message) {}
+            public java.util.Collection<?> getOnlinePlayers() { return java.util.Collections.emptyList(); }
+        }
+        EOF
+        
+        cat > temp_hytale/com/hypixel/hytale/api/player/Player.java << 'EOF'
+        package com.hypixel.hytale.api.player;
+        public interface Player {
+            java.util.UUID getUuid();
+            String getName();
+            void sendMessage(String message);
+            void teleport(double x, double y, double z, float yaw, float pitch);
+        }
+        EOF
+        
+        cat > temp_hytale/com/hypixel/hytale/api/event/Event.java << 'EOF'
+        package com.hypixel.hytale.api.event;
+        public interface Event {}
+        EOF
+        
+        cat > temp_hytale/com/hypixel/hytale/api/entity/Entity.java << 'EOF'
+        package com.hypixel.hytale.api.entity;
+        public interface Entity {
+            java.util.UUID getUuid();
+            double getX();
+            double getY();
+            double getZ();
+        }
+        EOF
+        
+        cat > temp_hytale/com/hypixel/hytale/api/world/World.java << 'EOF'
+        package com.hypixel.hytale.api.world;
+        public interface World {
+            String getName();
+        }
+        EOF
+        
+        # Compile stub classes
+        find temp_hytale -name "*.java" -print | xargs javac -d temp_hytale_classes 2>/dev/null || true
+        
+        # Create stub JAR
+        mkdir -p temp_hytale_classes
+        if [ -d temp_hytale_classes ] && [ "$(ls -A temp_hytale_classes 2>/dev/null)" ]; then
+          jar cf Rubidium-Framework/libs/HytaleServer.jar -C temp_hytale_classes .
+        else
+          # Create minimal empty jar as fallback
+          echo "Manifest-Version: 1.0" > MANIFEST.MF
+          jar cfm Rubidium-Framework/libs/HytaleServer.jar MANIFEST.MF
+        fi
+        
+        rm -rf temp_hytale temp_hytale_classes MANIFEST.MF 2>/dev/null || true
+        echo "Created stub HytaleServer.jar for CI build"
       
     - name: Build with Gradle
       run: ./gradlew shadowJar --no-daemon

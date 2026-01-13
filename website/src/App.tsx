@@ -309,7 +309,7 @@ function RubidiumPage() {
           <p className="rubidium-tagline">Production-Ready Server Framework for Hytale</p>
           <p className="rubidium-description">
             Rubidium is a modular, runtime-reloadable, performance-focused framework for 
-            Hytale servers. Built with Java 21+, it provides the foundation for building 
+            Hytale servers. Built with Java 25, it provides the foundation for building 
             scalable server infrastructure while remaining safe for official modding APIs.
           </p>
           <div className="hero-buttons">
@@ -555,7 +555,7 @@ function RubidiumLicensePage() {
         <div className="overview-content">
           <p>
             <strong>Rubidium</strong> is a production-ready, modular server framework designed specifically for 
-            Hytale servers. Built with Java 21+ and modern software engineering principles, Rubidium provides 
+            Hytale servers. Built with Java 25 and modern software engineering principles, Rubidium provides 
             server operators and developers with a comprehensive foundation for building high-performance, 
             scalable multiplayer experiences.
           </p>
