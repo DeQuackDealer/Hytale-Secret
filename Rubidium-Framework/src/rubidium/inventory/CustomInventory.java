@@ -68,8 +68,25 @@ public class CustomInventory {
     
     public void updateSlot(int slot, ItemStack item) {
         slots.put(slot, new InventorySlot(item, slots.getOrDefault(slot, new InventorySlot(null, null)).clickHandler()));
-        
+    }
+    
+    public void sendSlotUpdate(Player player, int slot) {
+        if (viewers.contains(player.getUUID())) {
+            InventorySlot slotData = slots.get(slot);
+            ItemStack item = slotData != null ? slotData.item() : null;
+            player.sendPacket(new UpdateSlotPacket(id, slot, item));
+        }
+    }
+    
+    public void broadcastSlotUpdate(int slot, java.util.function.Function<UUID, Player> playerResolver) {
+        InventorySlot slotData = slots.get(slot);
+        ItemStack item = slotData != null ? slotData.item() : null;
+        UpdateSlotPacket packet = new UpdateSlotPacket(id, slot, item);
         for (UUID viewerId : viewers) {
+            Player player = playerResolver.apply(viewerId);
+            if (player != null) {
+                player.sendPacket(packet);
+            }
         }
     }
     

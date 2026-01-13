@@ -81,13 +81,25 @@ public class BossBar {
         return Collections.unmodifiableSet(viewers);
     }
     
+    public void sendUpdateTo(Player player, UpdateType type) {
+        Action action = switch (type) {
+            case TITLE -> Action.UPDATE_TITLE;
+            case PROGRESS -> Action.UPDATE_PROGRESS;
+            case COLOR -> Action.UPDATE_COLOR;
+            case STYLE -> Action.UPDATE_STYLE;
+            case SHOW -> Action.ADD;
+            case HIDE -> Action.REMOVE;
+        };
+        player.sendPacket(new BossBarPacket(id, action, title, progress, color, style));
+    }
+    
     private void broadcastUpdate(UpdateType type) {
     }
     
+    public enum UpdateType { TITLE, PROGRESS, COLOR, STYLE, SHOW, HIDE }
     public enum Color { PINK, BLUE, RED, GREEN, YELLOW, PURPLE, WHITE }
     public enum Style { SOLID, SEGMENTED_6, SEGMENTED_10, SEGMENTED_12, SEGMENTED_20 }
     public enum Action { ADD, REMOVE, UPDATE_PROGRESS, UPDATE_TITLE, UPDATE_STYLE, UPDATE_COLOR }
-    private enum UpdateType { TITLE, PROGRESS, COLOR, STYLE, SHOW, HIDE }
     
     public record BossBarPacket(String id, Action action, String title, float progress, Color color, Style style) {}
 }
