@@ -89,6 +89,10 @@ impl WorldHeatmap {
                     region_z: *rz,
                     center_x: (*rx * self.region_size + self.region_size / 2) as f64,
                     center_z: (*rz * self.region_size + self.region_size / 2) as f64,
+
+
+
+                    
                     activity_score: e.value().activity_score.load(Ordering::Relaxed),
                     player_visits: e.value().player_visits.load(Ordering::Relaxed),
                 }

@@ -1,0 +1,50 @@
+{
+  "id": "rubidium",
+  "name": "Rubidium Framework",
+  "version": "1.0.0",
+  "description": "High-performance modular server framework for Hytale",
+  "authors": ["Yellow Tale Team"],
+  "main": "rubidium.hytale.RubidiumHytalePlugin",
+  "api_version": "1.0",
+  "dependencies": [],
+  "soft_dependencies": [],
+  "load_order": "STARTUP",
+  "features": {
+    "models": true,
+    "animations": true,
+    "voice_chat": true,
+    "waypoints": true,
+    "party_system": true,
+    "economy": true,
+    "teleportation": true,
+    "chat": true,
+    "permissions": true,
+    "display_apis": true,
+    "inventory_builder": true,
+    "boss_bar": true,
+    "tab_list": true,
+    "particle_effects": true,
+    "sound_manager": true,
+    "cooldown_manager": true,
+    "session_manager": true,
+    "announcements": true,
+    "location_manager": true
+  },
+  "permissions": {
+    "rubidium.admin": {
+      "description": "Full Rubidium admin access",
+      "default": "op"
+    },
+    "rubidium.reload": {
+      "description": "Reload Rubidium configuration",
+      "default": "op"
+    }
+  },
+  "commands": {
+    "rubidium": {
+      "description": "Rubidium framework commands",
+      "usage": "/rubidium <reload|version|stats>",
+      "permission": "rubidium.admin"
+    }
+  }
+}
