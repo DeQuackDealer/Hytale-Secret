@@ -1,0 +1,25 @@
+name: Rubidium
+version: 1.0.0
+main: rubidium.hytale.RubidiumHytalePlugin
+api-version: "1.0"
+description: High-performance modular server framework for Hytale
+authors: [Yellow Tale Team]
+website: https://yellowtale.com
+load: STARTUP
+
+softdepend: []
+depend: []
+
+commands:
+  rubidium:
+    description: Rubidium framework commands
+    usage: /<command> <reload|version|stats>
+    permission: rubidium.admin
+
+permissions:
+  rubidium.admin:
+    description: Full Rubidium admin access
+    default: op
+  rubidium.reload:
+    description: Reload Rubidium configuration
+    default: op

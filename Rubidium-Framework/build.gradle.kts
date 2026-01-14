@@ -67,12 +67,31 @@ tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJ
     archiveBaseName.set("Rubidium")
     archiveClassifier.set("")
     
+    // Relocate all bundled dependencies to avoid conflicts with server/other plugins
     relocate("com.google.gson", "rubidium.libs.gson")
     relocate("org.yaml.snakeyaml", "rubidium.libs.snakeyaml")
     relocate("com.google.common", "rubidium.libs.guava")
+    relocate("com.moandjiezana.toml", "rubidium.libs.toml")
+    relocate("io.netty", "rubidium.libs.netty")
+    relocate("org.slf4j", "rubidium.libs.slf4j")
     
+    // Exclude compile-only annotations (not needed at runtime)
     dependencies {
         exclude(dependency("org.jetbrains:annotations"))
+    }
+    
+    // Merge service files for proper SPI loading
+    mergeServiceFiles()
+    
+    // Set manifest for plugin loading
+    manifest {
+        attributes(
+            "Implementation-Title" to "Rubidium Framework",
+            "Implementation-Version" to project.version,
+            "Rubidium-Version" to "1.0.0",
+            "Main-Class" to "rubidium.hytale.RubidiumHytalePlugin",
+            "Plugin-Class" to "rubidium.hytale.RubidiumHytalePlugin"
+        )
     }
 }
 
