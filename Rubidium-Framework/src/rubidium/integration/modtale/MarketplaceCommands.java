@@ -78,15 +78,17 @@ public class MarketplaceCommands {
     
     private void handleBrowse(CommandSender sender, String[] args) {
         String category = args.length > 1 ? args[1].toLowerCase() : "popular";
-        int page = 0;
+        int parsedPage = 0;
         
         if (args.length > 2) {
             try {
-                page = Integer.parseInt(args[2]) - 1;
+                parsedPage = Integer.parseInt(args[2]) - 1;
             } catch (NumberFormatException e) {
-                page = 0;
+                parsedPage = 0;
             }
         }
+        
+        final int page = parsedPage;
         
         CompletableFuture<ModtaleClient.SearchResult> future = switch (category) {
             case "newest" -> marketplace.browseNewest(page);

@@ -84,7 +84,7 @@ public final class AccessControlCommands {
                 return;
             }
             
-            var player = resolved.getFirst();
+            var player = resolved.get(0);
             if (accessControl.removeFromWhitelist(player.uuid(), ctx.sender().getName())) {
                 ctx.sender().sendMessage("&a" + player.username() + " has been removed from the whitelist.");
             } else {
@@ -214,7 +214,7 @@ public final class AccessControlCommands {
                 return;
             }
             
-            var player = resolved.getFirst();
+            var player = resolved.get(0);
             if (accessControl.removeFromBlacklist(player.uuid(), ctx.sender().getName())) {
                 ctx.sender().sendMessage("&a" + player.username() + " has been unbanned.");
             } else {

@@ -11,6 +11,13 @@ public class Scheduler {
     
     private static final Logger logger = Logger.getLogger("Rubidium-Scheduler");
     
+    public enum Priority {
+        LOW,
+        NORMAL,
+        HIGH,
+        CRITICAL
+    }
+    
     private final ScheduledExecutorService asyncExecutor;
     private final ExecutorService syncExecutor;
     private final Map<Long, ScheduledTask> tasks;
@@ -110,7 +117,7 @@ public class Scheduler {
                     syncExecutor.submit(task);
                 }
             } catch (Exception e) {
-                logger.error("Error in scheduled task " + taskId + ": " + e.getMessage());
+                logger.severe("Error in scheduled task " + taskId + ": " + e.getMessage());
                 e.printStackTrace();
             }
         };

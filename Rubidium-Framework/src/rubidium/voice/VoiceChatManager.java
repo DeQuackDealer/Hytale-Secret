@@ -87,7 +87,8 @@ public class VoiceChatManager {
     
     public void onPlayerJoin(Player player) {
         VoiceState state = new VoiceState(player.getId());
-        state.setPosition(player.getPosition());
+        var loc = player.getPosition();
+        state.setPosition(new Vector3d(loc.x(), loc.y(), loc.z()));
         playerStates.put(player.getId(), state);
         
         if (config.autoJoinGlobal()) {

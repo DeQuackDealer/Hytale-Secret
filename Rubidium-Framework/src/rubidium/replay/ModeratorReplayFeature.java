@@ -3,7 +3,6 @@ package rubidium.replay;
 import rubidium.api.player.Player;
 import rubidium.core.logging.RubidiumLogger;
 import rubidium.core.scheduler.Scheduler;
-import rubidium.core.scheduler.TaskHandle;
 import rubidium.qol.QoLFeature;
 
 import java.nio.file.Path;
@@ -52,7 +51,7 @@ public class ModeratorReplayFeature extends QoLFeature {
     
     private ReplayConfig config;
     private Scheduler scheduler;
-    private TaskHandle captureTask;
+    private long captureTaskId = -1;
     
     private ReplayFramePool framePool;
     private ReplayStorageWorker storageWorker;
@@ -135,7 +134,7 @@ public class ModeratorReplayFeature extends QoLFeature {
         storageWorker.start();
         
         if (scheduler != null) {
-            captureTask = scheduler.scheduleRepeating(
+            captureTaskId = scheduler.scheduleRepeating(
                 "replay-capture",
                 this::captureFrame,
                 Duration.ofMillis(50),
@@ -150,9 +149,9 @@ public class ModeratorReplayFeature extends QoLFeature {
     
     @Override
     protected void onDisable() {
-        if (captureTask != null) {
-            captureTask.cancel();
-            captureTask = null;
+        if (captureTaskId >= 0 && scheduler != null) {
+            scheduler.cancel(captureTaskId);
+            captureTaskId = -1;
         }
         
         activeSessions.values().forEach(session -> {
@@ -208,8 +207,8 @@ public class ModeratorReplayFeature extends QoLFeature {
                 frame.setRotation(player.getYaw(), player.getPitch());
                 frame.setVelocity(player.getVelX(), player.getVelY(), player.getVelZ());
                 
-                frame.setHealth(player.getHealth());
-                frame.setArmor(player.getArmor());
+                frame.setHealth((float) player.getHealth());
+                frame.setArmor((float) player.getArmor());
                 
                 frame.setOnGround(player.isOnGround());
                 frame.setSprinting(player.isSprinting());

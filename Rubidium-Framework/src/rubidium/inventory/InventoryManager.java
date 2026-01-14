@@ -116,10 +116,10 @@ public class InventoryManager {
             }
             
             if (page > 0) {
-                builder.setItem(5, 0, ItemStack.of("arrow", "Previous Page"), (p, e) -> previousPage());
+                builder.setItem(5, 0, ItemStack.builder("arrow").displayName("Previous Page").build(), (p, e) -> previousPage());
             }
             if (page < getTotalPages() - 1) {
-                builder.setItem(5, 8, ItemStack.of("arrow", "Next Page"), (p, e) -> nextPage());
+                builder.setItem(5, 8, ItemStack.builder("arrow").displayName("Next Page").build(), (p, e) -> nextPage());
             }
             
             return builder.build();

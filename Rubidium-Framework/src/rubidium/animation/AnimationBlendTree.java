@@ -154,8 +154,9 @@ public class AnimationBlendTree {
                 totalWeight += weight;
             }
             
+            final float finalTotalWeight = totalWeight;
             List<BlendResult.Entry> normalized = entries.stream()
-                .map(e -> new BlendResult.Entry(e.animationId(), e.weight() / totalWeight))
+                .map(e -> new BlendResult.Entry(e.animationId(), e.weight() / finalTotalWeight))
                 .toList();
             
             return new BlendResult(normalized);

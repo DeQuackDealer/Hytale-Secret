@@ -98,25 +98,7 @@ public class InventoryBuilder {
         build().open(player);
     }
     
-    public record InventorySlot(ItemStack item, BiConsumer<Player, InventoryClickEvent> clickHandler) {}
-    
-    public record ItemStack(String material, int amount, String displayName, List<String> lore) {
-        public static ItemStack of(String material) {
-            return new ItemStack(material, 1, null, List.of());
-        }
-        
-        public static ItemStack of(String material, String displayName) {
-            return new ItemStack(material, 1, displayName, List.of());
-        }
-        
-        public static ItemStack of(String material, String displayName, String... lore) {
-            return new ItemStack(material, 1, displayName, Arrays.asList(lore));
-        }
-        
-        public ItemStack amount(int amount) {
-            return new ItemStack(material, amount, displayName, lore);
-        }
-    }
+    public record InventorySlot(rubidium.inventory.ItemStack item, BiConsumer<Player, InventoryClickEvent> clickHandler) {}
     
     public record InventoryClickEvent(int slot, ClickType clickType, boolean isShiftClick) {}
     public enum ClickType { LEFT, RIGHT, MIDDLE, SHIFT_LEFT, SHIFT_RIGHT, DROP, DOUBLE_CLICK }

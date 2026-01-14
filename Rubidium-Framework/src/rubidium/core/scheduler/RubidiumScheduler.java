@@ -237,6 +237,13 @@ public final class RubidiumScheduler {
         return cancelled;
     }
     
+    /**
+     * Alias for cancelTasks - cancel all tasks owned by a module.
+     */
+    public int cancelAllTasks(String owner) {
+        return cancelTasks(owner);
+    }
+    
     private void tick() {
         long tickNumber = currentTick.incrementAndGet();
         long tickStartNanos = System.nanoTime();

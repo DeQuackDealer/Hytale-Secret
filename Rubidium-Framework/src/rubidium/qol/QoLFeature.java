@@ -18,6 +18,10 @@ public abstract class QoLFeature {
         this.enabled = false;
     }
     
+    protected QoLFeature(String id, String name, RubidiumLogger logger) {
+        this(id, name, name + " feature", logger);
+    }
+    
     public String getId() {
         return id;
     }

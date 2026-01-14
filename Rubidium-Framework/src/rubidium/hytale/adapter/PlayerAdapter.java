@@ -1,148 +1,196 @@
 package rubidium.hytale.adapter;
 
 import rubidium.hytale.api.player.Player;
-import com.hypixel.hytale.server.core.entity.entities.player.ServerPlayer;
+import rubidium.hytale.api.world.Location;
+import rubidium.hytale.api.world.World;
 
 import java.util.UUID;
 
 /**
  * Adapts the real Hytale ServerPlayer to Rubidium's Player interface.
- * This enables Rubidium to work with the actual Hytale server at runtime.
+ * This is a placeholder implementation until the official Hytale SDK is available.
  */
 public class PlayerAdapter implements Player {
     
-    private final ServerPlayer hytalePlayer;
+    private final UUID uuid;
+    private String username;
+    private String displayName;
+    private Location location;
+    private World world;
+    private double health = 20.0;
+    private double maxHealth = 20.0;
+    private int foodLevel = 20;
+    private int ping = 0;
+    private boolean online = true;
+    private boolean op = false;
+    private boolean flying = false;
+    private boolean allowFlight = false;
+    private String gameMode = "survival";
     
-    public PlayerAdapter(ServerPlayer hytalePlayer) {
-        this.hytalePlayer = hytalePlayer;
-    }
-    
-    public ServerPlayer getHandle() {
-        return hytalePlayer;
+    public PlayerAdapter(UUID uuid, String username) {
+        this.uuid = uuid;
+        this.username = username;
+        this.displayName = username;
+        this.world = null;
+        this.location = new Location(null, 0, 64, 0, 0, 0);
     }
     
     @Override
     public UUID getUuid() {
-        return hytalePlayer.getUuid();
+        return uuid;
     }
     
     @Override
     public String getUsername() {
-        return hytalePlayer.getUsername();
+        return username;
     }
     
     @Override
     public String getDisplayName() {
-        return hytalePlayer.getDisplayName();
+        return displayName;
     }
     
     @Override
     public void setDisplayName(String displayName) {
-        hytalePlayer.setDisplayName(displayName);
-    }
-    
-    @Override
-    public double getX() {
-        return hytalePlayer.getX();
-    }
-    
-    @Override
-    public double getY() {
-        return hytalePlayer.getY();
-    }
-    
-    @Override
-    public double getZ() {
-        return hytalePlayer.getZ();
-    }
-    
-    @Override
-    public float getYaw() {
-        return hytalePlayer.getYaw();
-    }
-    
-    @Override
-    public float getPitch() {
-        return hytalePlayer.getPitch();
-    }
-    
-    @Override
-    public String getWorld() {
-        return hytalePlayer.getWorld();
-    }
-    
-    @Override
-    public void teleport(double x, double y, double z) {
-        hytalePlayer.teleport(x, y, z);
-    }
-    
-    @Override
-    public void teleport(double x, double y, double z, float yaw, float pitch) {
-        hytalePlayer.teleport(x, y, z, yaw, pitch);
-    }
-    
-    @Override
-    public void sendMessage(String message) {
-        hytalePlayer.sendMessage(message);
-    }
-    
-    @Override
-    public void sendTitle(String title, String subtitle, int fadeIn, int stay, int fadeOut) {
-        hytalePlayer.sendTitle(title, subtitle, fadeIn, stay, fadeOut);
-    }
-    
-    @Override
-    public void sendActionBar(String message) {
-        hytalePlayer.sendActionBar(message);
-    }
-    
-    @Override
-    public boolean hasPermission(String permission) {
-        return hytalePlayer.hasPermission(permission);
-    }
-    
-    @Override
-    public void kick(String reason) {
-        hytalePlayer.kick(reason);
+        this.displayName = displayName;
     }
     
     @Override
     public boolean isOnline() {
-        return hytalePlayer.isOnline();
+        return online;
+    }
+    
+    public void setOnline(boolean online) {
+        this.online = online;
     }
     
     @Override
-    public void sendPacket(Object packet) {
-        hytalePlayer.sendPacket(packet);
+    public boolean isOp() {
+        return op;
+    }
+    
+    public void setOp(boolean op) {
+        this.op = op;
     }
     
     @Override
-    public float getHealth() {
-        return hytalePlayer.getHealth();
+    public boolean hasPermission(String permission) {
+        return op;
     }
     
     @Override
-    public void setHealth(float health) {
-        hytalePlayer.setHealth(health);
+    public void sendMessage(String message) {
     }
     
     @Override
-    public float getMaxHealth() {
-        return hytalePlayer.getMaxHealth();
+    public void sendActionBar(String message) {
     }
     
     @Override
-    public void setMaxHealth(float maxHealth) {
-        hytalePlayer.setMaxHealth(maxHealth);
+    public void sendTitle(String title, String subtitle, int fadeIn, int stay, int fadeOut) {
+    }
+    
+    @Override
+    public Location getLocation() {
+        return location;
+    }
+    
+    @Override
+    public void teleport(Location location) {
+        this.location = location;
+        if (location.getWorld() != null) {
+            this.world = location.getWorld();
+        }
+    }
+    
+    @Override
+    public World getWorld() {
+        return world;
+    }
+    
+    public void setWorld(World world) {
+        this.world = world;
+    }
+    
+    @Override
+    public double getHealth() {
+        return health;
+    }
+    
+    @Override
+    public void setHealth(double health) {
+        this.health = Math.max(0, Math.min(health, maxHealth));
+    }
+    
+    @Override
+    public double getMaxHealth() {
+        return maxHealth;
+    }
+    
+    @Override
+    public void setMaxHealth(double maxHealth) {
+        this.maxHealth = maxHealth;
+    }
+    
+    @Override
+    public int getFoodLevel() {
+        return foodLevel;
+    }
+    
+    @Override
+    public void setFoodLevel(int level) {
+        this.foodLevel = Math.max(0, Math.min(level, 20));
     }
     
     @Override
     public int getPing() {
-        return hytalePlayer.getPing();
+        return ping;
+    }
+    
+    public void setPing(int ping) {
+        this.ping = ping;
+    }
+    
+    @Override
+    public void kick(String reason) {
+        online = false;
     }
     
     @Override
     public void playSound(String sound, float volume, float pitch) {
-        hytalePlayer.playSound(sound, volume, pitch);
+    }
+    
+    @Override
+    public void playSound(Location location, String sound, float volume, float pitch) {
+    }
+    
+    @Override
+    public boolean isFlying() {
+        return flying;
+    }
+    
+    @Override
+    public void setFlying(boolean flying) {
+        this.flying = flying;
+    }
+    
+    @Override
+    public void setAllowFlight(boolean allow) {
+        this.allowFlight = allow;
+    }
+    
+    @Override
+    public boolean getAllowFlight() {
+        return allowFlight;
+    }
+    
+    @Override
+    public void setGameMode(String gameMode) {
+        this.gameMode = gameMode;
+    }
+    
+    @Override
+    public String getGameMode() {
+        return gameMode;
     }
 }

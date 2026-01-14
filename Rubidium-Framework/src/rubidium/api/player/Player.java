@@ -10,6 +10,8 @@ public interface Player extends CommandSender {
     
     default UUID getUniqueId() { return getUUID(); }
     
+    default UUID getId() { return getUUID(); }
+    
     String getName();
     
     String getDisplayName();
@@ -59,6 +61,36 @@ public interface Player extends CommandSender {
     PlayerData getData();
     
     void sendPacket(Object packet);
+    
+    default double getHealth() { return 20.0; }
+    
+    default void setHealth(double health) {}
+    
+    default double getMaxHealth() { return 20.0; }
+    
+    default boolean isFlying() { return false; }
+    
+    default boolean isGliding() { return false; }
+    
+    default boolean isSprinting() { return false; }
+    
+    default boolean isSneaking() { return false; }
+    
+    default boolean isSwimming() { return false; }
+    
+    default boolean isOnGround() { return true; }
+    
+    default double getVelX() { return 0.0; }
+    
+    default double getVelY() { return 0.0; }
+    
+    default double getVelZ() { return 0.0; }
+    
+    default double getArmor() { return 0.0; }
+    
+    default int getHeldItemSlot() { return 0; }
+    
+    default Location getPosition() { return getLocation(); }
     
     record Location(double x, double y, double z, float yaw, float pitch) {
         public double distanceTo(Location other) {

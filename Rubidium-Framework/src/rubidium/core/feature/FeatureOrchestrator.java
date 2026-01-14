@@ -84,7 +84,7 @@ public class FeatureOrchestrator {
         if (feature == null) return false;
         
         if (!checkDependencies(feature)) {
-            logger.warn("Cannot start " + featureId + ": missing dependencies");
+            logger.warning("Cannot start " + featureId + ": missing dependencies");
             featureStates.put(featureId, FeatureState.DEPENDENCY_FAILED);
             return false;
         }
@@ -105,7 +105,7 @@ public class FeatureOrchestrator {
             return true;
             
         } catch (Exception e) {
-            logger.error("Failed to start feature " + featureId + ": " + e.getMessage());
+            logger.severe("Failed to start feature " + featureId + ": " + e.getMessage());
             featureStates.put(featureId, FeatureState.FAILED);
             healthStatus.put(featureId, FeatureHealth.unhealthy("Failed to start", e));
             
@@ -132,7 +132,7 @@ public class FeatureOrchestrator {
             fireEvent(new FeatureEvent(featureId, FeatureEvent.Type.STOPPED, null));
             
         } catch (Exception e) {
-            logger.warn("Error stopping feature " + featureId + ": " + e.getMessage());
+            logger.warning("Error stopping feature " + featureId + ": " + e.getMessage());
             featureStates.put(featureId, FeatureState.FAILED);
         }
     }
@@ -143,7 +143,7 @@ public class FeatureOrchestrator {
         healthStatus.put(featureId, FeatureHealth.disabled(reason));
         guards.get(featureId).forceOpen();
         
-        logger.warn("Feature disabled: " + featureId + " - " + reason);
+        logger.warning("Feature disabled: " + featureId + " - " + reason);
         fireEvent(new FeatureEvent(featureId, FeatureEvent.Type.DISABLED, reason));
     }
     
@@ -166,7 +166,7 @@ public class FeatureOrchestrator {
                     feature.shutdown();
                 }
             } catch (Exception e) {
-                logger.warn("Error shutting down " + id + ": " + e.getMessage());
+                logger.warning("Error shutting down " + id + ": " + e.getMessage());
             }
         }
         
@@ -198,11 +198,11 @@ public class FeatureOrchestrator {
                 if (health.status() == FeatureHealth.Status.UNHEALTHY) {
                     handleUnhealthyFeature(id, health);
                 } else if (health.status() == FeatureHealth.Status.DEGRADED) {
-                    logger.warn("Feature " + id + " is degraded: " + health.message());
+                    logger.warning("Feature " + id + " is degraded: " + health.message());
                 }
                 
             } catch (Exception e) {
-                logger.error("Health check failed for " + id + ": " + e.getMessage());
+                logger.severe("Health check failed for " + id + ": " + e.getMessage());
                 healthStatus.put(id, FeatureHealth.unhealthy("Health check failed", e));
                 handleUnhealthyFeature(id, healthStatus.get(id));
             }
@@ -213,7 +213,7 @@ public class FeatureOrchestrator {
         FeatureLifecycle feature = features.get(featureId);
         if (feature == null) return;
         
-        logger.warn("Feature " + featureId + " is unhealthy: " + health.message());
+        logger.warning("Feature " + featureId + " is unhealthy: " + health.message());
         
         if (feature.isOptional()) {
             FeatureGuard guard = guards.get(featureId);
@@ -223,7 +223,7 @@ public class FeatureOrchestrator {
                 guard.recordFailure(new RuntimeException(health.message()));
             }
         } else {
-            logger.error("Critical feature " + featureId + " is unhealthy!");
+            logger.severe("Critical feature " + featureId + " is unhealthy!");
             fireEvent(new FeatureEvent(featureId, FeatureEvent.Type.CRITICAL_FAILURE, health.message()));
         }
     }
@@ -273,7 +273,7 @@ public class FeatureOrchestrator {
             try {
                 listener.accept(event);
             } catch (Exception e) {
-                logger.warn("Error in event listener: " + e.getMessage());
+                logger.warning("Error in event listener: " + e.getMessage());
             }
         }
     }
@@ -293,7 +293,7 @@ public class FeatureOrchestrator {
             try {
                 return action.get();
             } catch (Exception e) {
-                logger.warn("Unguarded execution failed: " + e.getMessage());
+                logger.warning("Unguarded execution failed: " + e.getMessage());
                 return fallbackValue;
             }
         }
@@ -335,7 +335,7 @@ public class FeatureOrchestrator {
                         logger.info("Feature " + featureId + " recovered");
                     }
                 } catch (Exception e) {
-                    logger.warn("Recovery attempt failed for " + featureId + ": " + e.getMessage());
+                    logger.warning("Recovery attempt failed for " + featureId + ": " + e.getMessage());
                 }
             }
         }

@@ -52,9 +52,10 @@ public class ZoneManager {
     }
     
     public List<Zone> getZonesAt(double x, double y, double z, String world) {
+        final double px = x, py = y, pz = z;
         return zones.values().stream()
-            .filter(z -> z.getWorld() == null || z.getWorld().equals(world))
-            .filter(z -> z.contains(x, y, z))
+            .filter(zone -> zone.getWorld() == null || zone.getWorld().equals(world))
+            .filter(zone -> zone.contains(px, py, pz))
             .toList();
     }
     
@@ -71,7 +72,7 @@ public class ZoneManager {
     
     public boolean isInZoneType(double x, double y, double z, String world, Zone.ZoneType type) {
         return getZonesAt(x, y, z, world).stream()
-            .anyMatch(z -> z.getType() == type);
+            .anyMatch(zone -> zone.getType() == type);
     }
     
     public boolean isSafeZone(double x, double y, double z, String world) {

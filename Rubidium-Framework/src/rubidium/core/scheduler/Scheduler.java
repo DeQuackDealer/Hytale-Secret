@@ -8,6 +8,13 @@ import java.util.function.Consumer;
  */
 public class Scheduler {
     
+    public enum Priority {
+        LOW,
+        NORMAL,
+        HIGH,
+        CRITICAL
+    }
+    
     private static Scheduler instance;
     
     private final ScheduledExecutorService executor;
@@ -72,5 +79,40 @@ public class Scheduler {
     public void shutdown() {
         cancelAll();
         executor.shutdown();
+    }
+    
+    public long scheduleRepeating(Runnable task, long delayTicks, long periodTicks, Priority priority) {
+        return runRepeating(task, delayTicks, periodTicks);
+    }
+    
+    public long scheduleRepeating(Runnable task, long delayTicks, long periodTicks) {
+        return runRepeating(task, delayTicks, periodTicks);
+    }
+    
+    public long scheduleRepeating(String owner, Runnable task, java.time.Duration delay, java.time.Duration period, Priority priority) {
+        long delayTicks = delay.toMillis() / 50;
+        long periodTicks = period.toMillis() / 50;
+        return runRepeating(task, delayTicks, periodTicks);
+    }
+    
+    public static final class SimpleTaskHandle {
+        private final long taskId;
+        private final Scheduler scheduler;
+        
+        SimpleTaskHandle(long taskId, Scheduler scheduler) {
+            this.taskId = taskId;
+            this.scheduler = scheduler;
+        }
+        
+        public long getTaskId() { return taskId; }
+        
+        public boolean cancel() {
+            scheduler.cancel(taskId);
+            return true;
+        }
+    }
+    
+    public long scheduleRepeatingAsync(Runnable task, long delayTicks, long periodTicks, Priority priority) {
+        return runRepeating(task, delayTicks, periodTicks);
     }
 }

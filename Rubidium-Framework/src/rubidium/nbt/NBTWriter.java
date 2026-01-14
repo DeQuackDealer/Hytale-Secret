@@ -30,7 +30,7 @@ public class NBTWriter {
         
         dos.flush();
         if (compressed) {
-            ((GZIPOutputStream) dos).finish();
+            dos.close();
         }
     }
     

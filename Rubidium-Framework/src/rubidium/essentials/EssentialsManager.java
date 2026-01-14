@@ -183,7 +183,7 @@ public class EssentialsManager {
             data.setJailName(jailName);
             data.setJailExpiry(durationMs > 0 ? System.currentTimeMillis() + durationMs : -1);
             data.setJailReason(reason);
-            player.teleport(jail.getLocation());
+            player.teleport(jail.location());
         }
     }
     

@@ -41,12 +41,16 @@ public final class AccessControlService {
     }
     
     public record AccessCheckResult(
-        boolean allowed,
+        boolean permitted,
         AccessType listType,
         AccessEntry entry,
         String message
     ) {
-        public static AccessCheckResult allowed() {
+        public boolean allowed() {
+            return permitted;
+        }
+        
+        public static AccessCheckResult allow() {
             return new AccessCheckResult(true, null, null, null);
         }
         
@@ -97,12 +101,12 @@ public final class AccessControlService {
         cleanupExpired();
         
         return switch (mode) {
-            case DISABLED -> AccessCheckResult.allowed();
+            case DISABLED -> AccessCheckResult.allow();
             
             case WHITELIST_ONLY -> {
                 var entry = whitelist.get(uuid);
                 if (entry != null && !entry.isExpired()) {
-                    yield AccessCheckResult.allowed();
+                    yield AccessCheckResult.allow();
                 }
                 yield AccessCheckResult.denied(AccessType.WHITELIST, null, whitelistMessage);
             }
@@ -113,13 +117,13 @@ public final class AccessControlService {
                     yield AccessCheckResult.denied(AccessType.BLACKLIST, entry, 
                         entry.reason() != null ? entry.reason() : blacklistMessage);
                 }
-                yield AccessCheckResult.allowed();
+                yield AccessCheckResult.allow();
             }
             
             case WHITELIST_PRIORITY -> {
                 var whiteEntry = whitelist.get(uuid);
                 if (whiteEntry != null && !whiteEntry.isExpired()) {
-                    yield AccessCheckResult.allowed();
+                    yield AccessCheckResult.allow();
                 }
                 var blackEntry = blacklist.get(uuid);
                 if (blackEntry != null && !blackEntry.isExpired()) {
@@ -137,9 +141,9 @@ public final class AccessControlService {
                 }
                 var whiteEntry = whitelist.get(uuid);
                 if (whiteEntry != null && !whiteEntry.isExpired()) {
-                    yield AccessCheckResult.allowed();
+                    yield AccessCheckResult.allow();
                 }
-                yield AccessCheckResult.allowed();
+                yield AccessCheckResult.allow();
             }
         };
     }

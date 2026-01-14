@@ -90,4 +90,26 @@ public interface Player {
     void setGameMode(String gameMode);
     
     String getGameMode();
+    
+    default boolean isGliding() { return false; }
+    
+    default boolean isSprinting() { return false; }
+    
+    default boolean isSneaking() { return false; }
+    
+    default boolean isSwimming() { return false; }
+    
+    default boolean isOnGround() { return true; }
+    
+    default double getVelX() { return 0.0; }
+    
+    default double getVelY() { return 0.0; }
+    
+    default double getVelZ() { return 0.0; }
+    
+    default double getArmor() { return 0.0; }
+    
+    default int getHeldItemSlot() { return 0; }
+    
+    default Location getPosition() { return getLocation(); }
 }

@@ -3,8 +3,6 @@ package rubidium.qol;
 import rubidium.core.logging.RubidiumLogger;
 import rubidium.core.config.ConfigManager;
 import rubidium.core.scheduler.Scheduler;
-import rubidium.core.scheduler.TaskHandle;
-
 import java.io.*;
 import java.nio.file.*;
 import java.time.Duration;
@@ -18,7 +16,7 @@ public class QoLManager {
     private final Map<String, QoLFeature> features = new ConcurrentHashMap<>();
     private final Path configPath;
     private Properties featureStates;
-    private TaskHandle tickTask;
+    private long tickTaskId = -1;
     private Scheduler scheduler;
     
     public QoLManager(RubidiumLogger logger, ConfigManager configManager, Path dataDir) {
@@ -31,7 +29,7 @@ public class QoLManager {
     
     public void startTickLoop(Scheduler scheduler) {
         this.scheduler = scheduler;
-        this.tickTask = scheduler.scheduleRepeating(
+        this.tickTaskId = scheduler.scheduleRepeating(
             "qol-tick",
             this::tick,
             Duration.ofMillis(50),
@@ -42,9 +40,9 @@ public class QoLManager {
     }
     
     public void stopTickLoop() {
-        if (tickTask != null) {
-            tickTask.cancel();
-            tickTask = null;
+        if (tickTaskId >= 0 && scheduler != null) {
+            scheduler.cancel(tickTaskId);
+            tickTaskId = -1;
             logger.info("QoL tick loop stopped");
         }
     }

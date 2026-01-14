@@ -38,41 +38,39 @@ public class PluginLoader {
     
     private void loadPlugin(Path jarPath) {
         try (JarFile jar = new JarFile(jarPath.toFile())) {
-            JavaPluginInit init = readPluginDescriptor(jar);
-            if (init == null) {
-                logger.warn("No plugin descriptor found in: " + jarPath.getFileName());
+            PluginMetadata meta = readPluginDescriptor(jar);
+            if (meta == null) {
+                logger.warning("No plugin descriptor found in: " + jarPath.getFileName());
                 return;
             }
             
             ClassLoader loader = new PluginClassLoader(jarPath, getClass().getClassLoader());
-            Class<?> mainClass = loader.loadClass(init.mainClass());
+            Class<?> mainClass = loader.loadClass(meta.mainClass());
             
             if (!JavaPlugin.class.isAssignableFrom(mainClass)) {
-                logger.warn("Main class does not extend JavaPlugin: " + init.mainClass());
+                logger.warning("Main class does not extend JavaPlugin: " + meta.mainClass());
                 return;
             }
             
             JavaPlugin plugin = (JavaPlugin) mainClass.getDeclaredConstructor().newInstance();
-            plugin.initialize(init);
+            plugin.initializeMetadata(meta);
             
             loadedPlugins.add(plugin);
-            pluginsByName.put(init.name(), plugin);
+            pluginsByName.put(meta.name(), plugin);
             
-            logger.info("Loaded plugin: " + init.name() + " v" + init.version());
+            logger.info("Loaded plugin: " + meta.name() + " v" + meta.version());
             
         } catch (Exception e) {
-            logger.error("Failed to load plugin: " + jarPath.getFileName() + " - " + e.getMessage());
+            logger.severe("Failed to load plugin: " + jarPath.getFileName() + " - " + e.getMessage());
         }
     }
     
-    private JavaPluginInit readPluginDescriptor(JarFile jar) throws IOException {
-        // Try plugin.json first (Hytale style)
+    private PluginMetadata readPluginDescriptor(JarFile jar) throws IOException {
         JarEntry jsonEntry = jar.getJarEntry("plugin.json");
         if (jsonEntry != null) {
             return parsePluginJson(jar.getInputStream(jsonEntry));
         }
         
-        // Fall back to plugin.yml (Bukkit style)
         JarEntry ymlEntry = jar.getJarEntry("plugin.yml");
         if (ymlEntry != null) {
             return parsePluginYml(jar.getInputStream(ymlEntry));
@@ -81,15 +79,14 @@ public class PluginLoader {
         return null;
     }
     
-    private JavaPluginInit parsePluginJson(InputStream in) throws IOException {
-        // Simple JSON parsing without external dependency
+    private PluginMetadata parsePluginJson(InputStream in) throws IOException {
         String json = new String(in.readAllBytes());
         String name = extractJsonString(json, "name");
         String version = extractJsonString(json, "version");
         String mainClass = extractJsonString(json, "main");
         String description = extractJsonString(json, "description");
         
-        return new JavaPluginInit(
+        return new PluginMetadata(
             name != null ? name : "Unknown",
             version != null ? version : "1.0.0",
             mainClass != null ? mainClass : "",
@@ -97,14 +94,14 @@ public class PluginLoader {
         );
     }
     
-    private JavaPluginInit parsePluginYml(InputStream in) throws IOException {
+    private PluginMetadata parsePluginYml(InputStream in) throws IOException {
         String yml = new String(in.readAllBytes());
         String name = extractYmlValue(yml, "name");
         String version = extractYmlValue(yml, "version");
         String mainClass = extractYmlValue(yml, "main");
         String description = extractYmlValue(yml, "description");
         
-        return new JavaPluginInit(
+        return new PluginMetadata(
             name != null ? name : "Unknown",
             version != null ? version : "1.0.0",
             mainClass != null ? mainClass : "",
@@ -134,7 +131,7 @@ public class PluginLoader {
             try {
                 plugin.onLoad();
             } catch (Exception e) {
-                logger.error("Error loading " + plugin.getName() + ": " + e.getMessage());
+                logger.severe("Error loading " + plugin.getName() + ": " + e.getMessage());
             }
         }
         
@@ -144,7 +141,7 @@ public class PluginLoader {
                 plugin.setEnabled(true);
                 logger.info("Enabled: " + plugin.getName());
             } catch (Exception e) {
-                logger.error("Error enabling " + plugin.getName() + ": " + e.getMessage());
+                logger.severe("Error enabling " + plugin.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -157,7 +154,7 @@ public class PluginLoader {
                 plugin.setEnabled(false);
                 logger.info("Disabled: " + plugin.getName());
             } catch (Exception e) {
-                logger.error("Error disabling " + plugin.getName() + ": " + e.getMessage());
+                logger.severe("Error disabling " + plugin.getName() + ": " + e.getMessage());
             }
         }
     }

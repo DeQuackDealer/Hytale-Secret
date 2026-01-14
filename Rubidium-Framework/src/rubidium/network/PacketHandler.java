@@ -27,12 +27,12 @@ public class PacketHandler {
             
             Class<?>[] params = method.getParameterTypes();
             if (params.length < 2) {
-                logger.warn("PacketListener method must have at least 2 parameters (Player, packet): " + method);
+                logger.warning("PacketListener method must have at least 2 parameters (Player, packet): " + method);
                 continue;
             }
             
             if (!Player.class.isAssignableFrom(params[0])) {
-                logger.warn("First parameter must be Player: " + method);
+                logger.warning("First parameter must be Player: " + method);
                 continue;
             }
             
@@ -81,7 +81,7 @@ public class PacketHandler {
             try {
                 handler.method().invoke(handler.listener(), player, packet, event);
             } catch (Exception e) {
-                logger.error("Error handling packet " + packetType + ": " + e.getMessage());
+                logger.severe("Error handling packet " + packetType + ": " + e.getMessage());
                 e.printStackTrace();
             }
         }

@@ -126,7 +126,7 @@ public final class ReplayStorageWorker {
     
     public boolean submitWrite(ReplaySession session, boolean isFinal) {
         if (!running) return false;
-        return writeQueue.offer(new WriteTask(session, finalize));
+        return writeQueue.offer(new WriteTask(session, isFinal));
     }
     
     public void requestPrune(UUID playerId) {

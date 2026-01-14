@@ -53,8 +53,8 @@ public class VoiceService implements FeatureLifecycle {
         logger.info("Initializing Voice Service...");
         
         try {
-            channelManager.createChannel("global", VoiceChannel.Type.GLOBAL);
-            channelManager.createChannel("proximity", VoiceChannel.Type.PROXIMITY);
+            channelManager.createChannel("global", VoiceChannel.ChannelType.GLOBAL);
+            channelManager.createChannel("proximity", VoiceChannel.ChannelType.PROXIMITY);
             
             audioMixer.initialize();
             moderationService.initialize();

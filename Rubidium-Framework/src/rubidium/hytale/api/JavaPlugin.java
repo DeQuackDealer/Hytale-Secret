@@ -9,21 +9,26 @@ import java.util.logging.Logger;
  */
 public abstract class JavaPlugin {
     
-    private JavaPluginInit init;
+    private PluginMetadata metadata;
     private Logger logger;
     private Path dataFolder;
     private boolean enabled = false;
     
-    public final void initialize(JavaPluginInit init) {
-        this.init = init;
-        this.logger = Logger.getLogger(init.name());
-        this.dataFolder = Paths.get("plugins", init.name());
+    public final void initializeMetadata(PluginMetadata metadata) {
+        this.metadata = metadata;
+        this.logger = Logger.getLogger(metadata.name());
+        this.dataFolder = Paths.get("plugins", metadata.name());
         
         try {
             Files.createDirectories(dataFolder);
         } catch (IOException e) {
-            logger.error("Failed to create data folder: " + e.getMessage());
+            logger.severe("Failed to create data folder: " + e.getMessage());
         }
+    }
+    
+    @Deprecated
+    public final void initialize(JavaPluginInit init) {
+        initializeMetadata(PluginMetadata.from(init, getClass().getName()));
     }
     
     public abstract void onEnable();
@@ -38,11 +43,11 @@ public abstract class JavaPlugin {
     }
     
     public String getName() {
-        return init != null ? init.name() : getClass().getSimpleName();
+        return metadata != null ? metadata.name() : getClass().getSimpleName();
     }
     
     public String getVersion() {
-        return init != null ? init.version() : "1.0.0";
+        return metadata != null ? metadata.version() : "1.0.0";
     }
     
     public Logger getLogger() {
@@ -73,7 +78,7 @@ public abstract class JavaPlugin {
                     Files.copy(in, configPath);
                 }
             } catch (IOException e) {
-                logger.warn("Failed to save default config: " + e.getMessage());
+                logger.warning("Failed to save default config: " + e.getMessage());
             }
         }
     }

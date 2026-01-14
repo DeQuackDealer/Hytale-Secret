@@ -38,7 +38,7 @@ public class ServerAdapter {
     public Player wrapPlayer(ServerPlayer hytalePlayer) {
         return playerAdapters.computeIfAbsent(
             hytalePlayer.getUuid(),
-            uuid -> new PlayerAdapter(hytalePlayer)
+            uuid -> new PlayerAdapter(uuid, hytalePlayer.getUsername())
         );
     }
     
