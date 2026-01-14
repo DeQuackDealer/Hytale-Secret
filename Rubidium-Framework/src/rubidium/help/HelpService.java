@@ -1,10 +1,10 @@
 package rubidium.help;
 
 import rubidium.hytale.api.player.Player;
-import rubidium.commands.Command;
+import rubidium.annotations.Command;
 import rubidium.commands.CommandContext;
 import rubidium.commands.CommandResult;
-import rubidium.core.RubidiumLogger;
+import rubidium.core.logging.RubidiumLogger;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -407,7 +407,7 @@ public final class HelpService {
         
         if (ctx.args().length == 0) {
             showMainHelp(player, 1);
-            return CommandResult.success();
+            return CommandResult.ok();
         }
         
         var firstArg = ctx.args()[0].toLowerCase();
@@ -421,7 +421,7 @@ public final class HelpService {
             } catch (NumberFormatException ignored) {}
             
             showSearchResults(player, query, page);
-            return CommandResult.success();
+            return CommandResult.ok();
         }
         
         int page = 1;
@@ -437,6 +437,6 @@ public final class HelpService {
             showCommandHelp(player, firstArg);
         }
         
-        return CommandResult.success();
+        return CommandResult.ok();
     }
 }

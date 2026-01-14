@@ -1,8 +1,8 @@
 package rubidium.flight;
 
 import rubidium.hytale.api.player.Player;
-import rubidium.core.RubidiumLogger;
-import rubidium.commands.Command;
+import rubidium.core.logging.RubidiumLogger;
+import rubidium.annotations.Command;
 import rubidium.commands.CommandContext;
 import rubidium.commands.CommandResult;
 
@@ -278,14 +278,14 @@ public final class FlightSpeedManager {
         
         if (ctx.args().length == 0) {
             showFlightSpeedHelp(player);
-            return CommandResult.success();
+            return CommandResult.ok();
         }
         
         var input = ctx.args()[0].toLowerCase();
         
         if (presets.containsKey(input)) {
             applyPreset(player, input);
-            return CommandResult.success();
+            return CommandResult.ok();
         }
         
         try {
@@ -297,7 +297,7 @@ public final class FlightSpeedManager {
             return CommandResult.failure("Invalid speed");
         }
         
-        return CommandResult.success();
+        return CommandResult.ok();
     }
     
     private void showFlightSpeedHelp(Player player) {
@@ -334,7 +334,7 @@ public final class FlightSpeedManager {
             var state = getOrCreateState(player);
             player.sendMessage("&7Current walk speed: &f" + String.format("%.1f", state.walkSpeed() * 10) + "x");
             player.sendMessage("&7Usage: /walkspeed <0.1-1.0>");
-            return CommandResult.success();
+            return CommandResult.ok();
         }
         
         try {
@@ -345,7 +345,7 @@ public final class FlightSpeedManager {
             return CommandResult.failure("Invalid speed");
         }
         
-        return CommandResult.success();
+        return CommandResult.ok();
     }
     
     @Command(
@@ -370,6 +370,6 @@ public final class FlightSpeedManager {
             player.sendMessage("&aFlight enabled.");
         }
         
-        return CommandResult.success();
+        return CommandResult.ok();
     }
 }

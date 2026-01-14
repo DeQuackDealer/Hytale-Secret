@@ -54,7 +54,7 @@ public class FeatureGuard {
                         return result;
                     } catch (Exception e) {
                         recordFailure(e);
-                        logger.warning("Half-open trial failed for " + featureId + ": " + e.getMessage());
+                        logger.warn("Half-open trial failed for " + featureId + ": " + e.getMessage());
                         return fallback.get();
                     }
                 }
@@ -67,7 +67,7 @@ public class FeatureGuard {
             return result;
         } catch (Exception e) {
             recordFailure(e);
-            logger.warning("Feature " + featureId + " failed: " + e.getMessage());
+            logger.warn("Feature " + featureId + " failed: " + e.getMessage());
             return fallback.get();
         }
     }
@@ -140,11 +140,11 @@ public class FeatureGuard {
         if (state.get() == CircuitState.HALF_OPEN) {
             state.set(CircuitState.OPEN);
             stateChangedAt.set(Instant.now());
-            logger.warning("Circuit for " + featureId + " re-OPENED after HALF_OPEN failure");
+            logger.warn("Circuit for " + featureId + " re-OPENED after HALF_OPEN failure");
         } else if (failures >= failureThreshold && state.get() == CircuitState.CLOSED) {
             state.set(CircuitState.OPEN);
             stateChangedAt.set(Instant.now());
-            logger.warning("Circuit for " + featureId + " OPENED after " + failures + " failures");
+            logger.warn("Circuit for " + featureId + " OPENED after " + failures + " failures");
         }
     }
     

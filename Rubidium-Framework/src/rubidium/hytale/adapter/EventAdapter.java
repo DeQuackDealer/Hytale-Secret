@@ -90,7 +90,7 @@ public class EventAdapter {
                 try {
                     ((Consumer<T>) handler).accept(event);
                 } catch (Exception e) {
-                    logger.warning("Error in event handler: " + e.getMessage());
+                    logger.warn("Error in event handler: " + e.getMessage());
                 }
             }
         }

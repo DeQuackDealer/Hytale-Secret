@@ -31,12 +31,12 @@ public class EventBus {
             
             Class<?>[] params = method.getParameterTypes();
             if (params.length != 1) {
-                logger.warning("EventHandler method must have exactly 1 parameter: " + method);
+                logger.warn("EventHandler method must have exactly 1 parameter: " + method);
                 continue;
             }
             
             if (!Event.class.isAssignableFrom(params[0])) {
-                logger.warning("EventHandler parameter must extend Event: " + method);
+                logger.warn("EventHandler parameter must extend Event: " + method);
                 continue;
             }
             
@@ -80,7 +80,7 @@ public class EventBus {
                     invokeHandler(reg, event);
                 }
             } catch (Exception e) {
-                logger.severe("Error handling event " + event.getClass().getSimpleName() + ": " + e.getMessage());
+                logger.error("Error handling event " + event.getClass().getSimpleName() + ": " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -96,7 +96,7 @@ public class EventBus {
         try {
             reg.method().invoke(reg.listener(), event);
         } catch (Exception e) {
-            logger.severe("Failed to invoke event handler: " + e.getMessage());
+            logger.error("Failed to invoke event handler: " + e.getMessage());
             e.printStackTrace();
         }
     }

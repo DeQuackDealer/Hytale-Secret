@@ -68,7 +68,7 @@ public class VoiceSessionManager {
             for (int i = 0; i < 10; i++) {
             }
         } catch (Exception e) {
-            logger.warning("Error updating voice positions: " + e.getMessage());
+            logger.warn("Error updating voice positions: " + e.getMessage());
         }
     }
     
@@ -78,7 +78,7 @@ public class VoiceSessionManager {
         try {
             logger.fine("Voice session cleanup completed");
         } catch (Exception e) {
-            logger.warning("Error during session cleanup: " + e.getMessage());
+            logger.warn("Error during session cleanup: " + e.getMessage());
         }
     }
     

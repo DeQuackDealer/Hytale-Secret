@@ -105,7 +105,7 @@ public class RubidiumUI implements FeatureLifecycle {
     public void showScreen(Player player, String screenId) {
         UIScreen screen = registeredScreens.get(screenId);
         if (screen == null) {
-            logger.warning("Screen not found: " + screenId);
+            logger.warn("Screen not found: " + screenId);
             return;
         }
         

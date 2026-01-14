@@ -40,7 +40,7 @@ public class PluginLoader {
         try (JarFile jar = new JarFile(jarPath.toFile())) {
             JavaPluginInit init = readPluginDescriptor(jar);
             if (init == null) {
-                logger.warning("No plugin descriptor found in: " + jarPath.getFileName());
+                logger.warn("No plugin descriptor found in: " + jarPath.getFileName());
                 return;
             }
             
@@ -48,7 +48,7 @@ public class PluginLoader {
             Class<?> mainClass = loader.loadClass(init.mainClass());
             
             if (!JavaPlugin.class.isAssignableFrom(mainClass)) {
-                logger.warning("Main class does not extend JavaPlugin: " + init.mainClass());
+                logger.warn("Main class does not extend JavaPlugin: " + init.mainClass());
                 return;
             }
             
@@ -61,7 +61,7 @@ public class PluginLoader {
             logger.info("Loaded plugin: " + init.name() + " v" + init.version());
             
         } catch (Exception e) {
-            logger.severe("Failed to load plugin: " + jarPath.getFileName() + " - " + e.getMessage());
+            logger.error("Failed to load plugin: " + jarPath.getFileName() + " - " + e.getMessage());
         }
     }
     
@@ -134,7 +134,7 @@ public class PluginLoader {
             try {
                 plugin.onLoad();
             } catch (Exception e) {
-                logger.severe("Error loading " + plugin.getName() + ": " + e.getMessage());
+                logger.error("Error loading " + plugin.getName() + ": " + e.getMessage());
             }
         }
         
@@ -144,7 +144,7 @@ public class PluginLoader {
                 plugin.setEnabled(true);
                 logger.info("Enabled: " + plugin.getName());
             } catch (Exception e) {
-                logger.severe("Error enabling " + plugin.getName() + ": " + e.getMessage());
+                logger.error("Error enabling " + plugin.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -157,7 +157,7 @@ public class PluginLoader {
                 plugin.setEnabled(false);
                 logger.info("Disabled: " + plugin.getName());
             } catch (Exception e) {
-                logger.severe("Error disabling " + plugin.getName() + ": " + e.getMessage());
+                logger.error("Error disabling " + plugin.getName() + ": " + e.getMessage());
             }
         }
     }

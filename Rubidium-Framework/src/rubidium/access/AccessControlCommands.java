@@ -1,7 +1,7 @@
 package rubidium.access;
 
 import rubidium.access.AccessControlService.*;
-import rubidium.commands.Command;
+import rubidium.annotations.Command;
 import rubidium.commands.CommandContext;
 import rubidium.commands.CommandResult;
 import rubidium.hytale.api.player.Player;
@@ -67,7 +67,7 @@ public final class AccessControlCommands {
                 }
             });
         
-        return CommandResult.success();
+        return CommandResult.ok();
     }
     
     private CommandResult removeFromWhitelist(CommandContext ctx) {
@@ -92,7 +92,7 @@ public final class AccessControlCommands {
             }
         });
         
-        return CommandResult.success();
+        return CommandResult.ok();
     }
     
     private CommandResult listWhitelist(CommandContext ctx) {
@@ -100,7 +100,7 @@ public final class AccessControlCommands {
         
         if (entries.isEmpty()) {
             ctx.sender().sendMessage("&7The whitelist is empty.");
-            return CommandResult.success();
+            return CommandResult.ok();
         }
         
         ctx.sender().sendMessage("&6=== Whitelist (" + entries.size() + " entries) ===");
@@ -109,7 +109,7 @@ public final class AccessControlCommands {
             ctx.sender().sendMessage("&f" + entry.username() + " &7(" + expiry + "&7)");
         }
         
-        return CommandResult.success();
+        return CommandResult.ok();
     }
     
     private CommandResult setWhitelistMode(CommandContext ctx, boolean enabled) {
@@ -120,7 +120,7 @@ public final class AccessControlCommands {
             accessControl.setMode(AccessMode.DISABLED);
             ctx.sender().sendMessage("&cWhitelist has been disabled.");
         }
-        return CommandResult.success();
+        return CommandResult.ok();
     }
     
     private CommandResult importWhitelist(CommandContext ctx) {
@@ -141,7 +141,7 @@ public final class AccessControlCommands {
                 return null;
             });
         
-        return CommandResult.success();
+        return CommandResult.ok();
     }
     
     private CommandResult showWhitelistHelp(CommandContext ctx) {
@@ -153,7 +153,7 @@ public final class AccessControlCommands {
         ctx.sender().sendMessage("&e/whitelist import <url> &7- Import UUIDs from URL");
         ctx.sender().sendMessage("");
         ctx.sender().sendMessage("&7Duration format: 1h, 7d, 30d, 1M, 1y");
-        return CommandResult.success();
+        return CommandResult.ok();
     }
     
     @Command(
@@ -190,7 +190,7 @@ public final class AccessControlCommands {
                 }
             });
         
-        return CommandResult.success();
+        return CommandResult.ok();
     }
     
     @Command(
@@ -222,7 +222,7 @@ public final class AccessControlCommands {
             }
         });
         
-        return CommandResult.success();
+        return CommandResult.ok();
     }
     
     private CommandResult listBans(CommandContext ctx) {
@@ -230,7 +230,7 @@ public final class AccessControlCommands {
         
         if (entries.isEmpty()) {
             ctx.sender().sendMessage("&7No players are currently banned.");
-            return CommandResult.success();
+            return CommandResult.ok();
         }
         
         ctx.sender().sendMessage("&6=== Banned Players (" + entries.size() + ") ===");
@@ -240,7 +240,7 @@ public final class AccessControlCommands {
                 (entry.reason() != null ? entry.reason() : "No reason"));
         }
         
-        return CommandResult.success();
+        return CommandResult.ok();
     }
     
     private CommandResult showBanHelp(CommandContext ctx) {
@@ -251,7 +251,7 @@ public final class AccessControlCommands {
         ctx.sender().sendMessage("");
         ctx.sender().sendMessage("&7Duration format: 1h, 7d, 30d, 1M, 1y");
         ctx.sender().sendMessage("&7Leave duration empty for permanent ban");
-        return CommandResult.success();
+        return CommandResult.ok();
     }
     
     private Duration parseDuration(String input) {

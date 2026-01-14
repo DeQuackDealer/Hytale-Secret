@@ -1,7 +1,7 @@
 package rubidium.chat.tabcomplete;
 
 import rubidium.hytale.api.player.Player;
-import rubidium.core.RubidiumLogger;
+import rubidium.core.logging.RubidiumLogger;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -118,7 +118,7 @@ public final class TabCompleteService {
             try {
                 suggestions.addAll(provider.suggest(request, currentWord));
             } catch (Exception e) {
-                logger.warning("Custom tab provider failed: " + e.getMessage());
+                logger.warn("Custom tab provider failed: " + e.getMessage());
             }
         }
         

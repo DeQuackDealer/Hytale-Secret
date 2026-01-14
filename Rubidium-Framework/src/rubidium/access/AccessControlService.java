@@ -1,7 +1,7 @@
 package rubidium.access;
 
 import rubidium.hytale.api.player.Player;
-import rubidium.core.RubidiumLogger;
+import rubidium.core.logging.RubidiumLogger;
 
 import java.io.*;
 import java.net.URI;
@@ -297,7 +297,7 @@ public final class AccessControlService {
             try {
                 listener.accept(event);
             } catch (Exception e) {
-                logger.warning("Audit listener failed: " + e.getMessage());
+                logger.warn("Audit listener failed: " + e.getMessage());
             }
         }
     }
@@ -317,7 +317,7 @@ public final class AccessControlService {
             logger.info("Loaded " + whitelist.size() + " whitelist entries, " + 
                        blacklist.size() + " blacklist entries");
         } catch (Exception e) {
-            logger.severe("Failed to load access control data: " + e.getMessage());
+            logger.error("Failed to load access control data: " + e.getMessage());
         }
     }
     
@@ -328,18 +328,18 @@ public final class AccessControlService {
         
         var sanitized = filename.replaceAll("[^a-zA-Z0-9._-]", "");
         if (!sanitized.equals(filename)) {
-            logger.warning("Invalid filename rejected: " + filename);
+            logger.warn("Invalid filename rejected: " + filename);
             return null;
         }
         
         if (filename.contains("..") || filename.startsWith("/") || filename.contains(":")) {
-            logger.warning("Path traversal attempt blocked: " + filename);
+            logger.warn("Path traversal attempt blocked: " + filename);
             return null;
         }
         
         var resolved = dataDirectory.resolve(filename).normalize();
         if (!resolved.startsWith(dataDirectory.normalize())) {
-            logger.warning("Path traversal attempt blocked: " + filename);
+            logger.warn("Path traversal attempt blocked: " + filename);
             return null;
         }
         
@@ -366,7 +366,7 @@ public final class AccessControlService {
                     
                     target.put(uuid, new AccessEntry(uuid, username, reason, addedAt, addedBy, expiresAt));
                 } catch (Exception e) {
-                    logger.warning("Invalid access entry: " + line);
+                    logger.warn("Invalid access entry: " + line);
                 }
             }
         }
@@ -378,7 +378,7 @@ public final class AccessControlService {
             saveEntries(dataDirectory.resolve("whitelist.json"), whitelist);
             saveEntries(dataDirectory.resolve("blacklist.json"), blacklist);
         } catch (Exception e) {
-            logger.severe("Failed to save access control data: " + e.getMessage());
+            logger.error("Failed to save access control data: " + e.getMessage());
         }
     }
     

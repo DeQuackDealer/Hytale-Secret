@@ -1,6 +1,6 @@
 package rubidium.network;
 
-import rubidium.core.RubidiumLogger;
+import rubidium.core.logging.RubidiumLogger;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -125,7 +125,7 @@ public final class NativeNetworkBridge implements AutoCloseable {
                 running = true;
                 logger.info("Native network bridge started");
             } catch (Exception e) {
-                logger.severe("Failed to start native network bridge: " + e.getMessage());
+                logger.error("Failed to start native network bridge: " + e.getMessage());
                 throw new RuntimeException(e);
             }
         }, executor);
@@ -187,7 +187,7 @@ public final class NativeNetworkBridge implements AutoCloseable {
                 try {
                     var line = reader.readLine();
                     if (line == null) {
-                        logger.warning("Native bridge disconnected");
+                        logger.warn("Native bridge disconnected");
                         running = false;
                         break;
                     }
@@ -198,7 +198,7 @@ public final class NativeNetworkBridge implements AutoCloseable {
                     }
                 } catch (IOException e) {
                     if (running) {
-                        logger.warning("Error reading from native bridge: " + e.getMessage());
+                        logger.warn("Error reading from native bridge: " + e.getMessage());
                     }
                 }
             }
@@ -221,7 +221,7 @@ public final class NativeNetworkBridge implements AutoCloseable {
                     break;
                 } catch (IOException e) {
                     if (running) {
-                        logger.warning("Error writing to native bridge: " + e.getMessage());
+                        logger.warn("Error writing to native bridge: " + e.getMessage());
                     }
                 }
             }
@@ -239,7 +239,7 @@ public final class NativeNetworkBridge implements AutoCloseable {
             try {
                 handler.accept(message);
             } catch (Exception e) {
-                logger.warning("Message handler error: " + e.getMessage());
+                logger.warn("Message handler error: " + e.getMessage());
             }
         }
     }
@@ -302,7 +302,7 @@ public final class NativeNetworkBridge implements AutoCloseable {
             
             return new BridgeMessage(type, connectionId, data, address, reason, null);
         } catch (Exception e) {
-            logger.warning("Failed to parse bridge message: " + e.getMessage());
+            logger.warn("Failed to parse bridge message: " + e.getMessage());
             return null;
         }
     }

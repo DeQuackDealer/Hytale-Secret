@@ -22,7 +22,7 @@ public abstract class JavaPlugin {
         try {
             Files.createDirectories(dataFolder);
         } catch (IOException e) {
-            logger.severe("Failed to create data folder: " + e.getMessage());
+            logger.error("Failed to create data folder: " + e.getMessage());
         }
     }
     
@@ -73,7 +73,7 @@ public abstract class JavaPlugin {
                     Files.copy(in, configPath);
                 }
             } catch (IOException e) {
-                logger.warning("Failed to save default config: " + e.getMessage());
+                logger.warn("Failed to save default config: " + e.getMessage());
             }
         }
     }

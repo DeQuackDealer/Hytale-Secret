@@ -31,7 +31,7 @@ public class SafeExecutionContext {
             try {
                 return action.get();
             } catch (Exception e) {
-                logger.warning("[" + contextName + "] Unguarded execution failed for " + featureId + ": " + e.getMessage());
+                logger.warn("[" + contextName + "] Unguarded execution failed for " + featureId + ": " + e.getMessage());
                 return defaultValue;
             }
         }
@@ -64,11 +64,11 @@ public class SafeExecutionContext {
                 executor
             ).get(timeoutMs, TimeUnit.MILLISECONDS);
         } catch (TimeoutException e) {
-            logger.warning("[" + contextName + "] Timeout executing " + featureId);
+            logger.warn("[" + contextName + "] Timeout executing " + featureId);
             orchestrator.recordTimeout(featureId);
             return defaultValue;
         } catch (Exception e) {
-            logger.warning("[" + contextName + "] Error executing " + featureId + ": " + e.getMessage());
+            logger.warn("[" + contextName + "] Error executing " + featureId + ": " + e.getMessage());
             return defaultValue;
         }
     }

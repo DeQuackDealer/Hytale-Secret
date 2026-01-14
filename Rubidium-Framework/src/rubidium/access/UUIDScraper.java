@@ -1,7 +1,7 @@
 package rubidium.access;
 
 import rubidium.access.AccessControlService.ResolvedPlayer;
-import rubidium.core.RubidiumLogger;
+import rubidium.core.logging.RubidiumLogger;
 
 import java.net.URI;
 import java.net.http.*;
@@ -79,7 +79,7 @@ public final class UUIDScraper {
                 return tryProviders(username, providerIndex + 1);
             })
             .exceptionally(e -> {
-                logger.warning("Provider " + provider + " failed for " + username + ": " + e.getMessage());
+                logger.warn("Provider " + provider + " failed for " + username + ": " + e.getMessage());
                 return null;
             });
     }
@@ -121,7 +121,7 @@ public final class UUIDScraper {
                 default -> null;
             };
         } catch (Exception e) {
-            logger.warning("Failed to parse response from " + provider + ": " + e.getMessage());
+            logger.warn("Failed to parse response from " + provider + ": " + e.getMessage());
             return null;
         }
     }
@@ -182,13 +182,13 @@ public final class UUIDScraper {
                 var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
                 
                 if (response.statusCode() != 200) {
-                    logger.warning("Failed to fetch URL " + url + ": " + response.statusCode());
+                    logger.warn("Failed to fetch URL " + url + ": " + response.statusCode());
                     return List.<ResolvedPlayer>of();
                 }
                 
                 return extractPlayersFromContent(response.body());
             } catch (Exception e) {
-                logger.severe("Error scraping URL " + url + ": " + e.getMessage());
+                logger.error("Error scraping URL " + url + ": " + e.getMessage());
                 return List.of();
             }
         });

@@ -18,6 +18,8 @@ public interface Player {
     
     String getUsername();
     
+    default String getName() { return getUsername(); }
+    
     String getDisplayName();
     
     void setDisplayName(String displayName);

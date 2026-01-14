@@ -125,8 +125,12 @@ public class MaintenanceModeFeature extends QoLFeature {
         return Collections.unmodifiableSet(whitelistedPlayers);
     }
     
-    public record JoinResult(boolean allowed, String denyMessage) {
-        public static JoinResult allowed() {
+    public record JoinResult(boolean permitted, String denyMessage) {
+        public boolean allowed() {
+            return permitted;
+        }
+        
+        public static JoinResult allow() {
             return new JoinResult(true, null);
         }
         
@@ -137,17 +141,17 @@ public class MaintenanceModeFeature extends QoLFeature {
     
     public JoinResult canPlayerJoin(String playerId, Set<String> permissions) {
         if (!enabled || !maintenanceActive) {
-            return JoinResult.allowed();
+            return JoinResult.allow();
         }
         
         if (whitelistedPlayers.contains(playerId)) {
-            return JoinResult.allowed();
+            return JoinResult.allow();
         }
         
         if (permissions != null) {
             for (String bypassPerm : config.bypassPermissions()) {
                 if (permissions.contains(bypassPerm)) {
-                    return JoinResult.allowed();
+                    return JoinResult.allow();
                 }
             }
         }

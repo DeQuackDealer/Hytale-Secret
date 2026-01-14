@@ -108,13 +108,13 @@ public class LagDetectionFeature extends QoLFeature {
         
         tickTimes.addLast(tickDuration);
         while (tickTimes.size() > config.tickHistorySize()) {
-            tickTimes.removeFirst();
+            tickTimes.remove(0);
         }
         
         double currentTps = calculateTps();
         tpsHistory.addLast(currentTps);
         while (tpsHistory.size() > config.tickHistorySize()) {
-            tpsHistory.removeFirst();
+            tpsHistory.remove(0);
         }
         
         checkAndAlert(currentTps);

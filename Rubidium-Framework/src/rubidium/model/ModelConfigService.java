@@ -1,7 +1,7 @@
 package rubidium.model;
 
-import rubidium.core.RubidiumLogger;
-import rubidium.commands.Command;
+import rubidium.core.logging.RubidiumLogger;
+import rubidium.annotations.Command;
 import rubidium.commands.CommandContext;
 import rubidium.commands.CommandResult;
 
@@ -138,7 +138,7 @@ public final class ModelConfigService {
             Files.createDirectories(configDirectory);
             initializeWatchService();
         } catch (IOException e) {
-            logger.severe("Failed to initialize model config directory: " + e.getMessage());
+            logger.error("Failed to initialize model config directory: " + e.getMessage());
         }
     }
     
@@ -154,7 +154,7 @@ public final class ModelConfigService {
             Thread.ofVirtual().name("model-config-watcher").start(this::watchForChanges);
             logger.info("Model hot-reload watcher initialized");
         } catch (IOException e) {
-            logger.warning("Failed to initialize file watcher: " + e.getMessage());
+            logger.warn("Failed to initialize file watcher: " + e.getMessage());
         }
     }
     
@@ -248,7 +248,7 @@ public final class ModelConfigService {
     public boolean applyPatch(ModelPatch patch) {
         var model = models.get(patch.targetModelId());
         if (model == null) {
-            logger.warning("Cannot patch unknown model: " + patch.targetModelId());
+            logger.warn("Cannot patch unknown model: " + patch.targetModelId());
             return false;
         }
         
@@ -257,7 +257,7 @@ public final class ModelConfigService {
             var validation = validateModel(patched);
             
             if (!validation.valid()) {
-                logger.warning("Patch validation failed: " + String.join(", ", validation.errors()));
+                logger.warn("Patch validation failed: " + String.join(", ", validation.errors()));
                 return false;
             }
             
@@ -271,7 +271,7 @@ public final class ModelConfigService {
             
             return true;
         } catch (Exception e) {
-            logger.severe("Failed to apply patch: " + e.getMessage());
+            logger.error("Failed to apply patch: " + e.getMessage());
             return false;
         }
     }
@@ -426,7 +426,7 @@ public final class ModelConfigService {
     public boolean resetModel(String modelId) {
         var original = originalModels.get(modelId);
         if (original == null) {
-            logger.warning("No original model found for: " + modelId);
+            logger.warn("No original model found for: " + modelId);
             return false;
         }
         
@@ -495,11 +495,11 @@ public final class ModelConfigService {
                     notifyChange(new ModelChangeEvent(model.id(), "RELOAD", "Hot-reloaded from file"));
                     logger.info("Reloaded model: " + model.id());
                 } else {
-                    logger.warning("Model validation failed: " + String.join(", ", validation.errors()));
+                    logger.warn("Model validation failed: " + String.join(", ", validation.errors()));
                 }
             }
         } catch (IOException e) {
-            logger.severe("Failed to reload model: " + e.getMessage());
+            logger.error("Failed to reload model: " + e.getMessage());
         }
     }
     
@@ -516,7 +516,7 @@ public final class ModelConfigService {
             try {
                 listener.accept(event);
             } catch (Exception e) {
-                logger.warning("Model change listener failed: " + e.getMessage());
+                logger.warn("Model change listener failed: " + e.getMessage());
             }
         }
     }
@@ -549,7 +549,7 @@ public final class ModelConfigService {
     public CommandResult modelCommand(CommandContext ctx) {
         if (ctx.args().length == 0) {
             showModelHelp(ctx);
-            return CommandResult.success();
+            return CommandResult.ok();
         }
         
         var subcommand = ctx.args()[0].toLowerCase();
@@ -562,7 +562,7 @@ public final class ModelConfigService {
             case "rotate" -> rotateModel(ctx);
             default -> {
                 showModelHelp(ctx);
-                yield CommandResult.success();
+                yield CommandResult.ok();
             }
         };
     }
@@ -589,7 +589,7 @@ public final class ModelConfigService {
             ctx.sender().sendMessage("  " + status + " &f" + model.id() + " &7- " + model.name());
         }
         
-        return CommandResult.success();
+        return CommandResult.ok();
     }
     
     private CommandResult showModelInfo(CommandContext ctx) {
@@ -621,7 +621,7 @@ public final class ModelConfigService {
         ctx.sender().sendMessage("  &7Rotation: &f" + t.rotation().x() + ", " + t.rotation().y() + ", " + t.rotation().z());
         ctx.sender().sendMessage("  &7Scale: &f" + t.scale().x() + ", " + t.scale().y() + ", " + t.scale().z());
         
-        return CommandResult.success();
+        return CommandResult.ok();
     }
     
     private CommandResult resetModelCmd(CommandContext ctx) {
@@ -637,7 +637,7 @@ public final class ModelConfigService {
             ctx.sender().sendMessage("&cFailed to reset model: " + modelId);
         }
         
-        return CommandResult.success();
+        return CommandResult.ok();
     }
     
     private CommandResult scaleModel(CommandContext ctx) {
@@ -673,7 +673,7 @@ public final class ModelConfigService {
             return CommandResult.failure("Invalid numbers");
         }
         
-        return CommandResult.success();
+        return CommandResult.ok();
     }
     
     private CommandResult rotateModel(CommandContext ctx) {
@@ -709,6 +709,6 @@ public final class ModelConfigService {
             return CommandResult.failure("Invalid numbers");
         }
         
-        return CommandResult.success();
+        return CommandResult.ok();
     }
 }

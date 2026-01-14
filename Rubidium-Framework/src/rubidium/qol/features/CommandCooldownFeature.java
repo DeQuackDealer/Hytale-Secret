@@ -83,8 +83,12 @@ public class CommandCooldownFeature extends QoLFeature {
         cooldowns.clear();
     }
     
-    public record CooldownResult(boolean allowed, Duration remaining, String message) {
-        public static CooldownResult allowed() {
+    public record CooldownResult(boolean permitted, Duration remaining, String message) {
+        public boolean allowed() {
+            return permitted;
+        }
+        
+        public static CooldownResult allow() {
             return new CooldownResult(true, Duration.ZERO, null);
         }
         
@@ -95,13 +99,13 @@ public class CommandCooldownFeature extends QoLFeature {
     
     public CooldownResult checkCooldown(String playerId, String command, Set<String> playerPermissions) {
         if (!enabled) {
-            return CooldownResult.allowed();
+            return CooldownResult.allow();
         }
         
         if (playerPermissions != null) {
             for (String exemptPerm : config.exemptPermissions()) {
                 if (playerPermissions.contains(exemptPerm)) {
-                    return CooldownResult.allowed();
+                    return CooldownResult.allow();
                 }
             }
         }
@@ -111,7 +115,7 @@ public class CommandCooldownFeature extends QoLFeature {
             .getOrDefault(cmdLower, config.defaultCooldown());
         
         if (cooldownDuration.isZero() || cooldownDuration.isNegative()) {
-            return CooldownResult.allowed();
+            return CooldownResult.allow();
         }
         
         CooldownKey key = new CooldownKey(playerId, cmdLower);
@@ -129,7 +133,7 @@ public class CommandCooldownFeature extends QoLFeature {
         }
         
         cooldowns.put(key, Instant.now());
-        return CooldownResult.allowed();
+        return CooldownResult.allow();
     }
     
     public void resetCooldown(String playerId, String command) {

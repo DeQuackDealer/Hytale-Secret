@@ -26,7 +26,7 @@ public class ConfigManager {
         try {
             Files.createDirectories(dataFolder);
         } catch (IOException e) {
-            logger.severe("Failed to create data folder: " + e.getMessage());
+            logger.error("Failed to create data folder: " + e.getMessage());
         }
     }
     
@@ -70,7 +70,7 @@ public class ConfigManager {
                 }
             }
         } catch (IOException e) {
-            logger.warning("Failed to load config " + name + ": " + e.getMessage());
+            logger.warn("Failed to load config " + name + ": " + e.getMessage());
             return null;
         }
     }
@@ -95,7 +95,7 @@ public class ConfigManager {
                 }
             }
         } catch (IOException e) {
-            logger.warning("Failed to save config " + name + ": " + e.getMessage());
+            logger.warn("Failed to save config " + name + ": " + e.getMessage());
         }
     }
     
@@ -113,7 +113,7 @@ public class ConfigManager {
                 logger.fine("Copied default config: " + resourceName);
             }
         } catch (IOException e) {
-            logger.warning("Failed to copy default config " + resourceName + ": " + e.getMessage());
+            logger.warn("Failed to copy default config " + resourceName + ": " + e.getMessage());
         }
     }
     

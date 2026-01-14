@@ -45,7 +45,7 @@ public class TeleportManager {
     public void teleportDelayed(Player player, Location target, Consumer<TeleportResult> callback) {
         if (teleportDelay <= 0) {
             teleport(player, target);
-            callback.accept(TeleportResult.success());
+            callback.accept(TeleportResult.ok());
             return;
         }
         
@@ -62,7 +62,7 @@ public class TeleportManager {
             }
             
             teleport(p, target);
-            callback.accept(TeleportResult.success());
+            callback.accept(TeleportResult.ok());
         }, teleportDelay, TimeUnit.SECONDS);
         
         task.setFuture(future);
@@ -244,8 +244,12 @@ public class TeleportManager {
         }
     }
     
-    public record TeleportResult(boolean success, String message) {
-        public static TeleportResult success() {
+    public record TeleportResult(boolean succeeded, String message) {
+        public boolean success() {
+            return succeeded;
+        }
+        
+        public static TeleportResult ok() {
             return new TeleportResult(true, "Teleported successfully");
         }
         

@@ -27,7 +27,7 @@ public class HytalePlayerInventory implements PlayerInventory {
                 field.setAccessible(true);
                 this.inventoryHandle = field.get(hytalePlayer);
             } catch (Exception ex) {
-                logger.warning("Could not extract inventory handle");
+                logger.warn("Could not extract inventory handle");
             }
         }
     }
@@ -44,7 +44,7 @@ public class HytalePlayerInventory implements PlayerInventory {
                 Method m = inventoryHandle.getClass().getMethod("get", int.class);
                 return m.invoke(inventoryHandle, slot);
             } catch (Exception ex) {
-                logger.warning("Failed to get item at slot " + slot);
+                logger.warn("Failed to get item at slot " + slot);
             }
         }
         return null;
@@ -62,7 +62,7 @@ public class HytalePlayerInventory implements PlayerInventory {
                 Method m = inventoryHandle.getClass().getMethod("set", int.class, Object.class);
                 m.invoke(inventoryHandle, slot, item);
             } catch (Exception ex) {
-                logger.warning("Failed to set item at slot " + slot);
+                logger.warn("Failed to set item at slot " + slot);
             }
         }
     }
@@ -75,7 +75,7 @@ public class HytalePlayerInventory implements PlayerInventory {
             Method m = inventoryHandle.getClass().getMethod("clear");
             m.invoke(inventoryHandle);
         } catch (Exception e) {
-            logger.warning("Failed to clear inventory");
+            logger.warn("Failed to clear inventory");
         }
     }
     

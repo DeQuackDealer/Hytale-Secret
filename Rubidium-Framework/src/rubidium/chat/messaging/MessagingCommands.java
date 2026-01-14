@@ -1,6 +1,6 @@
 package rubidium.chat.messaging;
 
-import rubidium.commands.Command;
+import rubidium.annotations.Command;
 import rubidium.commands.CommandContext;
 import rubidium.commands.CommandResult;
 import rubidium.hytale.api.player.Player;
@@ -45,7 +45,7 @@ public final class MessagingCommands {
             return CommandResult.failure(result.errorMessage());
         }
         
-        return CommandResult.success();
+        return CommandResult.ok();
     }
     
     @Command(
@@ -68,7 +68,7 @@ public final class MessagingCommands {
             } else {
                 ctx.sender().sendMessage("&cYou have no one to reply to.");
             }
-            return CommandResult.success();
+            return CommandResult.ok();
         }
         
         var message = String.join(" ", ctx.args());
@@ -79,7 +79,7 @@ public final class MessagingCommands {
             return CommandResult.failure(result.errorMessage());
         }
         
-        return CommandResult.success();
+        return CommandResult.ok();
     }
     
     @Command(
@@ -116,7 +116,7 @@ public final class MessagingCommands {
             ctx.sender().sendMessage("&cSocial Spy disabled.");
         }
         
-        return CommandResult.success();
+        return CommandResult.ok();
     }
     
     @Command(
@@ -139,11 +139,11 @@ public final class MessagingCommands {
             } else {
                 ctx.sender().sendMessage("&7Ignored players: &f" + settings.blockedUsers().size());
             }
-            return CommandResult.success();
+            return CommandResult.ok();
         }
         
         ctx.sender().sendMessage("&7To block a player, use their UUID. Feature coming soon.");
-        return CommandResult.success();
+        return CommandResult.ok();
     }
     
     @Command(
@@ -176,7 +176,7 @@ public final class MessagingCommands {
             ctx.sender().sendMessage("&cPrivate messages are now &ldisabled&c.");
         }
         
-        return CommandResult.success();
+        return CommandResult.ok();
     }
     
     @Command(
@@ -201,7 +201,7 @@ public final class MessagingCommands {
             ctx.sender().sendMessage("&7Private Messages: " + (currentSettings.privateMessagesEnabled() ? "&aEnabled" : "&cDisabled"));
             ctx.sender().sendMessage("");
             ctx.sender().sendMessage("&7Use: /mentionsettings <sound|highlight> <on|off>");
-            return CommandResult.success();
+            return CommandResult.ok();
         }
         
         if (ctx.args().length < 2) {
@@ -239,6 +239,6 @@ public final class MessagingCommands {
             ctx.sender().sendMessage("&aMention " + setting + " " + (enabled ? "enabled" : "disabled") + ".");
         }
         
-        return CommandResult.success();
+        return CommandResult.ok();
     }
 }

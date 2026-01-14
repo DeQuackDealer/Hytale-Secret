@@ -1,7 +1,7 @@
 package rubidium.chat.messaging;
 
 import rubidium.hytale.api.player.Player;
-import rubidium.core.RubidiumLogger;
+import rubidium.core.logging.RubidiumLogger;
 
 import java.time.Instant;
 import java.util.*;
@@ -205,7 +205,7 @@ public final class MentionService {
     
     private void updateReplyTarget(Player sender, List<UUID> mentionedPlayerIds) {
         if (!mentionedPlayerIds.isEmpty()) {
-            var lastMentioned = mentionedPlayerIds.getLast();
+            var lastMentioned = mentionedPlayerIds.get(mentionedPlayerIds.size() - 1);
             if (playerLookup != null) {
                 playerLookup.apply(null);
             }

@@ -23,7 +23,7 @@ public class CommandManager {
         String name = command.getName().toLowerCase();
         
         if (commands.containsKey(name)) {
-            logger.warning("Command '" + name + "' is already registered, overwriting...");
+            logger.warn("Command '" + name + "' is already registered, overwriting...");
         }
         
         commands.put(name, new RegisteredCommand(plugin, command));
@@ -102,7 +102,7 @@ public class CommandManager {
             return command.execute(sender, label, args);
         } catch (Exception e) {
             sender.sendMessage("An error occurred while executing the command.");
-            logger.severe("Error executing command '" + label + "': " + e.getMessage());
+            logger.error("Error executing command '" + label + "': " + e.getMessage());
             e.printStackTrace();
             return true;
         }

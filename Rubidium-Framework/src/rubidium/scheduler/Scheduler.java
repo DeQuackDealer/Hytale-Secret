@@ -110,7 +110,7 @@ public class Scheduler {
                     syncExecutor.submit(task);
                 }
             } catch (Exception e) {
-                logger.severe("Error in scheduled task " + taskId + ": " + e.getMessage());
+                logger.error("Error in scheduled task " + taskId + ": " + e.getMessage());
                 e.printStackTrace();
             }
         };

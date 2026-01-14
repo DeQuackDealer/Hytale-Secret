@@ -1,10 +1,8 @@
 package rubidium.chat.messaging;
 
 import rubidium.hytale.api.player.Player;
-import rubidium.commands.Command;
-import rubidium.commands.CommandContext;
-import rubidium.commands.CommandResult;
-import rubidium.core.RubidiumLogger;
+import rubidium.annotations.Command;
+import rubidium.core.logging.RubidiumLogger;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -24,7 +22,7 @@ public final class ReplyManager {
         public void addMessage(Message message) {
             recentMessages.add(message);
             if (recentMessages.size() > MAX_HISTORY) {
-                recentMessages.removeFirst();
+                recentMessages.remove(0);
             }
         }
     }
