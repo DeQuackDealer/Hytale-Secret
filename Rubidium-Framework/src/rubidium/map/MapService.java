@@ -7,9 +7,6 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.Logger;
 
-/**
- * Map service providing minimap, world map, waypoints, and zone visualization.
- */
 public class MapService implements FeatureLifecycle {
     
     private static final Logger logger = Logger.getLogger("Rubidium-Map");
@@ -20,7 +17,8 @@ public class MapService implements FeatureLifecycle {
     private final WaypointManager waypointManager;
     private final ZoneManager zoneManager;
     private final FogOfWarManager fogOfWarManager;
-    private final MapRenderer renderer;
+    private final Minimap minimap;
+    private final HytaleMapIntegration hytaleMapIntegration;
     
     private final Map<UUID, PlayerMapState> playerStates = new ConcurrentHashMap<>();
     private final ScheduledExecutorService updateScheduler;
@@ -32,7 +30,8 @@ public class MapService implements FeatureLifecycle {
         this.waypointManager = new WaypointManager();
         this.zoneManager = new ZoneManager();
         this.fogOfWarManager = new FogOfWarManager();
-        this.renderer = new MapRenderer();
+        this.minimap = new Minimap(waypointManager, zoneManager);
+        this.hytaleMapIntegration = new HytaleMapIntegration(waypointManager, zoneManager);
         this.updateScheduler = Executors.newScheduledThreadPool(2, r -> {
             Thread t = new Thread(r, "MapService-Updater");
             t.setDaemon(true);
@@ -55,7 +54,7 @@ public class MapService implements FeatureLifecycle {
     
     @Override
     public void initialize() throws FeatureInitException {
-        logger.info("Initializing Map Service...");
+        logger.info("Initializing Map Service (integrates with Hytale world map)...");
         
         try {
             dataProvider.initialize();
@@ -81,7 +80,7 @@ public class MapService implements FeatureLifecycle {
             0, 500, TimeUnit.MILLISECONDS
         );
         
-        logger.info("Map Service started");
+        logger.info("Map Service started - Minimap and Hytale map integration active");
     }
     
     @Override
@@ -115,12 +114,24 @@ public class MapService implements FeatureLifecycle {
         playerStates.put(player.getUuid(), state);
         
         fogOfWarManager.initializePlayer(player.getUuid());
+        minimap.onPlayerJoin(player);
+        hytaleMapIntegration.onPlayerJoin(player);
         
         sendInitialMapData(player);
     }
     
     public void onPlayerQuit(UUID playerId) {
         playerStates.remove(playerId);
+        minimap.onPlayerQuit(playerId);
+        hytaleMapIntegration.onPlayerQuit(playerId);
+    }
+    
+    public void onPlayerMove(Player player) {
+        PlayerMapState state = playerStates.get(player.getUuid());
+        if (state != null) {
+            state.updateFromLocation();
+        }
+        minimap.onPlayerMove(player);
     }
     
     private void sendInitialMapData(Player player) {
@@ -164,14 +175,16 @@ public class MapService implements FeatureLifecycle {
             }
         }
         
-        MapUpdatePacket packet = new MapUpdatePacket(updates);
-        
-        for (PlayerMapState state : playerStates.values()) {
+        if (!updates.isEmpty()) {
+            MapUpdatePacket packet = new MapUpdatePacket(updates);
+            for (PlayerMapState state : playerStates.values()) {
+            }
         }
     }
     
     public Waypoint createWaypoint(UUID ownerId, String name, double x, double y, double z, String world) {
-        return waypointManager.createWaypoint(ownerId, name, x, y, z, world);
+        Waypoint waypoint = waypointManager.createWaypoint(ownerId, name, x, y, z, world);
+        return waypoint;
     }
     
     public void deleteWaypoint(UUID ownerId, String waypointId) {
@@ -213,6 +226,16 @@ public class MapService implements FeatureLifecycle {
         }
     }
     
+    public void setMinimapEnabled(UUID playerId, boolean enabled) {
+        minimap.setMinimapEnabled(playerId, enabled);
+    }
+    
+    public void setMinimapZoom(UUID playerId, float zoom) {
+        minimap.setZoomLevel(playerId, zoom);
+    }
+    
+    public Minimap getMinimap() { return minimap; }
+    public HytaleMapIntegration getHytaleMapIntegration() { return hytaleMapIntegration; }
     public WaypointManager getWaypointManager() { return waypointManager; }
     public ZoneManager getZoneManager() { return zoneManager; }
     public FogOfWarManager getFogOfWarManager() { return fogOfWarManager; }

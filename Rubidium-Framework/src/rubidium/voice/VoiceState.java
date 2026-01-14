@@ -1,6 +1,8 @@
 package rubidium.voice;
 
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class VoiceState {
     private final UUID playerId;
@@ -13,10 +15,16 @@ public class VoiceState {
     private boolean deafened;
     private boolean selfDeafened;
     private boolean prioritySpeaker;
+    private boolean whispering;
+    private boolean pttActive;
+    
+    private VoiceConfig.ActivationMode activationMode;
     
     private float inputVolume;
     private float outputVolume;
     private VoiceConfig.NoiseSuppressionLevel noiseSuppression;
+    
+    private final Map<UUID, Float> playerVolumes;
     
     private long lastVoiceActivity;
     private long totalSpeakTimeMs;
@@ -34,9 +42,13 @@ public class VoiceState {
         this.deafened = false;
         this.selfDeafened = false;
         this.prioritySpeaker = false;
+        this.whispering = false;
+        this.pttActive = false;
+        this.activationMode = VoiceConfig.ActivationMode.VOICE_ACTIVATION;
         this.inputVolume = 1.0f;
         this.outputVolume = 1.0f;
         this.noiseSuppression = VoiceConfig.NoiseSuppressionLevel.MODERATE;
+        this.playerVolumes = new ConcurrentHashMap<>();
         this.lastVoiceActivity = 0;
         this.totalSpeakTimeMs = 0;
         this.packetsReceived = 0;
@@ -62,6 +74,13 @@ public class VoiceState {
     public void setSelfDeafened(boolean selfDeafened) { this.selfDeafened = selfDeafened; }
     public boolean isPrioritySpeaker() { return prioritySpeaker; }
     public void setPrioritySpeaker(boolean prioritySpeaker) { this.prioritySpeaker = prioritySpeaker; }
+    public boolean isWhispering() { return whispering; }
+    public void setWhispering(boolean whispering) { this.whispering = whispering; }
+    public boolean isPttActive() { return pttActive; }
+    public void setPttActive(boolean pttActive) { this.pttActive = pttActive; }
+    
+    public VoiceConfig.ActivationMode getActivationMode() { return activationMode; }
+    public void setActivationMode(VoiceConfig.ActivationMode activationMode) { this.activationMode = activationMode; }
     
     public float getInputVolume() { return inputVolume; }
     public void setInputVolume(float inputVolume) { this.inputVolume = inputVolume; }
@@ -69,6 +88,22 @@ public class VoiceState {
     public void setOutputVolume(float outputVolume) { this.outputVolume = outputVolume; }
     public VoiceConfig.NoiseSuppressionLevel getNoiseSuppression() { return noiseSuppression; }
     public void setNoiseSuppression(VoiceConfig.NoiseSuppressionLevel noiseSuppression) { this.noiseSuppression = noiseSuppression; }
+    
+    public float getPlayerVolume(UUID playerId) {
+        return playerVolumes.getOrDefault(playerId, 1.0f);
+    }
+    
+    public void setPlayerVolume(UUID playerId, float volume) {
+        playerVolumes.put(playerId, volume);
+    }
+    
+    public void clearPlayerVolume(UUID playerId) {
+        playerVolumes.remove(playerId);
+    }
+    
+    public Map<UUID, Float> getAllPlayerVolumes() {
+        return new ConcurrentHashMap<>(playerVolumes);
+    }
     
     public long getLastVoiceActivity() { return lastVoiceActivity; }
     public void setLastVoiceActivity(long lastVoiceActivity) { this.lastVoiceActivity = lastVoiceActivity; }
@@ -87,5 +122,20 @@ public class VoiceState {
     
     public boolean canHear() {
         return !deafened && !selfDeafened;
+    }
+    
+    public boolean shouldTransmit() {
+        if (!canSpeak()) return false;
+        
+        switch (activationMode) {
+            case PUSH_TO_TALK:
+                return pttActive;
+            case VOICE_ACTIVATION:
+                return speaking;
+            case HYBRID:
+                return pttActive || speaking;
+            default:
+                return false;
+        }
     }
 }
