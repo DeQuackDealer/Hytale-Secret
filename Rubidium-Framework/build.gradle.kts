@@ -10,7 +10,7 @@ version = "1.0.0"
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(25))
+        languageVersion.set(JavaLanguageVersion.of(21))
     }
     withJavadocJar()
     withSourcesJar()
@@ -18,7 +18,8 @@ java {
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
-    options.release.set(25)
+    options.release.set(21)
+    options.compilerArgs.add("-Xlint:-options")
 }
 
 repositories {
@@ -30,7 +31,11 @@ repositories {
 }
 
 dependencies {
-    compileOnly(files("libs/HytaleServer.jar"))
+    // HytaleServer.jar is optional - only include if present for development
+    val hytaleServerJar = file("libs/HytaleServer.jar")
+    if (hytaleServerJar.exists()) {
+        compileOnly(files(hytaleServerJar))
+    }
     
     api("org.jetbrains:annotations:24.0.0")
     api("com.google.code.gson:gson:2.11.0")

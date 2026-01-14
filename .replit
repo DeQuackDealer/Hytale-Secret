@@ -1,4 +1,4 @@
-modules = ["rust-stable", "nodejs-20", "python-3.11", "postgresql-16"]
+modules = ["rust-stable", "nodejs-20", "python-3.11", "postgresql-16", "java-21.0.5"]
 [agent]
 expertMode = true
 integrations = ["stripe:2.0.0"]
