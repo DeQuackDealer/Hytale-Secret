@@ -102,8 +102,8 @@ function Navbar() {
     <nav className="navbar">
       <div className="nav-container">
         <Link to="/" className="nav-logo">
-          <Gamepad2 size={32} />
-          <span>Yellow Tale</span>
+          <Cpu size={32} />
+          <span>Rubidium</span>
         </Link>
         
         <button className="nav-toggle" onClick={() => setIsOpen(!isOpen)}>
@@ -112,10 +112,9 @@ function Navbar() {
         
         <div className={`nav-links ${isOpen ? 'open' : ''}`}>
           <Link to="/" onClick={() => setIsOpen(false)}>Home</Link>
-          <Link to="/download" onClick={() => setIsOpen(false)}>Download</Link>
-          <Link to="/features" onClick={() => setIsOpen(false)}>Features</Link>
-          <Link to="/rubidium" onClick={() => setIsOpen(false)}>Rubidium</Link>
+          <Link to="/rubidium/documentation" onClick={() => setIsOpen(false)}>Docs</Link>
           <Link to="/marketplace" onClick={() => setIsOpen(false)}>Marketplace</Link>
+          <Link to="/download" onClick={() => setIsOpen(false)}>Download</Link>
           <Link to="/premium" onClick={() => setIsOpen(false)}>Premium</Link>
           {user ? (
             <>
@@ -141,20 +140,21 @@ function Home() {
       <section className="hero rubidium-focus-hero">
         <div className="hero-content">
           <div className="hero-badge">
-            <Cpu size={20} /> Powered by Rubidium
+            <Cpu size={20} /> Server Framework for Hytale
           </div>
-          <h1>Yellow Tale & Rubidium</h1>
-          <p className="hero-subtitle">The Ultimate Hytale Platform</p>
+          <h1>Rubidium</h1>
+          <p className="hero-subtitle">Build Amazing Hytale Servers</p>
           <p className="hero-description">
-            A comprehensive ecosystem for Hytale - featuring the Yellow Tale desktop launcher 
-            and Rubidium server framework. Production-ready, modular, and built for performance.
+            The production-ready server framework for Hytale. Modular architecture, 
+            easy-to-use APIs, runtime hot-reload, and built-in performance optimization.
+            Start building your dream server in minutes.
           </p>
           <div className="hero-buttons">
-            <Link to="/rubidium" className="btn btn-primary">
-              <Cpu size={20} /> Explore Rubidium
+            <Link to="/rubidium/documentation" className="btn btn-primary">
+              <Layers size={20} /> Read the Docs
             </Link>
             <Link to="/download" className="btn btn-secondary">
-              <Download size={20} /> Download Launcher
+              <Download size={20} /> Download SDK
             </Link>
           </div>
         </div>
@@ -211,39 +211,44 @@ function Home() {
       </section>
 
       <section className="features-preview">
-        <h2>Yellow Tale Launcher</h2>
-        <p className="section-subtitle">The perfect client companion for Rubidium servers</p>
+        <h2>Easy-to-Use APIs</h2>
+        <p className="section-subtitle">Build plugins in minutes with clean, intuitive interfaces</p>
         <div className="feature-grid">
           <div className="feature-card">
-            <Users size={48} />
-            <h3>Friends System</h3>
-            <p>Add friends, see who's online, and join their games with one click.</p>
+            <Volume2 size={48} />
+            <h3>Voice Chat API</h3>
+            <p>Add proximity voice, groups, and whisper mode with just a few lines of code.</p>
           </div>
           <div className="feature-card">
-            <Zap size={48} />
-            <h3>Fast & Native</h3>
-            <p>Built in Rust for maximum performance. No browser overhead.</p>
+            <Map size={48} />
+            <h3>Map Integration</h3>
+            <p>Sync markers, waypoints, and objectives with Hytale's built-in world map.</p>
           </div>
           <div className="feature-card">
             <Layers size={48} />
-            <h3>Mod Profiles</h3>
-            <p>Create and switch between different mod configurations instantly.</p>
+            <h3>UI Framework</h3>
+            <p>Declarative UI components that render beautifully in-game.</p>
           </div>
           <div className="feature-card">
-            <Settings size={48} />
-            <h3>Performance Tuning</h3>
-            <p>Optimize RAM, Java args, and system settings for best FPS.</p>
+            <Zap size={48} />
+            <h3>Performance Tools</h3>
+            <p>Entity culling, chunk optimization, and automatic performance tuning.</p>
           </div>
           <div className="feature-card">
             <Shield size={48} />
-            <h3>Safe & Legal</h3>
-            <p>No memory injection or game modification. 100% compliant.</p>
+            <h3>Permissions</h3>
+            <p>Fine-grained permission system with groups and inheritance.</p>
           </div>
           <div className="feature-card">
-            <Crown size={48} />
-            <h3>Rubidium Integration</h3>
-            <p>Enhanced server-side plugin system for optimized multiplayer.</p>
+            <Target size={48} />
+            <h3>Teleportation</h3>
+            <p>Complete /tp, /tpa, homes, and warps - ready to use.</p>
           </div>
+        </div>
+        <div className="cta-buttons" style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center', gap: '1rem' }}>
+          <Link to="/rubidium/documentation/apis" className="btn btn-primary">
+            <Layers size={20} /> Explore All APIs
+          </Link>
         </div>
       </section>
 
@@ -259,7 +264,7 @@ function Home() {
           <div className="feature-card">
             <Palette size={48} />
             <h3>Skins & Cosmetics</h3>
-            <p>Express yourself with unique skins that other Yellow Tale users can see.</p>
+            <p>Express yourself with unique skins visible to all players.</p>
           </div>
           <div className="feature-card">
             <Smile size={48} />
@@ -281,14 +286,14 @@ function Home() {
 
       <section className="cta-section">
         <div className="cta-content">
-          <h2>Ready to Play?</h2>
-          <p>Join thousands of players using Yellow Tale for the best Hytale experience.</p>
+          <h2>Ready to Build?</h2>
+          <p>Start creating amazing Hytale server experiences with Rubidium today.</p>
           <div className="cta-buttons">
-            <Link to="/login" className="btn btn-primary">
-              <UserPlus size={20} /> Create Account
+            <Link to="/rubidium/documentation/getting-started" className="btn btn-primary">
+              <Layers size={20} /> Getting Started Guide
             </Link>
             <Link to="/download" className="btn btn-secondary">
-              <Download size={20} /> Download
+              <Download size={20} /> Download SDK
             </Link>
           </div>
         </div>
@@ -2713,24 +2718,804 @@ function LauncherPreview() {
   );
 }
 
+function DocsLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="docs-page">
+      <aside className="docs-sidebar">
+        <div className="docs-nav">
+          <h3>Documentation</h3>
+          <div className="docs-nav-section">
+            <h4>Getting Started</h4>
+            <Link to="/rubidium/documentation">Overview</Link>
+            <Link to="/rubidium/documentation/getting-started">Quick Start</Link>
+            <Link to="/rubidium/documentation/installation">Installation</Link>
+          </div>
+          <div className="docs-nav-section">
+            <h4>Core Concepts</h4>
+            <Link to="/rubidium/documentation/modules">Modules</Link>
+            <Link to="/rubidium/documentation/lifecycle">Lifecycle</Link>
+            <Link to="/rubidium/documentation/config">Configuration</Link>
+          </div>
+          <div className="docs-nav-section">
+            <h4>APIs</h4>
+            <Link to="/rubidium/documentation/apis">API Overview</Link>
+            <Link to="/rubidium/documentation/apis/voice">Voice Chat</Link>
+            <Link to="/rubidium/documentation/apis/map">Map Integration</Link>
+            <Link to="/rubidium/documentation/apis/ui">UI Framework</Link>
+            <Link to="/rubidium/documentation/apis/teleport">Teleportation</Link>
+          </div>
+          <div className="docs-nav-section">
+            <h4>Examples</h4>
+            <Link to="/rubidium/documentation/examples">Code Examples</Link>
+          </div>
+        </div>
+      </aside>
+      <main className="docs-content">
+        {children}
+      </main>
+    </div>
+  );
+}
+
+function DocsOverview() {
+  return (
+    <DocsLayout>
+      <div className="docs-article">
+        <h1>Rubidium Documentation</h1>
+        <p className="docs-intro">
+          Welcome to the Rubidium documentation. Rubidium is a production-ready server framework 
+          for Hytale that makes building powerful plugins incredibly easy.
+        </p>
+
+        <div className="docs-cards">
+          <Link to="/rubidium/documentation/getting-started" className="docs-card">
+            <Play size={32} />
+            <h3>Quick Start</h3>
+            <p>Get up and running in 5 minutes</p>
+          </Link>
+          <Link to="/rubidium/documentation/apis" className="docs-card">
+            <Layers size={32} />
+            <h3>API Reference</h3>
+            <p>Explore all available APIs</p>
+          </Link>
+          <Link to="/rubidium/documentation/examples" className="docs-card">
+            <Package size={32} />
+            <h3>Examples</h3>
+            <p>Learn from working code</p>
+          </Link>
+        </div>
+
+        <h2>Why Rubidium?</h2>
+        <ul className="docs-list">
+          <li><strong>Easy APIs</strong> - Simple, intuitive interfaces that just work</li>
+          <li><strong>Hot Reload</strong> - Change code without restarting the server</li>
+          <li><strong>Performance</strong> - Built-in optimization and monitoring</li>
+          <li><strong>Type Safe</strong> - Full Java 19+ with modern patterns</li>
+        </ul>
+
+        <h2>Quick Example</h2>
+        <pre className="docs-code">{`public class MyPlugin extends RubidiumModule {
+    @Override
+    public void onEnable() {
+        // Register a simple command
+        commands().register("hello", (sender, args) -> {
+            sender.sendMessage("Hello from Rubidium!");
+        });
+        
+        // Add voice chat to your server
+        VoiceAPI.setPlayerMuted(playerId, false);
+        
+        // Create a map marker
+        MapAPI.addMarker(playerId, "Shop", x, y, z);
+    }
+}`}</pre>
+      </div>
+    </DocsLayout>
+  );
+}
+
+function DocsGettingStarted() {
+  return (
+    <DocsLayout>
+      <div className="docs-article">
+        <h1>Getting Started</h1>
+        <p className="docs-intro">
+          This guide will help you create your first Rubidium plugin in just a few minutes.
+        </p>
+
+        <h2>Step 1: Add the Dependency</h2>
+        <p>Add Rubidium to your project:</p>
+        <h3>Gradle (Kotlin DSL)</h3>
+        <pre className="docs-code">{`dependencies {
+    implementation("com.rubidium:rubidium-api:1.0.0")
+}`}</pre>
+
+        <h3>Gradle (Groovy)</h3>
+        <pre className="docs-code">{`dependencies {
+    implementation 'com.rubidium:rubidium-api:1.0.0'
+}`}</pre>
+
+        <h3>Maven</h3>
+        <pre className="docs-code">{`<dependency>
+    <groupId>com.rubidium</groupId>
+    <artifactId>rubidium-api</artifactId>
+    <version>1.0.0</version>
+</dependency>`}</pre>
+
+        <h2>Step 2: Create Your Module</h2>
+        <p>Create a new class that extends <code>RubidiumModule</code>:</p>
+        <pre className="docs-code">{`package com.example.myplugin;
+
+import rubidium.core.module.RubidiumModule;
+
+public class MyPlugin extends RubidiumModule {
+    
+    @Override
+    public String getId() {
+        return "my_plugin";
+    }
+    
+    @Override
+    public String getName() {
+        return "My Plugin";
+    }
+    
+    @Override
+    public void onEnable() {
+        getLogger().info("My plugin is enabled!");
+    }
+    
+    @Override
+    public void onDisable() {
+        getLogger().info("My plugin is disabled!");
+    }
+}`}</pre>
+
+        <h2>Step 3: Create module.json</h2>
+        <p>Create a <code>module.json</code> file in your resources folder:</p>
+        <pre className="docs-code">{`{
+    "id": "my_plugin",
+    "name": "My Plugin",
+    "version": "1.0.0",
+    "main": "com.example.myplugin.MyPlugin",
+    "description": "My first Rubidium plugin",
+    "authors": ["Your Name"]
+}`}</pre>
+
+        <h2>Step 4: Build and Install</h2>
+        <p>Build your JAR and place it in the <code>modules/</code> folder of your Rubidium server.</p>
+        <pre className="docs-code">{`./gradlew shadowJar
+cp build/libs/myplugin-1.0.0.jar /path/to/server/modules/`}</pre>
+
+        <h2>That's It!</h2>
+        <p>Your plugin will load automatically when the server starts. Check the console for your log message!</p>
+        
+        <div className="docs-next">
+          <Link to="/rubidium/documentation/apis" className="btn btn-primary">
+            Explore APIs <ChevronRight size={18} />
+          </Link>
+        </div>
+      </div>
+    </DocsLayout>
+  );
+}
+
+function DocsInstallation() {
+  return (
+    <DocsLayout>
+      <div className="docs-article">
+        <h1>Installation</h1>
+        <p className="docs-intro">
+          Learn how to install Rubidium on your server.
+        </p>
+
+        <h2>Requirements</h2>
+        <ul className="docs-list">
+          <li>Java 19 or higher</li>
+          <li>4GB+ RAM recommended</li>
+          <li>Hytale server installation</li>
+        </ul>
+
+        <h2>Download</h2>
+        <p>Download the latest Rubidium JAR from the releases page:</p>
+        <pre className="docs-code">{`wget https://releases.rubidium.dev/latest/Rubidium-1.0.0.jar`}</pre>
+
+        <h2>Server Setup</h2>
+        <ol className="docs-list">
+          <li>Place <code>Rubidium-1.0.0.jar</code> in your server's <code>plugins/</code> folder</li>
+          <li>Start your server</li>
+          <li>Rubidium will create a <code>modules/</code> folder for your plugins</li>
+        </ol>
+
+        <h2>Verify Installation</h2>
+        <p>Check the server console for:</p>
+        <pre className="docs-code">{`[Rubidium] Framework v1.0.0 loaded
+[Rubidium] Loaded 0 modules`}</pre>
+      </div>
+    </DocsLayout>
+  );
+}
+
+function DocsModules() {
+  return (
+    <DocsLayout>
+      <div className="docs-article">
+        <h1>Modules</h1>
+        <p className="docs-intro">
+          Modules are the building blocks of Rubidium. Each plugin is a module.
+        </p>
+
+        <h2>Module Structure</h2>
+        <pre className="docs-code">{`my-plugin/
+  src/
+    main/
+      java/
+        com/example/
+          MyPlugin.java
+      resources/
+        module.json
+        config.yml
+  build.gradle`}</pre>
+
+        <h2>Hot Reload</h2>
+        <p>Rubidium supports hot-reloading modules without restarting the server:</p>
+        <pre className="docs-code">{`/rubidium reload my_plugin`}</pre>
+
+        <h2>Dependencies</h2>
+        <p>Declare dependencies on other modules:</p>
+        <pre className="docs-code">{`{
+    "id": "my_plugin",
+    "dependencies": ["economy", "permissions"],
+    "softDependencies": ["voice_chat"]
+}`}</pre>
+      </div>
+    </DocsLayout>
+  );
+}
+
+function DocsLifecycle() {
+  return (
+    <DocsLayout>
+      <div className="docs-article">
+        <h1>Lifecycle</h1>
+        <p className="docs-intro">
+          Understanding the module lifecycle helps you write better plugins.
+        </p>
+
+        <h2>Lifecycle Methods</h2>
+        <pre className="docs-code">{`public class MyPlugin extends RubidiumModule {
+    
+    @Override
+    public void onLoad() {
+        // Called when JAR is loaded, before enable
+        // Good for: loading configs, registering services
+    }
+    
+    @Override
+    public void onEnable() {
+        // Called when module is enabled
+        // Good for: registering commands, listeners, tasks
+    }
+    
+    @Override
+    public void onDisable() {
+        // Called when module is disabled
+        // Good for: cleanup, saving data
+    }
+    
+    @Override
+    public void onReload() {
+        // Called during hot-reload
+        // Good for: refreshing configs without full restart
+    }
+}`}</pre>
+
+        <h2>Lifecycle Order</h2>
+        <ol className="docs-list">
+          <li><code>onLoad()</code> - All modules loaded in dependency order</li>
+          <li><code>onEnable()</code> - All modules enabled in dependency order</li>
+          <li><code>onDisable()</code> - Modules disabled in reverse order</li>
+        </ol>
+      </div>
+    </DocsLayout>
+  );
+}
+
+function DocsConfig() {
+  return (
+    <DocsLayout>
+      <div className="docs-article">
+        <h1>Configuration</h1>
+        <p className="docs-intro">
+          Rubidium provides a powerful configuration system with hot-reload support.
+        </p>
+
+        <h2>Simple Config</h2>
+        <pre className="docs-code">{`// Access your config
+String message = getConfig().getString("welcome_message", "Hello!");
+int maxPlayers = getConfig().getInt("max_players", 100);
+
+// Save changes
+getConfig().set("welcome_message", "Welcome!");
+getConfig().save();`}</pre>
+
+        <h2>Typed Configs</h2>
+        <pre className="docs-code">{`// Define a config class
+public record MyConfig(
+    String welcomeMessage,
+    int maxPlayers,
+    List<String> bannedWords
+) {}
+
+// Load it automatically
+MyConfig config = getTypedConfig(MyConfig.class);
+System.out.println(config.welcomeMessage());`}</pre>
+
+        <h2>Hot Reload</h2>
+        <p>Configs reload automatically when files change:</p>
+        <pre className="docs-code">{`// Listen for config changes
+onConfigReload(() -> {
+    refreshSettings();
+});`}</pre>
+      </div>
+    </DocsLayout>
+  );
+}
+
+function DocsAPIs() {
+  return (
+    <DocsLayout>
+      <div className="docs-article">
+        <h1>API Reference</h1>
+        <p className="docs-intro">
+          Rubidium provides clean, easy-to-use APIs for common server features.
+        </p>
+
+        <div className="docs-api-grid">
+          <Link to="/rubidium/documentation/apis/voice" className="docs-api-card">
+            <Volume2 size={40} />
+            <h3>Voice Chat API</h3>
+            <p>Proximity voice, groups, whisper mode, push-to-talk</p>
+          </Link>
+          
+          <Link to="/rubidium/documentation/apis/map" className="docs-api-card">
+            <Map size={40} />
+            <h3>Map API</h3>
+            <p>Markers, waypoints, quest objectives, minimap integration</p>
+          </Link>
+          
+          <Link to="/rubidium/documentation/apis/ui" className="docs-api-card">
+            <Monitor size={40} />
+            <h3>UI Framework</h3>
+            <p>Declarative UI components, menus, HUD elements</p>
+          </Link>
+          
+          <Link to="/rubidium/documentation/apis/teleport" className="docs-api-card">
+            <Target size={40} />
+            <h3>Teleportation</h3>
+            <p>/tp, /tpa, homes, warps, spawn management</p>
+          </Link>
+        </div>
+
+        <h2>API Design Principles</h2>
+        <ul className="docs-list">
+          <li><strong>Simple by Default</strong> - Common tasks take one line of code</li>
+          <li><strong>Powerful When Needed</strong> - Full control available via builders</li>
+          <li><strong>Type Safe</strong> - Compile-time error checking</li>
+          <li><strong>Well Documented</strong> - Every method has clear JavaDocs</li>
+        </ul>
+      </div>
+    </DocsLayout>
+  );
+}
+
+function DocsVoiceAPI() {
+  return (
+    <DocsLayout>
+      <div className="docs-article">
+        <h1>Voice Chat API</h1>
+        <p className="docs-intro">
+          Add voice chat to your server with Simple Voice Chat quality features.
+        </p>
+
+        <h2>Quick Start</h2>
+        <pre className="docs-code">{`import rubidium.voice.VoiceAPI;
+
+// Check if voice is available
+if (VoiceAPI.isAvailable()) {
+    // Mute/unmute a player
+    VoiceAPI.setPlayerMuted(playerId, true);
+    
+    // Enable whisper mode (8 block range)
+    VoiceAPI.setWhisperMode(playerId, true);
+    
+    // Set activation mode
+    VoiceAPI.setActivationMode(playerId, ActivationMode.PUSH_TO_TALK);
+}`}</pre>
+
+        <h2>Voice Groups</h2>
+        <p>Create private voice channels for teams or parties:</p>
+        <pre className="docs-code">{`// Create a group
+VoiceGroup group = VoiceAPI.createGroup(ownerId, "Party Chat");
+
+// Password protect it
+group.setPassword("secret123");
+
+// Players can join
+VoiceAPI.joinGroup(playerId, group.getId(), "secret123");
+
+// Leave the group
+VoiceAPI.leaveGroup(playerId, group.getId());`}</pre>
+
+        <h2>Per-Player Volume</h2>
+        <pre className="docs-code">{`// Adjust how loud another player sounds to you
+VoiceAPI.setPlayerVolume(listenerId, speakerId, 0.5f); // 50% volume`}</pre>
+
+        <h2>Events</h2>
+        <pre className="docs-code">{`// Listen for voice state changes
+VoiceAPI.onStateChange((playerId, state) -> {
+    if (state.isSpeaking()) {
+        // Player started talking
+    }
+});
+
+// Listen for group events
+VoiceAPI.onGroupJoin((playerId, group) -> {
+    broadcast(player.getName() + " joined " + group.getName());
+});`}</pre>
+
+        <h2>Features</h2>
+        <ul className="docs-list">
+          <li>Opus codec for high-quality, low-bandwidth audio</li>
+          <li>RNNoise-style noise suppression</li>
+          <li>Automatic gain control</li>
+          <li>Voice activity detection (VAD)</li>
+          <li>Push-to-talk support</li>
+          <li>Whisper mode (8 block range)</li>
+          <li>Password-protected groups</li>
+        </ul>
+      </div>
+    </DocsLayout>
+  );
+}
+
+function DocsMapAPI() {
+  return (
+    <DocsLayout>
+      <div className="docs-article">
+        <h1>Map Integration API</h1>
+        <p className="docs-intro">
+          Integrate with Hytale's built-in world map (M key) for markers, waypoints, and objectives.
+        </p>
+
+        <h2>Quick Start</h2>
+        <pre className="docs-code">{`import rubidium.map.MapAPI;
+
+// Add a marker visible to a player
+MapAPI.addMarker(playerId, "Shop", x, y, z, MarkerIcon.SHOP);
+
+// Create a waypoint
+Waypoint wp = MapAPI.createWaypoint(playerId, "My Base", x, y, z);
+
+// Add a quest objective marker
+MapAPI.addQuestMarker(playerId, "Find the artifact", x, y, z);`}</pre>
+
+        <h2>Minimap Integration</h2>
+        <pre className="docs-code">{`// Show/hide minimap elements
+MapAPI.setMinimapVisible(playerId, true);
+MapAPI.setMinimapZoom(playerId, 2.0f);
+
+// Track player positions on minimap
+MapAPI.setPlayerVisible(playerId, targetId, true);`}</pre>
+
+        <h2>Waypoints</h2>
+        <pre className="docs-code">{`// Create personal waypoints
+Waypoint home = MapAPI.createWaypoint(playerId, "Home", x, y, z);
+
+// List player's waypoints
+List<Waypoint> waypoints = MapAPI.getWaypoints(playerId);
+
+// Delete a waypoint
+MapAPI.deleteWaypoint(playerId, waypoint.getId());`}</pre>
+
+        <h2>Hytale World Map Sync</h2>
+        <p>All markers automatically sync with the native Hytale world map when players press M:</p>
+        <pre className="docs-code">{`// Markers appear on both minimap and world map
+MapAPI.addMarker(playerId, "Town", x, y, z, MarkerIcon.TOWN);
+
+// Quest objectives show on world map with tracking
+MapAPI.addQuestObjective(playerId, "Defeat the Dragon", x, y, z);`}</pre>
+      </div>
+    </DocsLayout>
+  );
+}
+
+function DocsUIAPI() {
+  return (
+    <DocsLayout>
+      <div className="docs-article">
+        <h1>UI Framework</h1>
+        <p className="docs-intro">
+          Create beautiful in-game UIs with a declarative component system.
+        </p>
+
+        <h2>Quick Start</h2>
+        <pre className="docs-code">{`import rubidium.ui.*;
+
+// Create a simple menu
+UIMenu menu = UI.menu("Shop")
+    .addItem(UI.button("Buy Sword", () -> buySword()))
+    .addItem(UI.button("Buy Shield", () -> buyShield()))
+    .build();
+
+// Show to player
+UI.show(playerId, menu);`}</pre>
+
+        <h2>Components</h2>
+        <pre className="docs-code">{`// Text
+UI.text("Hello World").color(Color.GOLD)
+
+// Buttons
+UI.button("Click Me", () -> doSomething())
+    .width(200).height(40)
+
+// Progress bars
+UI.progressBar(0.75f).color(Color.GREEN)
+
+// Icons
+UI.icon(ItemType.DIAMOND_SWORD)
+
+// Layouts
+UI.row(component1, component2, component3)
+UI.column(component1, component2, component3)
+UI.grid(3, components)`}</pre>
+
+        <h2>HUD Elements</h2>
+        <pre className="docs-code">{`// Add to player's HUD
+HudElement healthBar = UI.hud("health")
+    .position(HudPosition.TOP_LEFT)
+    .add(UI.progressBar(player.getHealthPercent()))
+    .build();
+
+UI.addHud(playerId, healthBar);
+
+// Update dynamically
+healthBar.update(UI.progressBar(newHealth));`}</pre>
+
+        <h2>Forms & Input</h2>
+        <pre className="docs-code">{`// Create an input form
+UIForm form = UI.form("Settings")
+    .addField("username", UI.textInput("Username"))
+    .addField("volume", UI.slider(0, 100, 80))
+    .addField("enabled", UI.checkbox("Enable Feature"))
+    .onSubmit(data -> {
+        String username = data.getString("username");
+        int volume = data.getInt("volume");
+    })
+    .build();`}</pre>
+      </div>
+    </DocsLayout>
+  );
+}
+
+function DocsTeleportAPI() {
+  return (
+    <DocsLayout>
+      <div className="docs-article">
+        <h1>Teleportation API</h1>
+        <p className="docs-intro">
+          Complete teleportation system with /tp, /tpa, homes, and warps built-in.
+        </p>
+
+        <h2>Built-in Commands</h2>
+        <p>Rubidium provides these commands out of the box:</p>
+        <pre className="docs-code">{`/tp <player>           - Teleport to player (admin)
+/tp <player> <target>  - Teleport player to target (admin)
+/tp <x> <y> <z>        - Teleport to coordinates (admin)
+/tpa <player>          - Request to teleport to player
+/tpahere <player>      - Request player to teleport to you
+/tpaccept              - Accept teleport request
+/tpdeny                - Deny teleport request
+/home                  - Teleport to your home
+/home <name>           - Teleport to named home
+/sethome [name]        - Set your home location
+/delhome <name>        - Delete a home
+/homes                 - List your homes
+/warp <name>           - Teleport to a warp
+/setwarp <name>        - Create a warp (admin)
+/delwarp <name>        - Delete a warp (admin)
+/warps                 - List available warps
+/spawn                 - Teleport to spawn
+/setspawn              - Set spawn location (admin)`}</pre>
+
+        <h2>API Usage</h2>
+        <pre className="docs-code">{`import rubidium.teleport.TeleportAPI;
+
+// Teleport a player
+TeleportAPI.teleport(playerId, x, y, z);
+
+// Teleport with options
+TeleportAPI.teleport(playerId, location)
+    .withDelay(3)          // 3 second delay
+    .cancelOnMove()        // Cancel if player moves
+    .withMessage("Teleporting in 3 seconds...")
+    .execute();
+
+// Manage homes
+TeleportAPI.setHome(playerId, "base", location);
+Location home = TeleportAPI.getHome(playerId, "base");
+List<Home> homes = TeleportAPI.getHomes(playerId);
+
+// Manage warps
+TeleportAPI.createWarp("spawn", location);
+TeleportAPI.teleportToWarp(playerId, "spawn");`}</pre>
+
+        <h2>TPA Requests</h2>
+        <pre className="docs-code">{`// Send a TPA request
+TeleportAPI.sendTpaRequest(senderId, targetId);
+
+// Handle requests programmatically
+TeleportAPI.onTpaRequest((sender, target) -> {
+    // Custom logic before showing request
+    return true; // Allow the request
+});
+
+// Auto-accept for friends
+TeleportAPI.setAutoAccept(playerId, true);`}</pre>
+
+        <h2>Permissions</h2>
+        <pre className="docs-code">{`rubidium.teleport.tp      - Use /tp command
+rubidium.teleport.tpa     - Use /tpa command
+rubidium.teleport.home    - Use /home command
+rubidium.teleport.homes.5 - Allow 5 homes
+rubidium.teleport.warp    - Use /warp command
+rubidium.teleport.spawn   - Use /spawn command`}</pre>
+      </div>
+    </DocsLayout>
+  );
+}
+
+function DocsExamples() {
+  return (
+    <DocsLayout>
+      <div className="docs-article">
+        <h1>Code Examples</h1>
+        <p className="docs-intro">
+          Learn from complete, working examples.
+        </p>
+
+        <h2>Simple Plugin</h2>
+        <pre className="docs-code">{`public class WelcomePlugin extends RubidiumModule {
+    
+    @Override
+    public void onEnable() {
+        // Listen for player join
+        events().on(PlayerJoinEvent.class, event -> {
+            Player player = event.getPlayer();
+            player.sendMessage("Welcome, " + player.getName() + "!");
+            
+            // Play a sound
+            player.playSound(Sounds.LEVEL_UP);
+        });
+    }
+}`}</pre>
+
+        <h2>Economy Plugin</h2>
+        <pre className="docs-code">{`public class EconomyPlugin extends RubidiumModule {
+    private Map<UUID, Double> balances = new HashMap<>();
+    
+    @Override
+    public void onEnable() {
+        // Load balances from config
+        balances = getConfig().getMap("balances", UUID.class, Double.class);
+        
+        // Register commands
+        commands().register("balance", (sender, args) -> {
+            double bal = balances.getOrDefault(sender.getId(), 100.0);
+            sender.sendMessage("Balance: $" + bal);
+        });
+        
+        commands().register("pay", (sender, args) -> {
+            if (args.length < 2) {
+                sender.sendMessage("Usage: /pay <player> <amount>");
+                return;
+            }
+            Player target = players().find(args[0]);
+            double amount = Double.parseDouble(args[1]);
+            
+            transfer(sender.getId(), target.getId(), amount);
+        });
+    }
+    
+    public void transfer(UUID from, UUID to, double amount) {
+        double fromBal = balances.getOrDefault(from, 0.0);
+        if (fromBal < amount) throw new InsufficientFundsException();
+        
+        balances.put(from, fromBal - amount);
+        balances.put(to, balances.getOrDefault(to, 0.0) + amount);
+        save();
+    }
+}`}</pre>
+
+        <h2>Voice Chat Zone</h2>
+        <pre className="docs-code">{`public class VoiceZonesPlugin extends RubidiumModule {
+    
+    @Override
+    public void onEnable() {
+        // Create a "quiet zone" where voice is disabled
+        Region quietZone = regions().create("library", pos1, pos2);
+        
+        events().on(PlayerEnterRegionEvent.class, event -> {
+            if (event.getRegion().equals(quietZone)) {
+                VoiceAPI.setPlayerMuted(event.getPlayer().getId(), true);
+                event.getPlayer().sendMessage("Entering quiet zone - voice disabled");
+            }
+        });
+        
+        events().on(PlayerLeaveRegionEvent.class, event -> {
+            if (event.getRegion().equals(quietZone)) {
+                VoiceAPI.setPlayerMuted(event.getPlayer().getId(), false);
+                event.getPlayer().sendMessage("Leaving quiet zone - voice enabled");
+            }
+        });
+    }
+}`}</pre>
+
+        <h2>Custom Map Markers</h2>
+        <pre className="docs-code">{`public class ShopMarkersPlugin extends RubidiumModule {
+    
+    @Override
+    public void onEnable() {
+        // Add shop markers for all players
+        List<Shop> shops = loadShops();
+        
+        for (Shop shop : shops) {
+            // Marker visible to everyone
+            MapAPI.addGlobalMarker(
+                shop.getName(),
+                shop.getLocation(),
+                MarkerIcon.SHOP
+            );
+        }
+        
+        // Dynamic markers based on player
+        events().on(PlayerJoinEvent.class, event -> {
+            Player player = event.getPlayer();
+            
+            // Show personal quest markers
+            for (Quest quest : getActiveQuests(player)) {
+                MapAPI.addQuestMarker(
+                    player.getId(),
+                    quest.getObjective(),
+                    quest.getTargetLocation()
+                );
+            }
+        });
+    }
+}`}</pre>
+      </div>
+    </DocsLayout>
+  );
+}
+
 function Footer() {
   return (
     <footer className="footer">
       <div className="footer-content">
         <div className="footer-brand">
-          <Gamepad2 size={24} />
-          <span>Yellow Tale</span>
+          <Cpu size={24} />
+          <span>Rubidium</span>
         </div>
-        <p>The ultimate launcher for Hytale. Not affiliated with Hypixel Studios.</p>
+        <p>The production-ready server framework for Hytale. Not affiliated with Hypixel Studios.</p>
         <div className="footer-links">
-          <Link to="/rubidium">Rubidium</Link>
-          <Link to="/rubidium/license">Rubidium License</Link>
+          <Link to="/rubidium/documentation">Documentation</Link>
+          <Link to="/rubidium/documentation/apis">API Reference</Link>
           <Link to="/marketplace">Marketplace</Link>
+          <Link to="/rubidium/license">License</Link>
           <a href="#">Privacy Policy</a>
-          <a href="#">Terms of Service</a>
           <a href="#">Contact</a>
         </div>
-        <p className="copyright">&copy; 2026 Yellow Tale. All rights reserved.</p>
+        <p className="copyright">&copy; 2026 Rubidium. All rights reserved.</p>
       </div>
     </footer>
   );
@@ -2754,6 +3539,18 @@ function AppLayout() {
           <Route path="/features" element={<FeaturesPage />} />
           <Route path="/rubidium" element={<RubidiumPage />} />
           <Route path="/rubidium/license" element={<RubidiumLicensePage />} />
+          <Route path="/rubidium/documentation" element={<DocsOverview />} />
+          <Route path="/rubidium/documentation/getting-started" element={<DocsGettingStarted />} />
+          <Route path="/rubidium/documentation/installation" element={<DocsInstallation />} />
+          <Route path="/rubidium/documentation/modules" element={<DocsModules />} />
+          <Route path="/rubidium/documentation/lifecycle" element={<DocsLifecycle />} />
+          <Route path="/rubidium/documentation/config" element={<DocsConfig />} />
+          <Route path="/rubidium/documentation/apis" element={<DocsAPIs />} />
+          <Route path="/rubidium/documentation/apis/voice" element={<DocsVoiceAPI />} />
+          <Route path="/rubidium/documentation/apis/map" element={<DocsMapAPI />} />
+          <Route path="/rubidium/documentation/apis/ui" element={<DocsUIAPI />} />
+          <Route path="/rubidium/documentation/apis/teleport" element={<DocsTeleportAPI />} />
+          <Route path="/rubidium/documentation/examples" element={<DocsExamples />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/marketplace/upload" element={<UploadPage />} />
           <Route path="/premium" element={<PremiumPage />} />
