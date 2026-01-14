@@ -10,7 +10,8 @@ version = "1.0.0"
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(19))
+        languageVersion.set(JavaLanguageVersion.of(25))
+        vendor.set(JvmVendorSpec.ADOPTIUM)
     }
     withJavadocJar()
     withSourcesJar()
@@ -18,7 +19,12 @@ java {
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
-    options.release.set(19)
+    options.release.set(25)
+    options.compilerArgs.addAll(listOf(
+        "--enable-preview",
+        "-Xlint:all",
+        "-Xlint:-processing"
+    ))
 }
 
 repositories {
