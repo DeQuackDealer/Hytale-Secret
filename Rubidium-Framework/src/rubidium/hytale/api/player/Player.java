@@ -12,6 +12,10 @@ public interface Player {
     
     UUID getUuid();
     
+    default UUID getUUID() { return getUuid(); }
+    
+    default UUID getUniqueId() { return getUuid(); }
+    
     String getUsername();
     
     String getDisplayName();

@@ -6,6 +6,8 @@ public interface Player extends CommandSender {
     
     UUID getUUID();
     
+    default UUID getUuid() { return getUUID(); }
+    
     default UUID getUniqueId() { return getUUID(); }
     
     String getName();
