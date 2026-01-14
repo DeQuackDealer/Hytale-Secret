@@ -115,7 +115,7 @@ public class VoiceModerationService {
     public void stopRecording(String recordingId) {
         VoiceRecording recording = activeRecordings.remove(recordingId);
         if (recording != null) {
-            recording.finalize();
+            recording.finalizeRecording();
             logger.info("Stopped voice recording: " + recordingId);
         }
     }
@@ -205,7 +205,7 @@ public class VoiceModerationService {
             }
         }
         
-        void finalize() {
+        void finalizeRecording() {
         }
     }
 }

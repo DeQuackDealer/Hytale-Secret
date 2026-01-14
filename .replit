@@ -1,4 +1,4 @@
-modules = ["rust-stable", "nodejs-20", "python-3.11", "postgresql-16", "java-21.0.5"]
+modules = ["rust-stable", "nodejs-20", "python-3.11", "postgresql-16", "java-21.0.5", "java-graalvm22.3"]
 [agent]
 expertMode = true
 integrations = ["stripe:2.0.0"]
@@ -61,7 +61,7 @@ externalPort = 8080
 
 [nix]
 channel = "stable-25_05"
-packages = ["openssl", "pkg-config"]
+packages = ["openssl", "pkg-config", "gradle"]
 
 [deployment]
 deploymentTarget = "autoscale"

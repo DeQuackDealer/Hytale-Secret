@@ -1,24 +1,27 @@
 package rubidium.hytale;
 
 import rubidium.core.RubidiumCore;
-import rubidium.hytale.adapter.HytaleAdapter;
-import rubidium.hytale.event.HytaleEventBridge;
+import rubidium.core.feature.FeatureOrchestrator;
+import rubidium.hytale.adapter.ServerAdapter;
+import rubidium.hytale.adapter.EventAdapter;
+import rubidium.hytale.api.event.*;
+import com.hypixel.hytale.server.core.HytaleServer;
 
 import java.util.logging.Logger;
 
+/**
+ * Main entry point for Rubidium Framework on Hytale servers.
+ */
 public class RubidiumHytalePlugin {
     
     private static final Logger logger = Logger.getLogger("Rubidium");
     
     private static RubidiumHytalePlugin instance;
     
-    private final Object hytalePlugin;
-    private final HytaleAdapter adapter;
     private RubidiumCore core;
+    private FeatureOrchestrator orchestrator;
     
-    public RubidiumHytalePlugin(Object hytalePlugin) {
-        this.hytalePlugin = hytalePlugin;
-        this.adapter = HytaleAdapter.getInstance();
+    public RubidiumHytalePlugin() {
         instance = this;
     }
     
@@ -26,56 +29,60 @@ public class RubidiumHytalePlugin {
         return instance;
     }
     
-    public void onEnable(Object hytaleServer) {
+    public void onEnable(HytaleServer hytaleServer) {
         logger.info("Rubidium Framework initializing...");
         
-        adapter.initialize(hytaleServer);
+        ServerAdapter.getInstance().initialize(hytaleServer);
         
-        core = new RubidiumCore();
+        core = RubidiumCore.initialize(java.nio.file.Paths.get("rubidium"));
+        orchestrator = FeatureOrchestrator.getInstance();
         
+        registerCoreFeatures();
         registerEventBridges();
+        
+        orchestrator.startAll();
         
         logger.info("Rubidium Framework v1.0.0 enabled - Ready for Hytale!");
         logger.info("  - Player API: Connected");
         logger.info("  - Entity API: Connected");
         logger.info("  - Event Bridge: Active");
-        logger.info("  - Packet Adapter: Active");
+        logger.info("  - Feature Orchestrator: " + orchestrator.getAllHealth().size() + " features");
+    }
+    
+    private void registerCoreFeatures() {
     }
     
     private void registerEventBridges() {
-        HytaleEventBridge eventBridge = adapter.getEventBridge();
+        EventAdapter eventAdapter = EventAdapter.getInstance();
         
-        eventBridge.registerListener(HytaleEventBridge.RubidiumPlayerJoinEvent.class, event -> {
-            if (event.player() != null) {
-                logger.fine("Player joined: " + event.player().getName());
-            }
+        eventAdapter.registerListener(PlayerJoinEvent.class, event -> {
+            logger.fine("Player joined: " + event.getPlayer().getUsername());
         });
         
-        eventBridge.registerListener(HytaleEventBridge.RubidiumPlayerQuitEvent.class, event -> {
-            if (event.player() != null) {
-                adapter.unwrapPlayer(event.player().getUUID());
-                logger.fine("Player quit: " + event.player().getName());
-            }
+        eventAdapter.registerListener(PlayerQuitEvent.class, event -> {
+            logger.fine("Player quit: " + event.getPlayer().getUsername());
+        });
+        
+        eventAdapter.registerListener(BlockBreakEvent.class, event -> {
+            logger.fine("Block broken at " + event.getX() + "," + event.getY() + "," + event.getZ());
         });
     }
     
     public void onDisable() {
         logger.info("Rubidium Framework disabling...");
         
-        adapter.shutdown();
+        if (orchestrator != null) {
+            orchestrator.stopAll();
+        }
         
         logger.info("Rubidium Framework disabled");
-    }
-    
-    public HytaleAdapter getAdapter() {
-        return adapter;
     }
     
     public RubidiumCore getCore() {
         return core;
     }
     
-    public Object getHytalePlugin() {
-        return hytalePlugin;
+    public FeatureOrchestrator getOrchestrator() {
+        return orchestrator;
     }
 }

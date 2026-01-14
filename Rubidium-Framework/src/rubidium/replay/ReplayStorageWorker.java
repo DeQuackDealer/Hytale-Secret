@@ -38,7 +38,7 @@ public final class ReplayStorageWorker {
         }
     }
     
-    public record WriteTask(ReplaySession session, boolean finalize) {}
+    public record WriteTask(ReplaySession session, boolean isFinal) {}
     public record PruneTask(UUID playerId) {}
     
     private final RubidiumLogger logger;
@@ -124,7 +124,7 @@ public final class ReplayStorageWorker {
         logger.info("Replay storage worker stopped");
     }
     
-    public boolean submitWrite(ReplaySession session, boolean finalize) {
+    public boolean submitWrite(ReplaySession session, boolean isFinal) {
         if (!running) return false;
         return writeQueue.offer(new WriteTask(session, finalize));
     }
@@ -161,7 +161,7 @@ public final class ReplayStorageWorker {
     
     private void processWriteTask(WriteTask task) {
         try {
-            if (task.finalize()) {
+            if (task.isFinal()) {
                 task.session().finalize();
             }
             

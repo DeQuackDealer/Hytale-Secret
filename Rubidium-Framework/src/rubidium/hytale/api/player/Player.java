@@ -36,7 +36,24 @@ public interface Player {
     
     Location getLocation();
     
+    default double getX() { return getLocation().getX(); }
+    default double getY() { return getLocation().getY(); }
+    default double getZ() { return getLocation().getZ(); }
+    default float getYaw() { return getLocation().getYaw(); }
+    default float getPitch() { return getLocation().getPitch(); }
+    
     void teleport(Location location);
+    
+    default void teleport(double x, double y, double z) {
+        teleport(new Location(getWorld(), x, y, z, getYaw(), getPitch()));
+    }
+    
+    default void teleport(double x, double y, double z, float yaw, float pitch) {
+        teleport(new Location(getWorld(), x, y, z, yaw, pitch));
+    }
+    
+    default void sendPacket(Object packet) {
+    }
     
     World getWorld();
     

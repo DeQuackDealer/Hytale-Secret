@@ -85,12 +85,12 @@ public class VoiceSession {
     
     public void joinChannel(VoiceChannel channel) {
         joinedChannels.add(channel);
-        channel.addMember(this);
+        channel.addMember(getPlayerId());
     }
     
     public void leaveChannel(VoiceChannel channel) {
         joinedChannels.remove(channel);
-        channel.removeMember(this);
+        channel.removeMember(getPlayerId());
     }
     
     public void leaveAllChannels() {
@@ -116,10 +116,9 @@ public class VoiceSession {
     }
     
     public void updatePosition() {
-        var loc = player.getLocation();
-        this.lastX = loc.x();
-        this.lastY = loc.y();
-        this.lastZ = loc.z();
+        this.lastX = player.getX();
+        this.lastY = player.getY();
+        this.lastZ = player.getZ();
     }
     
     public double getX() { return lastX; }
