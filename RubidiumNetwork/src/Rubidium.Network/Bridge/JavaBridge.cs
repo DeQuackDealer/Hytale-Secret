@@ -1,4 +1,5 @@
 using System.IO.Pipes;
+using System.Net.Sockets;
 using System.Text.Json;
 using System.Threading.Channels;
 using Microsoft.Extensions.Logging;
@@ -13,6 +14,9 @@ public sealed class JavaBridge : IAsyncDisposable
     private readonly string _pipeName;
     
     private NamedPipeServerStream? _pipeServer;
+    private Socket? _unixSocket;
+    private Socket? _clientSocket;
+    private Stream? _clientStream;
     private StreamReader? _reader;
     private StreamWriter? _writer;
     private CancellationTokenSource? _cts;
@@ -38,6 +42,25 @@ public sealed class JavaBridge : IAsyncDisposable
     {
         _cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
         
+        var isWindows = OperatingSystem.IsWindows();
+        
+        if (isWindows)
+        {
+            await StartNamedPipeAsync(_cts.Token);
+        }
+        else
+        {
+            await StartUnixDomainSocketAsync(_cts.Token);
+        }
+        
+        _readTask = ReadMessagesAsync(_cts.Token);
+        _eventForwardTask = ForwardNetworkEventsAsync(_cts.Token);
+        
+        _ = WriteMessagesAsync(_cts.Token);
+    }
+    
+    private async Task StartNamedPipeAsync(CancellationToken ct)
+    {
         _pipeServer = new NamedPipeServerStream(
             _pipeName,
             PipeDirection.InOut,
@@ -48,17 +71,37 @@ public sealed class JavaBridge : IAsyncDisposable
         
         _logger.LogInformation("Waiting for Java process to connect on pipe: {PipeName}", _pipeName);
         
-        await _pipeServer.WaitForConnectionAsync(_cts.Token);
+        await _pipeServer.WaitForConnectionAsync(ct);
         
-        _logger.LogInformation("Java process connected");
+        _logger.LogInformation("Java process connected via named pipe");
         
         _reader = new StreamReader(_pipeServer);
         _writer = new StreamWriter(_pipeServer) { AutoFlush = true };
+    }
+    
+    private async Task StartUnixDomainSocketAsync(CancellationToken ct)
+    {
+        var socketPath = $"/tmp/{_pipeName}.sock";
         
-        _readTask = ReadMessagesAsync(_cts.Token);
-        _eventForwardTask = ForwardNetworkEventsAsync(_cts.Token);
+        if (File.Exists(socketPath))
+        {
+            File.Delete(socketPath);
+        }
         
-        _ = WriteMessagesAsync(_cts.Token);
+        var endpoint = new UnixDomainSocketEndPoint(socketPath);
+        _unixSocket = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified);
+        _unixSocket.Bind(endpoint);
+        _unixSocket.Listen(1);
+        
+        _logger.LogInformation("Waiting for Java process to connect on Unix socket: {SocketPath}", socketPath);
+        
+        _clientSocket = await _unixSocket.AcceptAsync(ct);
+        _clientStream = new NetworkStream(_clientSocket, ownsSocket: false);
+        
+        _logger.LogInformation("Java process connected via Unix domain socket");
+        
+        _reader = new StreamReader(_clientStream);
+        _writer = new StreamWriter(_clientStream) { AutoFlush = true };
     }
     
     private async Task ReadMessagesAsync(CancellationToken ct)
@@ -71,7 +114,7 @@ public sealed class JavaBridge : IAsyncDisposable
                 
                 if (string.IsNullOrEmpty(line))
                 {
-                    if (!_pipeServer!.IsConnected)
+                    if (!IsConnected())
                     {
                         _logger.LogWarning("Java process disconnected");
                         break;
@@ -101,6 +144,21 @@ public sealed class JavaBridge : IAsyncDisposable
         {
             _logger.LogError(ex, "Error reading from Java bridge");
         }
+    }
+    
+    private bool IsConnected()
+    {
+        if (_pipeServer is not null)
+        {
+            return _pipeServer.IsConnected;
+        }
+        
+        if (_clientSocket is not null)
+        {
+            return _clientSocket.Connected;
+        }
+        
+        return false;
     }
     
     private async Task HandleIncomingMessageAsync(BridgeMessage message, CancellationToken ct)
@@ -245,6 +303,23 @@ public sealed class JavaBridge : IAsyncDisposable
         if (_pipeServer is not null)
         {
             await _pipeServer.DisposeAsync();
+        }
+        
+        if (_clientStream is not null)
+        {
+            await _clientStream.DisposeAsync();
+        }
+        
+        _clientSocket?.Dispose();
+        _unixSocket?.Dispose();
+        
+        if (!OperatingSystem.IsWindows())
+        {
+            var socketPath = $"/tmp/{_pipeName}.sock";
+            if (File.Exists(socketPath))
+            {
+                try { File.Delete(socketPath); } catch { }
+            }
         }
         
         _cts?.Dispose();

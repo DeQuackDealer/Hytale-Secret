@@ -304,13 +304,13 @@ public final class AccessControlService {
     
     private void loadFromDisk() {
         try {
-            var whitelistFile = dataDirectory.resolve("whitelist.json");
-            var blacklistFile = dataDirectory.resolve("blacklist.json");
+            var whitelistFile = validateAndResolvePath("whitelist.json");
+            var blacklistFile = validateAndResolvePath("blacklist.json");
             
-            if (Files.exists(whitelistFile)) {
+            if (whitelistFile != null && Files.exists(whitelistFile)) {
                 loadEntries(whitelistFile, whitelist);
             }
-            if (Files.exists(blacklistFile)) {
+            if (blacklistFile != null && Files.exists(blacklistFile)) {
                 loadEntries(blacklistFile, blacklist);
             }
             
@@ -319,6 +319,31 @@ public final class AccessControlService {
         } catch (Exception e) {
             logger.severe("Failed to load access control data: " + e.getMessage());
         }
+    }
+    
+    private Path validateAndResolvePath(String filename) {
+        if (filename == null || filename.isEmpty()) {
+            return null;
+        }
+        
+        var sanitized = filename.replaceAll("[^a-zA-Z0-9._-]", "");
+        if (!sanitized.equals(filename)) {
+            logger.warning("Invalid filename rejected: " + filename);
+            return null;
+        }
+        
+        if (filename.contains("..") || filename.startsWith("/") || filename.contains(":")) {
+            logger.warning("Path traversal attempt blocked: " + filename);
+            return null;
+        }
+        
+        var resolved = dataDirectory.resolve(filename).normalize();
+        if (!resolved.startsWith(dataDirectory.normalize())) {
+            logger.warning("Path traversal attempt blocked: " + filename);
+            return null;
+        }
+        
+        return resolved;
     }
     
     private void loadEntries(Path file, Map<UUID, AccessEntry> target) throws IOException {

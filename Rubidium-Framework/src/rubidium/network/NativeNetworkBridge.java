@@ -99,6 +99,7 @@ public final class NativeNetworkBridge implements AutoCloseable {
     private Process nativeProcess;
     private BufferedReader reader;
     private BufferedWriter writer;
+    private java.nio.channels.SocketChannel unixSocketChannel;
     private volatile boolean running;
     private CompletableFuture<NetworkMetrics> pendingMetricsRequest;
     
@@ -149,13 +150,11 @@ public final class NativeNetworkBridge implements AutoCloseable {
         Thread.sleep(1000);
         
         var isWindows = System.getProperty("os.name").toLowerCase().contains("win");
-        var pipePath = isWindows 
-            ? "\\\\.\\pipe\\" + pipeName 
-            : "/tmp/" + pipeName;
         
         for (int i = 0; i < 30; i++) {
             try {
                 if (isWindows) {
+                    var pipePath = "\\\\.\\pipe\\" + pipeName;
                     var file = new RandomAccessFile(pipePath, "rw");
                     reader = new BufferedReader(new InputStreamReader(
                         new FileInputStream(file.getFD()), StandardCharsets.UTF_8));
@@ -163,9 +162,15 @@ public final class NativeNetworkBridge implements AutoCloseable {
                         new FileOutputStream(file.getFD()), StandardCharsets.UTF_8));
                     return;
                 } else {
-                    var socket = new java.net.Socket("localhost", 50051);
-                    reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                    writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+                    var socketPath = java.nio.file.Path.of("/tmp", pipeName + ".sock");
+                    var address = java.net.UnixDomainSocketAddress.of(socketPath);
+                    unixSocketChannel = java.nio.channels.SocketChannel.open(address);
+                    unixSocketChannel.configureBlocking(true);
+                    
+                    reader = new BufferedReader(java.nio.channels.Channels.newReader(
+                        unixSocketChannel, StandardCharsets.UTF_8));
+                    writer = new BufferedWriter(java.nio.channels.Channels.newWriter(
+                        unixSocketChannel, StandardCharsets.UTF_8));
                     return;
                 }
             } catch (IOException e) {
@@ -336,8 +341,14 @@ public final class NativeNetworkBridge implements AutoCloseable {
         running = false;
         
         try {
-            if (writer != null) writer.close();
+            if (writer != null) {
+                writer.flush();
+                writer.close();
+            }
             if (reader != null) reader.close();
+            if (unixSocketChannel != null && unixSocketChannel.isOpen()) {
+                unixSocketChannel.close();
+            }
         } catch (IOException ignored) {}
         
         if (nativeProcess != null) {
@@ -345,6 +356,11 @@ public final class NativeNetworkBridge implements AutoCloseable {
         }
         
         executor.shutdown();
+        try {
+            executor.awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException ignored) {
+            Thread.currentThread().interrupt();
+        }
         
         logger.info("Native network bridge closed");
     }

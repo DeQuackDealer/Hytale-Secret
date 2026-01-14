@@ -82,17 +82,36 @@ public sealed class NetworkServer : IAsyncDisposable
         ThreadPool.SetMinThreads(_config.WorkerThreads, _config.IoCompletionThreads);
     }
     
+    private (IPEndPoint endpoint, AddressFamily family, bool useDualMode) ResolveBindEndpoint(string address, int port)
+    {
+        if (address == "0.0.0.0")
+        {
+            if (_config.EnableDualMode)
+            {
+                return (new IPEndPoint(IPAddress.IPv6Any, port), AddressFamily.InterNetworkV6, true);
+            }
+            return (new IPEndPoint(IPAddress.Any, port), AddressFamily.InterNetwork, false);
+        }
+        
+        if (address == "::")
+        {
+            return (new IPEndPoint(IPAddress.IPv6Any, port), AddressFamily.InterNetworkV6, _config.EnableDualMode);
+        }
+        
+        var parsed = IPAddress.Parse(address);
+        var family = parsed.AddressFamily;
+        var useDualMode = _config.EnableDualMode && family == AddressFamily.InterNetworkV6;
+        
+        return (new IPEndPoint(parsed, port), family, useDualMode);
+    }
+    
     private Task StartTcpListenerAsync()
     {
-        var endpoint = new IPEndPoint(IPAddress.Parse(_config.BindAddress), _config.TcpPort);
+        var (endpoint, addressFamily, useDualMode) = ResolveBindEndpoint(_config.BindAddress, _config.TcpPort);
         
-        _tcpListener = new Socket(
-            _config.EnableDualMode ? AddressFamily.InterNetworkV6 : AddressFamily.InterNetwork,
-            SocketType.Stream,
-            ProtocolType.Tcp
-        );
+        _tcpListener = new Socket(addressFamily, SocketType.Stream, ProtocolType.Tcp);
         
-        if (_config.EnableDualMode)
+        if (useDualMode && addressFamily == AddressFamily.InterNetworkV6)
         {
             _tcpListener.DualMode = true;
         }
@@ -115,15 +134,11 @@ public sealed class NetworkServer : IAsyncDisposable
     
     private Task StartUdpSocketAsync()
     {
-        var endpoint = new IPEndPoint(IPAddress.Parse(_config.BindAddress), _config.UdpPort);
+        var (endpoint, addressFamily, useDualMode) = ResolveBindEndpoint(_config.BindAddress, _config.UdpPort);
         
-        _udpSocket = new Socket(
-            _config.EnableDualMode ? AddressFamily.InterNetworkV6 : AddressFamily.InterNetwork,
-            SocketType.Dgram,
-            ProtocolType.Udp
-        );
+        _udpSocket = new Socket(addressFamily, SocketType.Dgram, ProtocolType.Udp);
         
-        if (_config.EnableDualMode)
+        if (useDualMode && addressFamily == AddressFamily.InterNetworkV6)
         {
             _udpSocket.DualMode = true;
         }
