@@ -13,12 +13,12 @@ jobs:
     
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
     
-    - name: Set up JDK 21
-      uses: actions/setup-java@v4
+    - name: Set up JDK 25
+      uses: actions/setup-java@v5
       with:
-        java-version: '21'
+        java-version: '25'
         distribution: 'temurin'
         cache: 'gradle'
     
@@ -29,7 +29,7 @@ jobs:
       run: ./gradlew shadowJar --no-daemon
     
     - name: Upload Rubidium JAR
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: Rubidium
         path: build/libs/Rubidium-*.jar
@@ -42,12 +42,12 @@ jobs:
     
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
     
-    - name: Set up JDK 21
-      uses: actions/setup-java@v4
+    - name: Set up JDK 25
+      uses: actions/setup-java@v5
       with:
-        java-version: '21'
+        java-version: '25'
         distribution: 'temurin'
         cache: 'gradle'
     

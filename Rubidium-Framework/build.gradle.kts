@@ -10,7 +10,7 @@ version = "1.0.0"
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
+        languageVersion.set(JavaLanguageVersion.of(25))
     }
     withJavadocJar()
     withSourcesJar()
@@ -18,8 +18,7 @@ java {
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
-    options.release.set(21)
-    options.compilerArgs.add("-Xlint:-options")
+    options.release.set(25)
 }
 
 repositories {
