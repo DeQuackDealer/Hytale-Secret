@@ -1,44 +1,92 @@
 package rubidium.permissions;
 
-import java.util.Map;
+import java.util.*;
 
-public record PermissionContext(
-    String world,
-    String server,
-    Map<String, String> conditions
-) {
-    public static PermissionContext global() {
-        return new PermissionContext(null, null, Map.of());
+/**
+ * Context for contextual permissions (world, server, etc).
+ */
+public class PermissionContext {
+    
+    private static final PermissionContext EMPTY = new PermissionContext(Map.of());
+    
+    private final Map<String, String> values;
+    
+    private PermissionContext(Map<String, String> values) {
+        this.values = values;
     }
     
-    public static PermissionContext world(String world) {
-        return new PermissionContext(world, null, Map.of());
+    public static PermissionContext empty() {
+        return EMPTY;
     }
     
-    public static PermissionContext server(String server) {
-        return new PermissionContext(null, server, Map.of());
+    public static Builder builder() {
+        return new Builder();
     }
     
-    public static PermissionContext with(String key, String value) {
-        return new PermissionContext(null, null, Map.of(key, value));
+    public static PermissionContext of(String key, String value) {
+        return builder().add(key, value).build();
     }
     
-    public boolean matches(PermissionContext required) {
-        if (required.world() != null && !required.world().equals(this.world())) {
-            return false;
-        }
-        if (required.server() != null && !required.server().equals(this.server())) {
-            return false;
-        }
-        for (var entry : required.conditions().entrySet()) {
-            if (!entry.getValue().equals(this.conditions().get(entry.getKey()))) {
+    public Optional<String> get(String key) {
+        return Optional.ofNullable(values.get(key));
+    }
+    
+    public boolean has(String key) {
+        return values.containsKey(key);
+    }
+    
+    public boolean isEmpty() {
+        return values.isEmpty();
+    }
+    
+    public Map<String, String> getValues() {
+        return Collections.unmodifiableMap(values);
+    }
+    
+    public boolean matches(PermissionContext other) {
+        if (this.isEmpty() || other.isEmpty()) return true;
+        
+        for (Map.Entry<String, String> entry : values.entrySet()) {
+            String otherValue = other.values.get(entry.getKey());
+            if (otherValue != null && !otherValue.equals(entry.getValue())) {
                 return false;
             }
         }
+        
         return true;
     }
     
-    public boolean isGlobal() {
-        return world == null && server == null && conditions.isEmpty();
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PermissionContext that = (PermissionContext) o;
+        return Objects.equals(values, that.values);
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(values);
+    }
+    
+    public static class Builder {
+        private final Map<String, String> values = new HashMap<>();
+        
+        public Builder add(String key, String value) {
+            values.put(key, value);
+            return this;
+        }
+        
+        public Builder world(String world) {
+            return add("world", world);
+        }
+        
+        public Builder server(String server) {
+            return add("server", server);
+        }
+        
+        public PermissionContext build() {
+            return new PermissionContext(Map.copyOf(values));
+        }
     }
 }

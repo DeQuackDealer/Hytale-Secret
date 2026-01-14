@@ -3,79 +3,102 @@ package rubidium.permissions;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Per-player permission data.
+ */
 public class PlayerPermissions {
+    
     private final UUID playerId;
-    private final Set<Role> roles;
-    private final Map<String, PermissionGrant> directPermissions;
-    private Role primaryRole;
-    private String customPrefix;
-    private String customSuffix;
+    private final Set<String> groups;
+    private final Map<PermissionEntry, Boolean> permissions;
+    private final Map<String, TemporaryPermission> temporaryPermissions;
+    private String primaryGroup;
+    private String prefix;
+    private String suffix;
     
     public PlayerPermissions(UUID playerId) {
         this.playerId = playerId;
-        this.roles = ConcurrentHashMap.newKeySet();
-        this.directPermissions = new ConcurrentHashMap<>();
-        this.primaryRole = null;
-        this.customPrefix = null;
-        this.customSuffix = null;
+        this.groups = ConcurrentHashMap.newKeySet();
+        this.permissions = new ConcurrentHashMap<>();
+        this.temporaryPermissions = new ConcurrentHashMap<>();
+        this.primaryGroup = "default";
     }
     
     public UUID getPlayerId() { return playerId; }
-    public Set<Role> getRoles() { return Collections.unmodifiableSet(roles); }
-    public Map<String, PermissionGrant> getDirectPermissions() { return Collections.unmodifiableMap(directPermissions); }
-    public Role getPrimaryRole() { return primaryRole; }
-    public void setPrimaryRole(Role primaryRole) { this.primaryRole = primaryRole; }
-    public String getCustomPrefix() { return customPrefix; }
-    public void setCustomPrefix(String customPrefix) { this.customPrefix = customPrefix; }
-    public String getCustomSuffix() { return customSuffix; }
-    public void setCustomSuffix(String customSuffix) { this.customSuffix = customSuffix; }
     
-    public void addRole(Role role) {
-        roles.add(role);
-        if (primaryRole == null || role.getPriority() > primaryRole.getPriority()) {
-            primaryRole = role;
+    public Set<String> getGroups() { return groups; }
+    
+    public void addGroup(String groupId) {
+        groups.add(groupId);
+    }
+    
+    public void removeGroup(String groupId) {
+        groups.remove(groupId);
+    }
+    
+    public boolean inGroup(String groupId) {
+        return groups.contains(groupId);
+    }
+    
+    public String getPrimaryGroup() { return primaryGroup; }
+    
+    public void setPrimaryGroup(String group) {
+        this.primaryGroup = group;
+    }
+    
+    public String getPrefix() { return prefix; }
+    public void setPrefix(String prefix) { this.prefix = prefix; }
+    
+    public String getSuffix() { return suffix; }
+    public void setSuffix(String suffix) { this.suffix = suffix; }
+    
+    public void setPermission(String permission, boolean value, PermissionContext context) {
+        permissions.put(new PermissionEntry(permission, context), value);
+    }
+    
+    public void unsetPermission(String permission, PermissionContext context) {
+        permissions.remove(new PermissionEntry(permission, context));
+    }
+    
+    public boolean hasExplicitPermission(String permission, PermissionContext context) {
+        cleanExpiredTemporary();
+        
+        if (temporaryPermissions.containsKey(permission)) {
+            return true;
         }
+        
+        return permissions.containsKey(new PermissionEntry(permission, context)) ||
+               permissions.containsKey(new PermissionEntry(permission, PermissionContext.empty()));
     }
     
-    public void removeRole(Role role) {
-        roles.remove(role);
-        if (role.equals(primaryRole)) {
-            primaryRole = roles.stream()
-                .max(Comparator.comparingInt(Role::getPriority))
-                .orElse(null);
+    public boolean getExplicitPermission(String permission, PermissionContext context) {
+        cleanExpiredTemporary();
+        
+        TemporaryPermission temp = temporaryPermissions.get(permission);
+        if (temp != null) {
+            return temp.value();
         }
+        
+        Boolean value = permissions.get(new PermissionEntry(permission, context));
+        if (value != null) return value;
+        
+        value = permissions.get(new PermissionEntry(permission, PermissionContext.empty()));
+        return value != null && value;
     }
     
-    public boolean hasRole(Role role) {
-        return roles.contains(role);
+    public void setTemporaryPermission(String permission, boolean value, long durationMs) {
+        long expiry = System.currentTimeMillis() + durationMs;
+        temporaryPermissions.put(permission, new TemporaryPermission(permission, value, expiry));
     }
     
-    public void setDirectPermission(String permission, PermissionGrant grant) {
-        directPermissions.put(permission, grant);
+    public void removeTemporaryPermission(String permission) {
+        temporaryPermissions.remove(permission);
     }
     
-    public void removeDirectPermission(String permission) {
-        directPermissions.remove(permission);
-    }
-    
-    public PermissionGrant getDirectPermission(String permission) {
-        PermissionGrant grant = directPermissions.get(permission);
-        if (grant != null && grant.expiresAt() != null && grant.expiresAt() < System.currentTimeMillis()) {
-            directPermissions.remove(permission);
-            return null;
-        }
-        return grant;
-    }
-    
-    public boolean hasDirectPermission(String permission) {
-        return getDirectPermission(permission) != null;
-    }
-    
-    public void cleanupExpiredPermissions() {
+    private void cleanExpiredTemporary() {
         long now = System.currentTimeMillis();
-        directPermissions.entrySet().removeIf(entry -> {
-            PermissionGrant grant = entry.getValue();
-            return grant.expiresAt() != null && grant.expiresAt() < now;
-        });
+        temporaryPermissions.entrySet().removeIf(e -> e.getValue().expiry() < now);
     }
+    
+    public record TemporaryPermission(String permission, boolean value, long expiry) {}
 }

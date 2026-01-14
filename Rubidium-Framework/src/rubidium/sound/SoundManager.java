@@ -1,114 +1,177 @@
 package rubidium.sound;
 
-import rubidium.api.player.Player;
-import rubidium.core.logging.RubidiumLogger;
+import rubidium.hytale.api.player.Player;
+import rubidium.hytale.api.world.Location;
 
 import java.util.*;
+import java.util.concurrent.*;
 
+/**
+ * 3D Positional Audio System.
+ * Handles sound playback, ambient sounds, music, and custom sound packs.
+ */
 public class SoundManager {
     
-    private final RubidiumLogger logger;
-    private final Map<String, SoundDefinition> sounds;
+    private static SoundManager instance;
     
-    public SoundManager(RubidiumLogger logger) {
-        this.logger = logger;
-        this.sounds = new HashMap<>();
+    private final Map<String, SoundCategory> categories;
+    private final Map<String, SoundPack> soundPacks;
+    private final Map<UUID, PlayerSoundState> playerStates;
+    private final Map<String, AmbientSoundZone> ambientZones;
+    private final ScheduledExecutorService scheduler;
+    
+    private float masterVolume = 1.0f;
+    private boolean soundEnabled = true;
+    
+    private SoundManager() {
+        this.categories = new ConcurrentHashMap<>();
+        this.soundPacks = new ConcurrentHashMap<>();
+        this.playerStates = new ConcurrentHashMap<>();
+        this.ambientZones = new ConcurrentHashMap<>();
+        this.scheduler = Executors.newScheduledThreadPool(2, r -> {
+            Thread t = new Thread(r, "Rubidium-Sound");
+            t.setDaemon(true);
+            return t;
+        });
+        
+        registerDefaultCategories();
     }
     
-    public void registerSound(String id, String soundPath) {
-        registerSound(id, soundPath, 1.0f, 1.0f, SoundCategory.MASTER);
+    public static SoundManager getInstance() {
+        if (instance == null) {
+            instance = new SoundManager();
+        }
+        return instance;
     }
     
-    public void registerSound(String id, String soundPath, float defaultVolume, float defaultPitch, SoundCategory category) {
-        sounds.put(id, new SoundDefinition(id, soundPath, defaultVolume, defaultPitch, category));
+    private void registerDefaultCategories() {
+        registerCategory(new SoundCategory("master", 1.0f));
+        registerCategory(new SoundCategory("music", 0.7f));
+        registerCategory(new SoundCategory("ambient", 0.8f));
+        registerCategory(new SoundCategory("effects", 1.0f));
+        registerCategory(new SoundCategory("voice", 1.0f));
+        registerCategory(new SoundCategory("ui", 0.8f));
+    }
+    
+    public void registerCategory(SoundCategory category) {
+        categories.put(category.getId(), category);
+    }
+    
+    public void registerSoundPack(SoundPack pack) {
+        soundPacks.put(pack.getId(), pack);
     }
     
     public void playSound(Player player, String soundId) {
-        SoundDefinition def = sounds.get(soundId);
-        if (def == null) {
-            logger.warn("Unknown sound: " + soundId);
-            return;
-        }
-        player.sendPacket(new SoundPacket(def.soundPath(), def.defaultVolume(), def.defaultPitch(), def.category()));
+        playSound(player, soundId, 1.0f, 1.0f);
     }
     
     public void playSound(Player player, String soundId, float volume, float pitch) {
-        SoundDefinition def = sounds.get(soundId);
-        if (def == null) {
-            logger.warn("Unknown sound: " + soundId);
-            return;
+        if (!soundEnabled) return;
+        
+        Sound sound = resolveSound(soundId);
+        if (sound == null) return;
+        
+        float finalVolume = calculateVolume(sound, volume);
+        player.playSound(sound.getResourcePath(), finalVolume, pitch);
+    }
+    
+    public void playSound3D(Location location, String soundId, float volume, float pitch, float maxDistance) {
+        if (!soundEnabled) return;
+        
+        Sound sound = resolveSound(soundId);
+        if (sound == null) return;
+        
+        for (PlayerSoundState state : playerStates.values()) {
+            Player player = state.getPlayer();
+            if (player == null || !player.isOnline()) continue;
+            
+            double distance = player.getLocation().distance(location);
+            if (distance > maxDistance) continue;
+            
+            float distanceFactor = 1.0f - (float)(distance / maxDistance);
+            float finalVolume = calculateVolume(sound, volume) * distanceFactor;
+            
+            if (finalVolume > 0.01f) {
+                player.playSound(location, sound.getResourcePath(), finalVolume, pitch);
+            }
         }
-        player.sendPacket(new SoundPacket(def.soundPath(), volume, pitch, def.category()));
     }
     
-    public void playSoundAt(Collection<Player> players, String soundId, double x, double y, double z) {
-        playSoundAt(players, soundId, x, y, z, 1.0f, 1.0f);
-    }
-    
-    public void playSoundAt(Collection<Player> players, String soundId, double x, double y, double z, float volume, float pitch) {
-        SoundDefinition def = sounds.get(soundId);
-        if (def == null) {
-            logger.warn("Unknown sound: " + soundId);
-            return;
+    public void playMusic(Player player, String trackId) {
+        PlayerSoundState state = getPlayerState(player);
+        if (state.getCurrentMusic() != null) {
+            stopMusic(player);
         }
         
-        for (Player player : players) {
-            double distance = calculateDistance(player, x, y, z);
-            if (distance > 64.0) continue;
-            
-            float adjustedVolume = calculateVolumeAtDistance(volume, distance);
-            float pan = calculatePan(player, x, z);
-            
-            player.sendPacket(new SpatialSoundPacket(def.soundPath(), adjustedVolume, pitch, def.category(), pan));
+        Sound track = resolveSound(trackId);
+        if (track != null) {
+            state.setCurrentMusic(trackId);
+            float volume = calculateVolume(track, 1.0f);
+            player.playSound(track.getResourcePath(), volume, 1.0f);
         }
     }
     
-    public void playSoundAtPlayer(Player player, String soundId, Player target) {
-        playSoundAt(List.of(player), soundId, 
-            target.getLocation().x(), 
-            target.getLocation().y(), 
-            target.getLocation().z());
+    public void stopMusic(Player player) {
+        PlayerSoundState state = getPlayerState(player);
+        state.setCurrentMusic(null);
     }
     
-    private double calculateDistance(Player player, double x, double y, double z) {
-        double dx = player.getLocation().x() - x;
-        double dy = player.getLocation().y() - y;
-        double dz = player.getLocation().z() - z;
-        return Math.sqrt(dx * dx + dy * dy + dz * dz);
+    public void startAmbient(Player player, String zoneId) {
+        AmbientSoundZone zone = ambientZones.get(zoneId);
+        if (zone == null) return;
+        
+        PlayerSoundState state = getPlayerState(player);
+        state.setCurrentAmbient(zoneId);
     }
     
-    private float calculateVolumeAtDistance(float baseVolume, double distance) {
-        if (distance < 1.0) return baseVolume;
-        return (float) (baseVolume / (1.0 + distance * 0.1));
+    public void stopAmbient(Player player) {
+        PlayerSoundState state = getPlayerState(player);
+        state.setCurrentAmbient(null);
     }
     
-    private float calculatePan(Player listener, double soundX, double soundZ) {
-        double dx = soundX - listener.getLocation().x();
-        double dz = soundZ - listener.getLocation().z();
-        double angle = Math.atan2(dz, dx);
-        double playerYaw = Math.toRadians(listener.getLocation().yaw());
-        double relativeAngle = angle - playerYaw;
-        return (float) Math.sin(relativeAngle);
+    public void registerAmbientZone(AmbientSoundZone zone) {
+        ambientZones.put(zone.getId(), zone);
     }
     
-    public void stopAllSounds(Player player) {
-        player.sendPacket(new StopAllSoundsPacket());
+    private Sound resolveSound(String soundId) {
+        for (SoundPack pack : soundPacks.values()) {
+            Sound sound = pack.getSound(soundId);
+            if (sound != null) return sound;
+        }
+        return new Sound(soundId, soundId, "effects", 1.0f, false);
     }
     
-    public void stopSound(Player player, String soundId) {
-        SoundDefinition def = sounds.get(soundId);
-        if (def != null) {
-            player.sendPacket(new StopSoundPacket(def.soundPath()));
+    private float calculateVolume(Sound sound, float baseVolume) {
+        SoundCategory category = categories.get(sound.getCategory());
+        float categoryVolume = category != null ? category.getVolume() : 1.0f;
+        return masterVolume * categoryVolume * sound.getBaseVolume() * baseVolume;
+    }
+    
+    private PlayerSoundState getPlayerState(Player player) {
+        return playerStates.computeIfAbsent(player.getUuid(), 
+            k -> new PlayerSoundState(player));
+    }
+    
+    public void setMasterVolume(float volume) {
+        this.masterVolume = Math.max(0, Math.min(1, volume));
+    }
+    
+    public float getMasterVolume() {
+        return masterVolume;
+    }
+    
+    public void setSoundEnabled(boolean enabled) {
+        this.soundEnabled = enabled;
+    }
+    
+    public void setCategoryVolume(String categoryId, float volume) {
+        SoundCategory category = categories.get(categoryId);
+        if (category != null) {
+            category.setVolume(volume);
         }
     }
     
-    public enum SoundCategory {
-        MASTER, MUSIC, AMBIENT, WEATHER, BLOCKS, HOSTILE, NEUTRAL, PLAYERS, VOICE
+    public void shutdown() {
+        scheduler.shutdown();
     }
-    
-    public record SoundDefinition(String id, String soundPath, float defaultVolume, float defaultPitch, SoundCategory category) {}
-    public record SoundPacket(String soundPath, float volume, float pitch, SoundCategory category) {}
-    public record SpatialSoundPacket(String soundPath, float volume, float pitch, SoundCategory category, float pan) {}
-    public record StopAllSoundsPacket() {}
-    public record StopSoundPacket(String soundPath) {}
 }
