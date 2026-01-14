@@ -57,6 +57,14 @@ tasks.test {
     useJUnitPlatform()
 }
 
+tasks.withType<Javadoc> {
+    val opts = options as StandardJavadocDocletOptions
+    opts.addBooleanOption("-enable-preview", true)
+    opts.addStringOption("source", "19")
+    opts.addStringOption("Xdoclint:none", "-quiet")
+    isFailOnError = false
+}
+
 tasks.jar {
     manifest {
         attributes(
