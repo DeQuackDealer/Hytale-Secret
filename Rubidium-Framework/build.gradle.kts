@@ -5,21 +5,20 @@ plugins {
     id("com.gradleup.shadow") version "9.0.0-beta12"
 }
 
-group = "com.yellowtale"
+group = "com.rubidium"
 version = "1.0.0"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_19
-    targetCompatibility = JavaVersion.VERSION_19
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
     withJavadocJar()
     withSourcesJar()
 }
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
-    options.release.set(19)
+    options.release.set(21)
     options.compilerArgs.addAll(listOf(
-        "--enable-preview",
         "-Xlint:all",
         "-Xlint:-processing"
     ))
@@ -59,8 +58,7 @@ tasks.test {
 
 tasks.withType<Javadoc> {
     val opts = options as StandardJavadocDocletOptions
-    opts.addBooleanOption("-enable-preview", true)
-    opts.addStringOption("source", "19")
+    opts.addStringOption("source", "21")
     opts.addStringOption("Xdoclint:none", "-quiet")
     isFailOnError = false
 }
