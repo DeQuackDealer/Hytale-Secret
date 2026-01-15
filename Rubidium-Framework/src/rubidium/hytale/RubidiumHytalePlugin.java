@@ -5,6 +5,7 @@ import rubidium.core.feature.FeatureOrchestrator;
 import rubidium.hytale.adapter.ServerAdapter;
 import rubidium.hytale.adapter.EventAdapter;
 import rubidium.hytale.api.event.*;
+import rubidium.welcome.FirstJoinHandler;
 import com.hypixel.hytale.server.core.HytaleServer;
 
 import java.util.logging.Logger;
@@ -39,6 +40,8 @@ public class RubidiumHytalePlugin {
         
         registerCoreFeatures();
         registerEventBridges();
+        
+        FirstJoinHandler.register();
         
         orchestrator.startAll();
         
