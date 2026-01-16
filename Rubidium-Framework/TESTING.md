@@ -58,11 +58,10 @@ test-server/
 
 ### 1. Build Your Plugin
 
-For the example DinoMod plugin:
+Create your plugin in a separate directory and build it:
 
 ```bash
-cd example-plugins/DinoMod
-../../gradlew jar
+./gradlew jar
 ```
 
 ### 2. Install the Plugin
@@ -70,7 +69,7 @@ cd example-plugins/DinoMod
 Copy the JAR to the plugins folder:
 
 ```bash
-cp build/libs/DinoMod-1.0.0.jar ../../test-server/plugins/
+cp build/libs/MyPlugin-1.0.0.jar test-server/plugins/
 ```
 
 ### 3. Restart the Server
