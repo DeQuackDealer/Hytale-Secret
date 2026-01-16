@@ -99,7 +99,7 @@ tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJ
             "Implementation-Title" to "Rubidium Framework",
             "Implementation-Version" to project.version,
             "Rubidium-Version" to "1.0.0",
-            "Main-Class" to "rubidium.hytale.RubidiumHytalePlugin",
+            "Main-Class" to "rubidium.server.RubidiumServer",
             "Plugin-Class" to "rubidium.hytale.RubidiumHytalePlugin"
         )
     }

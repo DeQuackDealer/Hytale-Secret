@@ -1,0 +1,31 @@
+name: DinoMod
+version: 1.0.0
+main: dinomod.DinoModPlugin
+author: Rubidium Example
+description: Example plugin demonstrating all Rubidium Framework APIs
+
+# Plugin dependencies (optional)
+depend: []
+softdepend: []
+
+# API version
+api-version: "1.0"
+
+# Commands
+commands:
+  dino:
+    description: DinoMod main command
+    usage: /dino <spawn|info|list>
+    permission: dinomod.command
+
+# Permissions
+permissions:
+  dinomod.command:
+    description: Access to /dino command
+    default: true
+  dinomod.spawn:
+    description: Spawn dinosaurs
+    default: op
+  dinomod.admin:
+    description: Full admin access
+    default: op
