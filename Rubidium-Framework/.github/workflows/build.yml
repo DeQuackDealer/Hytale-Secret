@@ -31,22 +31,37 @@ jobs:
       run: chmod +x gradlew
     
     - name: Build all artifacts
-      run: ./gradlew buildAll --no-daemon
+      run: ./gradlew buildAll --info --no-daemon
     
     - name: Make scripts executable
-      run: chmod +x build/libs/*.sh 2>/dev/null || true
+      run: chmod +x build/libs/rubidium-test-gui.sh || echo "Script not found"
     
     - name: List build artifacts
-      run: ls -la build/libs/
+      run: |
+        echo "=== Build output ==="
+        ls -la build/libs/ || echo "build/libs does not exist"
+        echo "=== Scripts directory ==="
+        ls -la scripts/ || echo "scripts does not exist"
     
-    - name: Upload Rubidium Release
+    - name: Upload Rubidium Plugin
       uses: actions/upload-artifact@v4
       with:
-        name: Rubidium-Release
-        path: |
-          build/libs/Rubidium-*.jar
-          build/libs/TestServerLauncher.jar
-          build/libs/*.sh
+        name: Rubidium-Plugin
+        path: build/libs/Rubidium-1.0.0.jar
+        if-no-files-found: error
+    
+    - name: Upload Test Launcher
+      uses: actions/upload-artifact@v4
+      with:
+        name: TestServerLauncher
+        path: build/libs/TestServerLauncher.jar
+        if-no-files-found: warn
+    
+    - name: Upload Test Script
+      uses: actions/upload-artifact@v4
+      with:
+        name: rubidium-test-gui
+        path: build/libs/rubidium-test-gui.sh
         if-no-files-found: warn
 
   release:
@@ -69,10 +84,10 @@ jobs:
       run: chmod +x gradlew
     
     - name: Build Release
-      run: ./gradlew buildAll --no-daemon
+      run: ./gradlew buildAll --info --no-daemon
     
     - name: Make scripts executable
-      run: chmod +x build/libs/*.sh 2>/dev/null || true
+      run: chmod +x build/libs/rubidium-test-gui.sh || echo "Script not found"
     
     - name: List build artifacts
       run: ls -la build/libs/
@@ -81,9 +96,9 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         files: |
-          build/libs/Rubidium-*.jar
+          build/libs/Rubidium-1.0.0.jar
           build/libs/TestServerLauncher.jar
-          build/libs/*.sh
+          build/libs/rubidium-test-gui.sh
         generate_release_notes: true
         fail_on_unmatched_files: false
       env:

@@ -123,15 +123,13 @@ tasks.register("copyToPlugins") {
 }
 
 tasks.register<Jar>("launcherJar") {
-    dependsOn(tasks.named("compileJava"))
+    dependsOn(tasks.named("compileLauncherJava"))
     
     archiveBaseName.set("TestServerLauncher")
     archiveClassifier.set("")
     archiveVersion.set("")
     
-    from(sourceSets.main.get().output) {
-        include("launcher/**")
-    }
+    from(sourceSets["launcher"].output)
     
     manifest {
         attributes("Main-Class" to "launcher.TestServerLauncher")
@@ -160,9 +158,15 @@ sourceSets {
     main {
         java {
             srcDirs("src")
+            exclude("launcher/**")
         }
         resources {
             srcDirs("resources")
+        }
+    }
+    create("launcher") {
+        java {
+            srcDirs("src/launcher")
         }
     }
 }
