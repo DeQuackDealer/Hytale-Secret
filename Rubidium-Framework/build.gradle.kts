@@ -9,16 +9,15 @@ group = "com.rubidium"
 version = "1.0.0"
 
 java {
-    // Use Java 19 for development (production Hytale uses Java 25, but bytecode is forward-compatible)
-    sourceCompatibility = JavaVersion.VERSION_19
-    targetCompatibility = JavaVersion.VERSION_19
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
     withJavadocJar()
     withSourcesJar()
 }
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
-    options.release.set(19)
+    options.release.set(25)
     options.compilerArgs.addAll(listOf(
         "-Xlint:all",
         "-Xlint:-processing"
