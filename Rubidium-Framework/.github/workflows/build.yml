@@ -3,9 +3,14 @@ name: Build Rubidium
 on:
   push:
     branches: [ main, master, develop ]
+    tags:
+      - 'v*'
   pull_request:
     branches: [ main, master ]
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
