@@ -138,12 +138,19 @@ tasks.register<Jar>("launcherJar") {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
+tasks.register<Copy>("copyTestScripts") {
+    from("scripts")
+    into("build/libs")
+    include("*.sh", "*.bat", "*.ps1")
+}
+
 tasks.register("buildAll") {
-    dependsOn(tasks.named("shadowJar"), tasks.named("launcherJar"))
+    dependsOn(tasks.named("shadowJar"), tasks.named("launcherJar"), tasks.named("copyTestScripts"))
     doLast {
         println("Built artifacts:")
         println("  - build/libs/Rubidium-${version}.jar (Framework)")
         println("  - build/libs/TestServerLauncher.jar (Launcher GUI)")
+        println("  - build/libs/rubidium-test-gui.sh (Test Script)")
     }
 }
 

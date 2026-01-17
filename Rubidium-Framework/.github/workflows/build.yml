@@ -33,18 +33,14 @@ jobs:
     - name: Build all artifacts
       run: ./gradlew buildAll --no-daemon
     
-    - name: Upload Rubidium Framework
+    - name: Upload Rubidium Release
       uses: actions/upload-artifact@v4
       with:
-        name: Rubidium-Framework
-        path: build/libs/Rubidium-*.jar
-        if-no-files-found: error
-    
-    - name: Upload Test Server Launcher
-      uses: actions/upload-artifact@v4
-      with:
-        name: TestServerLauncher
-        path: build/libs/TestServerLauncher.jar
+        name: Rubidium-Release
+        path: |
+          build/libs/Rubidium-*.jar
+          build/libs/TestServerLauncher.jar
+          build/libs/*.sh
         if-no-files-found: error
 
   release:
@@ -70,11 +66,12 @@ jobs:
       run: ./gradlew buildAll --no-daemon
     
     - name: Create Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         files: |
           build/libs/Rubidium-*.jar
           build/libs/TestServerLauncher.jar
+          build/libs/*.sh
         generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
