@@ -140,12 +140,16 @@ tasks.register<Jar>("launcherJar") {
 
 tasks.register<Copy>("copyTestScripts") {
     from("scripts")
-    into("build/libs")
+    into(layout.buildDirectory.dir("libs"))
     include("*.sh", "*.bat", "*.ps1")
 }
 
+tasks.named("assemble") {
+    dependsOn(tasks.named("launcherJar"), tasks.named("copyTestScripts"))
+}
+
 tasks.register("buildAll") {
-    dependsOn(tasks.named("shadowJar"), tasks.named("launcherJar"), tasks.named("copyTestScripts"))
+    dependsOn(tasks.named("assemble"))
     doLast {
         println("Built artifacts:")
         println("  - build/libs/Rubidium-${version}.jar (Framework)")
