@@ -13,65 +13,63 @@ jobs:
     
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v5
+      uses: actions/checkout@v4
     
-    - name: Set up JDK 25
-      uses: actions/setup-java@v5
+    - name: Set up JDK 19
+      uses: actions/setup-java@v4
       with:
-        java-version: '25'
+        java-version: '19'
         distribution: 'temurin'
         cache: 'gradle'
     
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     
-    - name: Clean Gradle cache
-      run: rm -rf ~/.gradle/caches/*/scripts ~/.gradle/init.d/*.gradle
+    - name: Build all artifacts
+      run: ./gradlew buildAll --no-daemon
     
-    - name: Build with Gradle
-      run: ./gradlew clean shadowJar --no-daemon
-    
-    - name: Upload Rubidium JAR
-      uses: actions/upload-artifact@v5
+    - name: Upload Rubidium Framework
+      uses: actions/upload-artifact@v4
       with:
-        name: Rubidium
+        name: Rubidium-Framework
         path: build/libs/Rubidium-*.jar
+        if-no-files-found: error
+    
+    - name: Upload Test Server Launcher
+      uses: actions/upload-artifact@v4
+      with:
+        name: TestServerLauncher
+        path: build/libs/TestServerLauncher.jar
         if-no-files-found: error
 
   release:
     needs: build
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
     
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v5
+      uses: actions/checkout@v4
     
-    - name: Set up JDK 25
-      uses: actions/setup-java@v5
+    - name: Set up JDK 19
+      uses: actions/setup-java@v4
       with:
-        java-version: '25'
+        java-version: '19'
         distribution: 'temurin'
         cache: 'gradle'
     
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     
-    - name: Clean Gradle cache
-      run: rm -rf ~/.gradle/caches/*/scripts ~/.gradle/init.d/*.gradle
-    
-    - name: Build Release JAR
-      run: ./gradlew clean shadowJar --no-daemon
-    
-    - name: Get version
-      id: version
-      run: echo "VERSION=$(grep 'version = ' build.gradle.kts | cut -d'"' -f2)" >> $GITHUB_OUTPUT
+    - name: Build Release
+      run: ./gradlew buildAll --no-daemon
     
     - name: Create Release
       uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/')
       with:
-        files: build/libs/Rubidium-*.jar
+        files: |
+          build/libs/Rubidium-*.jar
+          build/libs/TestServerLauncher.jar
         generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
