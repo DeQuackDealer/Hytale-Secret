@@ -123,6 +123,8 @@ tasks.register("copyToPlugins") {
 }
 
 tasks.register<Jar>("launcherJar") {
+    dependsOn(tasks.named("compileJava"))
+    
     archiveBaseName.set("TestServerLauncher")
     archiveClassifier.set("")
     archiveVersion.set("")
