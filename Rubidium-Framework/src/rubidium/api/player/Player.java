@@ -70,6 +70,8 @@ public interface Player extends CommandSender {
     
     default boolean isFlying() { return false; }
     
+    default void setFlying(boolean flying) {}
+    
     default boolean isGliding() { return false; }
     
     default boolean isSprinting() { return false; }
@@ -90,7 +92,21 @@ public interface Player extends CommandSender {
     
     default int getHeldItemSlot() { return 0; }
     
+    default int getFoodLevel() { return 20; }
+    
+    default void setFoodLevel(int level) {}
+    
+    default GameMode getGameMode() { return GameMode.SURVIVAL; }
+    
+    default void setGameMode(GameMode mode) {}
+    
     default Location getPosition() { return getLocation(); }
+    
+    void teleport(Location location);
+    
+    enum GameMode {
+        SURVIVAL, CREATIVE, ADVENTURE, SPECTATOR
+    }
     
     record Location(double x, double y, double z, float yaw, float pitch) {
         public double distanceTo(Location other) {

@@ -1,9 +1,9 @@
 package rubidium.admin.panels;
 
 import rubidium.admin.AdminPanel;
+import rubidium.admin.AdminUIModule;
 import rubidium.api.player.Player;
 import rubidium.api.server.Server;
-import rubidium.ui.RubidiumUI;
 import rubidium.ui.components.*;
 
 import java.util.Collection;
@@ -85,7 +85,7 @@ public class PlayerManagementPanel implements AdminPanel {
             .setSize(100, 35)
             .setPosition(20, 520)
             .setBackground(0x2D2D35)
-            .onClick(() -> RubidiumUI.showUI(admin, createUI(admin)));
+            .onClick(() -> showUI(admin, createUI(admin)));
         panel.addChild(refreshBtn);
         
         UIButton backBtn = new UIButton("back")
@@ -93,7 +93,7 @@ public class PlayerManagementPanel implements AdminPanel {
             .setSize(120, 35)
             .setPosition(360, 520)
             .setBackground(0x8B0000)
-            .onClick(() -> rubidium.admin.AdminUIModule.getInstance().openMainMenu(admin));
+            .onClick(() -> AdminUIModule.getInstance().openMainMenu(admin));
         panel.addChild(backBtn);
         
         return panel;
@@ -125,7 +125,8 @@ public class PlayerManagementPanel implements AdminPanel {
             .setPosition(250, 10)
             .setBackground(0x4169E1)
             .onClick(() -> {
-                admin.teleport(target.getLocation());
+                Player.Location loc = target.getLocation();
+                admin.teleport(loc.x(), loc.y(), loc.z());
                 admin.sendMessage("&aTeleported to " + target.getName());
             });
         row.addChild(tpBtn);
@@ -186,7 +187,7 @@ public class PlayerManagementPanel implements AdminPanel {
                 String reason = reasonField.getValue();
                 target.kick(reason.isEmpty() ? "Kicked by admin" : reason);
                 admin.sendMessage("&aKicked " + target.getName());
-                RubidiumUI.showUI(admin, createUI(admin));
+                showUI(admin, createUI(admin));
             });
         dialog.addChild(confirmBtn);
         
@@ -195,10 +196,10 @@ public class PlayerManagementPanel implements AdminPanel {
             .setSize(145, 40)
             .setPosition(185, 130)
             .setBackground(0x505060)
-            .onClick(() -> RubidiumUI.showUI(admin, createUI(admin)));
+            .onClick(() -> showUI(admin, createUI(admin)));
         dialog.addChild(cancelBtn);
         
-        RubidiumUI.showUI(admin, dialog);
+        showUI(admin, dialog);
     }
     
     private void openBanDialog(Player admin, Player target) {
@@ -242,7 +243,7 @@ public class PlayerManagementPanel implements AdminPanel {
                 Server.banPlayer(target.getUniqueId(), reason, duration);
                 target.kick("Banned: " + reason);
                 admin.sendMessage("&aBanned " + target.getName() + " for " + duration);
-                RubidiumUI.showUI(admin, createUI(admin));
+                showUI(admin, createUI(admin));
             });
         dialog.addChild(confirmBtn);
         
@@ -251,10 +252,10 @@ public class PlayerManagementPanel implements AdminPanel {
             .setSize(145, 40)
             .setPosition(185, 200)
             .setBackground(0x505060)
-            .onClick(() -> RubidiumUI.showUI(admin, createUI(admin)));
+            .onClick(() -> showUI(admin, createUI(admin)));
         dialog.addChild(cancelBtn);
         
-        RubidiumUI.showUI(admin, dialog);
+        showUI(admin, dialog);
     }
     
     private void openPlayerDetails(Player admin, Player target) {
@@ -315,10 +316,10 @@ public class PlayerManagementPanel implements AdminPanel {
             .setSize(360, 40)
             .setPosition(20, 380)
             .setBackground(0x505060)
-            .onClick(() -> RubidiumUI.showUI(admin, createUI(admin)));
+            .onClick(() -> showUI(admin, createUI(admin)));
         details.addChild(backBtn);
         
-        RubidiumUI.showUI(admin, details);
+        showUI(admin, details);
     }
     
     private void addDetailLine(UIContainer container, String label, String value, int y) {
@@ -337,7 +338,11 @@ public class PlayerManagementPanel implements AdminPanel {
         container.addChild(valueText);
     }
     
-    private String formatLocation(rubidium.api.world.Location loc) {
-        return String.format("%.1f, %.1f, %.1f (%s)", loc.getX(), loc.getY(), loc.getZ(), loc.getWorld().getName());
+    private String formatLocation(Player.Location loc) {
+        return String.format("%.1f, %.1f, %.1f", loc.x(), loc.y(), loc.z());
+    }
+    
+    private void showUI(Player player, UIContainer ui) {
+        player.sendPacket(ui);
     }
 }

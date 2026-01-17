@@ -6,8 +6,7 @@ import rubidium.api.command.CommandContext;
 import rubidium.api.event.EventHandler;
 import rubidium.api.event.player.PlayerInteractEvent;
 import rubidium.api.player.Player;
-import rubidium.api.item.ItemStack;
-import rubidium.ui.RubidiumUI;
+import rubidium.inventory.ItemStack;
 import rubidium.ui.components.*;
 import rubidium.admin.panels.*;
 
@@ -149,7 +148,7 @@ public class AdminUIModule implements RubidiumModule {
         Player player = event.getPlayer();
         ItemStack item = event.getItemInHand();
         
-        if (item != null && ADMIN_STICK_ID.equals(item.getId()) && isAdmin(player)) {
+        if (item != null && ADMIN_STICK_ID.equals(item.getType()) && isAdmin(player)) {
             event.setCancelled(true);
             
             AdminConfig config = getConfig(player);
@@ -209,35 +208,42 @@ public class AdminUIModule implements RubidiumModule {
             .setPosition(20, y + 10)
             .setBackground(0x8B0000)
             .setHoverBackground(0xA52A2A)
-            .onClick(() -> RubidiumUI.closeUI(player));
+            .onClick(() -> closeUI(player));
         menu.addChild(closeButton);
         
-        RubidiumUI.showUI(player, menu);
+        showUI(player, menu);
     }
     
     public void openPanel(Player player, AdminPanel panel) {
         UIContainer ui = panel.createUI(player);
         if (ui != null) {
-            RubidiumUI.showUI(player, ui);
+            showUI(player, ui);
         }
     }
     
     public void giveAdminStick(Player player) {
-        ItemStack stick = ItemStack.builder()
-            .id(ADMIN_STICK_ID)
+        ItemStack stick = ItemStack.builder(ADMIN_STICK_ID)
             .displayName("&6Admin Stick")
-            .lore(Arrays.asList(
+            .lore(
                 "&7Right-click: Open Admin Menu",
                 "&7Left-click: Quick Action",
                 "&7Shift+Right: Configure Shortcuts"
-            ))
-            .glowing(true)
+            )
             .build();
         
         player.getInventory().addItem(stick);
     }
     
-    private void log(String message) {
+    private void showUI(Player player, UIContainer ui) {
+        player.sendPacket(ui);
+    }
+    
+    private void closeUI(Player player) {
+        player.sendPacket("CLOSE_UI");
+    }
+    
+    @Override
+    public void log(String message) {
         System.out.println("[AdminUI] " + message);
     }
     

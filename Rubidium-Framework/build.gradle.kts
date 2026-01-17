@@ -9,15 +9,15 @@ group = "com.rubidium"
 version = "1.0.0"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_25
-    targetCompatibility = JavaVersion.VERSION_25
+    sourceCompatibility = JavaVersion.VERSION_19
+    targetCompatibility = JavaVersion.VERSION_19
     withJavadocJar()
     withSourcesJar()
 }
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
-    options.release.set(25)
+    options.release.set(19)
     options.compilerArgs.addAll(listOf(
         "-Xlint:all",
         "-Xlint:-processing"
@@ -58,7 +58,7 @@ tasks.test {
 
 tasks.withType<Javadoc> {
     val opts = options as StandardJavadocDocletOptions
-    opts.addStringOption("source", "25")
+    opts.addStringOption("source", "19")
     opts.addStringOption("Xdoclint:none", "-quiet")
     isFailOnError = false
 }
