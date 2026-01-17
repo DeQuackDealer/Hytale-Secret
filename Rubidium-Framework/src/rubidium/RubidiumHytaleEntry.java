@@ -30,24 +30,9 @@ public class RubidiumHytaleEntry extends JavaPlugin {
     public RubidiumHytaleEntry(JavaPluginInit init) {
         super(init);
         instance = this;
-        detectEnvironment();
+        isServer = (init != null);
         LOGGER.info("[Rubidium] Framework v1.0.0 loading...");
-    }
-    
-    public RubidiumHytaleEntry() {
-        super(null);
-        instance = this;
-        isServer = false;
-        LOGGER.info("[Rubidium] Framework v1.0.0 loading (client mode)...");
-    }
-    
-    private void detectEnvironment() {
-        try {
-            Class.forName("com.hypixel.hytale.server.HytaleServer");
-            isServer = true;
-        } catch (ClassNotFoundException e) {
-            isServer = false;
-        }
+        LOGGER.info("[Rubidium] Environment: " + (isServer ? "Server" : "Singleplayer"));
     }
     
     @Override

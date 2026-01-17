@@ -1,15 +1,19 @@
 {
-  "id": "rubidium",
-  "name": "Rubidium",
-  "version": "1.0.0",
-  "description": "API Library for Hytale Plugin Development - Provides PathfindingAPI, NPCAPI, AIBehaviorAPI, and more",
-  "authors": ["Yellow Tale Team"],
-  "website": "https://github.com/yellow-tale/rubidium",
-  "main": "rubidium.RubidiumHytaleEntry",
-  "side": "both",
-  "type": "plugin",
-  "dependencies": [],
-  "loadOrder": "early",
-  "includesAssetPack": false,
-  "minGameVersion": "1.0.0"
+  "Group": "com.rubidium",
+  "Name": "Rubidium",
+  "Version": "1.0.0",
+  "Description": "API Library for Hytale Plugin Development - Provides PathfindingAPI, NPCAPI, AIBehaviorAPI, and more",
+  "Main": "rubidium.RubidiumHytaleEntry",
+  "Authors": [
+    {
+      "Name": "Yellow Tale Team",
+      "Url": "https://github.com/yellow-tale/rubidium"
+    }
+  ],
+  "Website": "https://github.com/yellow-tale/rubidium",
+  "ServerVersion": ">=0.0.1",
+  "Dependencies": {},
+  "OptionalDependencies": {},
+  "DisabledByDefault": false,
+  "IncludesAssetPack": false
 }
