@@ -1,5 +1,7 @@
 package com.hypixel.hytale.server.core.command;
 
+import java.util.UUID;
+
 /**
  * Stub for Hytale's ConsoleSender.
  * At runtime, the real ConsoleSender from HytaleServer.jar will be used.
@@ -7,6 +9,7 @@ package com.hypixel.hytale.server.core.command;
 public class ConsoleSender implements CommandSender {
     
     public static final ConsoleSender INSTANCE = new ConsoleSender();
+    private static final UUID CONSOLE_UUID = new UUID(0, 0);
     
     private ConsoleSender() {}
     
@@ -33,5 +36,10 @@ public class ConsoleSender implements CommandSender {
     @Override
     public boolean isConsole() {
         return true;
+    }
+    
+    @Override
+    public UUID getUniqueId() {
+        return CONSOLE_UUID;
     }
 }

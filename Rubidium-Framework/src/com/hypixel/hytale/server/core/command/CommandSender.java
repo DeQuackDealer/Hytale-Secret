@@ -1,5 +1,7 @@
 package com.hypixel.hytale.server.core.command;
 
+import java.util.UUID;
+
 /**
  * Stub for Hytale's CommandSender.
  * At runtime, the real CommandSender from HytaleServer.jar will be used.
@@ -15,4 +17,6 @@ public interface CommandSender {
     boolean isPlayer();
     
     boolean isConsole();
+    
+    UUID getUniqueId();
 }

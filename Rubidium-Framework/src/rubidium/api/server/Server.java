@@ -27,6 +27,10 @@ public final class Server {
             .findFirst();
     }
     
+    public static Player getPlayerByName(String name) {
+        return getPlayer(name).orElse(null);
+    }
+    
     public static int getOnlineCount() {
         return onlinePlayers.size();
     }
