@@ -27,7 +27,7 @@ public final class TeleportAPI {
         TeleportEvent event = new TeleportEvent(playerId, destination, warmupTicks);
         EventAPI.fire(event);
         
-        if (event instanceof EventAPI.Cancellable cancellable && cancellable.isCancelled()) {
+        if (event.isCancelled()) {
             if (callback != null) callback.accept(false);
             return;
         }

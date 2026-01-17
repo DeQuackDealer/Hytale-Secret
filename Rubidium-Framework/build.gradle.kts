@@ -9,15 +9,16 @@ group = "com.rubidium"
 version = "1.0.0"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_25
-    targetCompatibility = JavaVersion.VERSION_25
+    // Use Java 19 for development (production Hytale uses Java 25, but bytecode is forward-compatible)
+    sourceCompatibility = JavaVersion.VERSION_19
+    targetCompatibility = JavaVersion.VERSION_19
     withJavadocJar()
     withSourcesJar()
 }
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
-    options.release.set(25)
+    options.release.set(19)
     options.compilerArgs.addAll(listOf(
         "-Xlint:all",
         "-Xlint:-processing"
@@ -77,6 +78,9 @@ tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJ
     archiveBaseName.set("Rubidium")
     archiveClassifier.set("")
     
+    // CRITICAL: Exclude development stubs - they would conflict with real Hytale classes at runtime
+    exclude("com/hypixel/**")
+    
     // Relocate all bundled dependencies to avoid conflicts with server/other plugins
     relocate("com.google.gson", "rubidium.libs.gson")
     relocate("org.yaml.snakeyaml", "rubidium.libs.snakeyaml")
@@ -98,9 +102,7 @@ tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJ
         attributes(
             "Implementation-Title" to "Rubidium Framework",
             "Implementation-Version" to project.version,
-            "Rubidium-Version" to "1.0.0",
-            "Main-Class" to "rubidium.server.RubidiumServer",
-            "Plugin-Class" to "rubidium.hytale.RubidiumHytalePlugin"
+            "Rubidium-Version" to "1.0.0"
         )
     }
 }

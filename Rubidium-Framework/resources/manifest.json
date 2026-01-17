@@ -1,0 +1,9 @@
+{
+  "Main": "rubidium.RubidiumHytaleEntry",
+  "Version": "1.0.0",
+  "Name": "Rubidium",
+  "Description": "API Library for Hytale Plugin Development - Provides PathfindingAPI, NPCAPI, AIBehaviorAPI, and more",
+  "Authors": ["Yellow Tale Team"],
+  "Website": "https://github.com/yellow-tale/rubidium",
+  "IncludesAssetPack": false
+}

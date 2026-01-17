@@ -106,7 +106,7 @@ public final class NativeNetworkBridge implements AutoCloseable {
     public NativeNetworkBridge(RubidiumLogger logger, String pipeName) {
         this.logger = logger;
         this.pipeName = pipeName;
-        this.executor = Executors.newVirtualThreadPerTaskExecutor();
+        this.executor = Executors.newCachedThreadPool();
         this.outgoingQueue = new LinkedBlockingQueue<>();
         this.messageHandlers = new CopyOnWriteArrayList<>();
     }

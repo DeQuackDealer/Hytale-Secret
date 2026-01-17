@@ -90,7 +90,7 @@ public final class AccessControlService {
         this.dataDirectory = dataDirectory;
         this.httpClient = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(10))
-            .executor(Executors.newVirtualThreadPerTaskExecutor())
+            .executor(Executors.newCachedThreadPool())
             .build();
         this.uuidScraper = new UUIDScraper(httpClient, logger);
         

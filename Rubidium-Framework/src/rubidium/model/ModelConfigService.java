@@ -151,7 +151,7 @@ public final class ModelConfigService {
                 StandardWatchEventKinds.ENTRY_DELETE
             );
             
-            Thread.ofVirtual().name("model-config-watcher").start(this::watchForChanges);
+            new Thread(this::watchForChanges, "model-config-watcher").start();
             logger.info("Model hot-reload watcher initialized");
         } catch (IOException e) {
             logger.warn("Failed to initialize file watcher: " + e.getMessage());

@@ -1,91 +1,100 @@
 package rubidium.hytale;
 
-import rubidium.core.RubidiumCore;
-import rubidium.core.feature.FeatureOrchestrator;
-import rubidium.hytale.adapter.ServerAdapter;
-import rubidium.hytale.adapter.EventAdapter;
-import rubidium.hytale.api.event.*;
-import rubidium.welcome.FirstJoinHandler;
-import com.hypixel.hytale.server.core.HytaleServer;
+import rubidium.RubidiumPlugin;
+import rubidium.api.npc.NPCAPI;
+import rubidium.api.scheduler.SchedulerAPI;
 
 import java.util.logging.Logger;
 
 /**
- * Main entry point for Rubidium Framework on Hytale servers.
+ * Hytale-specific plugin wrapper for Rubidium Framework.
+ * 
+ * This class serves as the entry point when Rubidium is loaded
+ * as a Hytale plugin. It initializes all Rubidium APIs and
+ * sets up integration with the Hytale server.
+ * 
+ * When running on a real Hytale server, this should extend
+ * com.hypixel.hytale.server.core.plugin.JavaPlugin. For development
+ * without the Hytale JAR, it works as a standalone wrapper.
  */
 public class RubidiumHytalePlugin {
     
-    private static final Logger logger = Logger.getLogger("Rubidium");
-    
+    private static final Logger LOGGER = Logger.getLogger("Rubidium");
     private static RubidiumHytalePlugin instance;
     
-    private RubidiumCore core;
-    private FeatureOrchestrator orchestrator;
+    private RubidiumPlugin rubidium;
+    private boolean enabled = false;
     
     public RubidiumHytalePlugin() {
         instance = this;
+        LOGGER.info("Rubidium Framework v1.0.0 loading...");
     }
     
     public static RubidiumHytalePlugin getInstance() {
         return instance;
     }
     
-    public void onEnable(HytaleServer hytaleServer) {
-        logger.info("Rubidium Framework initializing...");
+    /**
+     * Called when the plugin is enabled by Hytale.
+     */
+    public void onEnable() {
+        LOGGER.info("Rubidium Framework initializing...");
         
-        ServerAdapter.getInstance().initialize(hytaleServer);
+        rubidium = new RubidiumPlugin();
+        rubidium.onEnable();
         
-        core = RubidiumCore.initialize(java.nio.file.Paths.get("rubidium"));
-        orchestrator = FeatureOrchestrator.getInstance();
+        // Start NPC tick loop
+        SchedulerAPI.runTimer("rubidium:npc_tick", () -> {
+            for (var npc : NPCAPI.all()) {
+                npc.tick();
+            }
+        }, 1, 1);
         
-        registerCoreFeatures();
-        registerEventBridges();
+        enabled = true;
         
-        FirstJoinHandler.register();
-        
-        orchestrator.startAll();
-        
-        logger.info("Rubidium Framework v1.0.0 enabled - Ready for Hytale!");
-        logger.info("  - Player API: Connected");
-        logger.info("  - Entity API: Connected");
-        logger.info("  - Event Bridge: Active");
-        logger.info("  - Feature Orchestrator: " + orchestrator.getAllHealth().size() + " features");
+        LOGGER.info("Rubidium Framework v1.0.0 enabled!");
+        LOGGER.info("Available APIs:");
+        LOGGER.info("  - PathfindingAPI: A* pathfinding with async support");
+        LOGGER.info("  - NPCAPI: NPC creation and behavior management");
+        LOGGER.info("  - AIBehaviorAPI: Behavior trees and goal selectors");
+        LOGGER.info("  - WorldQueryAPI: Raycasting and spatial queries");
+        LOGGER.info("  - SchedulerAPI: Task scheduling and cooldowns");
+        LOGGER.info("  - ScoreboardAPI: Dynamic scoreboards");
+        LOGGER.info("  - HologramAPI: Floating text displays");
+        LOGGER.info("  - TeleportAPI: Warps and TPA");
+        LOGGER.info("  - BossBarAPI: Custom boss bars");
+        LOGGER.info("  - InventoryAPI: Custom GUI menus");
+        LOGGER.info("  - ConfigAPI: YAML configuration");
+        LOGGER.info("  - MessageAPI: Colors and localization");
     }
     
-    private void registerCoreFeatures() {
-    }
-    
-    private void registerEventBridges() {
-        EventAdapter eventAdapter = EventAdapter.getInstance();
-        
-        eventAdapter.registerListener(PlayerJoinEvent.class, event -> {
-            logger.fine("Player joined: " + event.getPlayer().getUsername());
-        });
-        
-        eventAdapter.registerListener(PlayerQuitEvent.class, event -> {
-            logger.fine("Player quit: " + event.getPlayer().getUsername());
-        });
-        
-        eventAdapter.registerListener(BlockBreakEvent.class, event -> {
-            logger.fine("Block broken at " + event.getX() + "," + event.getY() + "," + event.getZ());
-        });
-    }
-    
+    /**
+     * Called when the plugin is disabled by Hytale.
+     */
     public void onDisable() {
-        logger.info("Rubidium Framework disabling...");
+        LOGGER.info("Rubidium Framework disabling...");
         
-        if (orchestrator != null) {
-            orchestrator.stopAll();
+        if (rubidium != null) {
+            rubidium.onDisable();
         }
         
-        logger.info("Rubidium Framework disabled");
+        SchedulerAPI.shutdown();
+        enabled = false;
+        
+        LOGGER.info("Rubidium Framework disabled.");
     }
     
-    public RubidiumCore getCore() {
-        return core;
+    /**
+     * Check if Rubidium is enabled.
+     */
+    public boolean isEnabled() {
+        return enabled;
     }
     
-    public FeatureOrchestrator getOrchestrator() {
-        return orchestrator;
+    /**
+     * Get the core Rubidium instance.
+     */
+    public RubidiumPlugin getRubidium() {
+        return rubidium;
     }
 }

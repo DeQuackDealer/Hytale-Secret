@@ -1,284 +1,360 @@
-# Testing Rubidium Framework Locally
+# Testing Rubidium Framework with Hytale
 
-This guide explains how to set up and run a local Rubidium server for testing your plugins.
+This guide explains how to set up and run a local Hytale test server with Rubidium installed.
 
 ## Quick Start
 
-### 1. Build the Framework
+### 1. Run the Setup Script
 
 ```bash
 cd Rubidium-Framework
-./gradlew shadowJar
+chmod +x setupserver.sh
+./setupserver.sh
 ```
 
-This creates `build/libs/Rubidium-1.0.0.jar`
+This will:
+- Check for Java 25+
+- Create the `test-server/` directory structure
+- Copy HytaleServer.jar from libs/
+- Build Rubidium and install it to earlyplugins/
+- Generate server configuration
 
-### 2. Run the Test Server
+### 2. Start the Test Server
 
 ```bash
-chmod +x run-server.sh
-./run-server.sh
+cd test-server
+./start.sh
 ```
 
-The script will:
-- Build the framework if needed
-- Create a `test-server/` directory
-- Generate default configuration
-- Start the server
+The server will start on **localhost:5520** (UDP).
 
-### 3. Server Console Commands
+### 3. Stop the Server
 
-Once running, you can use these commands:
-
-| Command | Description |
-|---------|-------------|
-| `help` | List all available commands |
-| `plugins` | List loaded plugins |
-| `version` | Show server version |
-| `reload` | Reload configuration |
-| `stop` | Stop the server |
+Press `Ctrl+C` or run:
+```bash
+./stop.sh
+```
 
 ## Directory Structure
 
-After running, your test server will have:
+After setup, your test server will have:
 
 ```
 test-server/
-├── rubidium.jar          # The server JAR
-├── eula.txt              # EULA acceptance
+├── HytaleServer.jar      # Official Hytale server
+├── start.sh              # Start script with optimized JVM flags
+├── stop.sh               # Stop script
 ├── config/
 │   └── server.properties # Server configuration
-├── plugins/              # Drop plugin JARs here
+├── earlyplugins/         # Plugin JARs go here
+│   └── Rubidium-1.0.0.jar
 ├── worlds/               # World data
+├── assets/               # Asset packs (optional)
 └── logs/
-    └── latest.log        # Server logs
+    └── server.log        # Server logs
 ```
 
 ## Testing Your Plugin
 
-### 1. Build Your Plugin
+### 1. Create Your Plugin
 
-Create your plugin in a separate directory and build it:
-
-```bash
-./gradlew jar
-```
-
-### 2. Install the Plugin
-
-Copy the JAR to the plugins folder:
-
-```bash
-cp build/libs/MyPlugin-1.0.0.jar test-server/plugins/
-```
-
-### 3. Restart the Server
-
-The server will automatically load plugins from the `plugins/` folder.
-
-## Configuration
-
-Edit `test-server/config/server.properties`:
-
-```properties
-# Server Settings
-server-name=My Test Server
-server-port=25565
-max-players=20
-
-# Performance
-view-distance=10
-simulation-distance=8
-
-# Features
-enable-command-block=true
-debug-mode=true
-online-mode=false
-spawn-protection=0
-```
-
-## Creating a Test Plugin
-
-### Minimal Plugin Structure
+Create a new plugin project with this structure:
 
 ```
 my-plugin/
 ├── build.gradle.kts
-├── plugin.yml
-└── src/
-    └── myplugin/
-        └── MyPlugin.java
+├── src/
+│   └── myplugin/
+│       └── MyPlugin.java
+└── resources/
+    └── manifest.json
 ```
 
-### plugin.yml
+### 2. manifest.json
 
-```yaml
-name: MyPlugin
-version: 1.0.0
-main: myplugin.MyPlugin
-author: YourName
-description: My test plugin
+```json
+{
+  "Main": "myplugin.MyPlugin",
+  "Version": "1.0.0",
+  "Name": "MyPlugin",
+  "Description": "My awesome Hytale plugin",
+  "IncludesAssetPack": false
+}
 ```
 
-### MyPlugin.java
+### 3. MyPlugin.java (Using Rubidium APIs)
 
 ```java
 package myplugin;
 
-import rubidium.api.RubidiumPlugin;
-import rubidium.api.block.BlockAPI;
-import rubidium.api.command.CommandAPI;
-import rubidium.api.event.EventAPI;
+import rubidium.api.pathfinding.PathfindingAPI;
+import rubidium.api.pathfinding.PathfindingAPI.*;
+import rubidium.api.npc.NPCAPI;
+import rubidium.api.scheduler.SchedulerAPI;
+import rubidium.api.hologram.HologramAPI;
 
-public class MyPlugin extends RubidiumPlugin {
+import java.util.logging.Logger;
+
+public class MyPlugin {
     
-    @Override
-    public void onEnable() {
-        getLogger().info("MyPlugin enabled!");
-        
-        // Register a custom block
-        BlockAPI.register(
-            BlockAPI.create("myplugin:magic_stone")
-                .displayName("Magic Stone")
-                .hardness(5.0f)
-                .lightLevel(10)
-                .build()
-        );
-        
-        // Register a command
-        CommandAPI.register(
-            CommandAPI.create("test")
-                .description("Test command")
-                .executor(ctx -> {
-                    getLogger().info("Test command executed!");
-                    return true;
-                })
-                .build()
-        );
-        
-        // Register an event listener
-        EventAPI.register(EventAPI.PlayerJoinEvent.class, event -> {
-            getLogger().info("Player joined: " + event.getPlayer());
-        });
+    private static final Logger LOGGER = Logger.getLogger("MyPlugin");
+    
+    public MyPlugin() {
+        LOGGER.info("MyPlugin loading...");
     }
     
-    @Override
+    public void onEnable() {
+        LOGGER.info("MyPlugin enabled!");
+        
+        // Create an NPC guard
+        var guard = NPCAPI.guard("myplugin:town_guard", "Town Guard");
+        var npc = NPCAPI.spawn(guard, Vec3i.of(100, 64, 100));
+        
+        // Create a hologram
+        HologramAPI.text("welcome", Vec3i.of(0, 70, 0),
+            "&6Welcome to the Server!",
+            "&7Powered by Rubidium"
+        );
+        
+        // Schedule a repeating task
+        SchedulerAPI.runTimer("myplugin:check", () -> {
+            LOGGER.info("Server tick check");
+        }, 100, 200);
+        
+        // Example: Pathfinding
+        var context = PathfindingAPI.createContext(pos -> true); // All passable
+        var path = PathfindingAPI.findPath(
+            Vec3i.of(0, 64, 0),
+            Vec3i.of(10, 64, 10),
+            context
+        );
+        
+        if (path.success()) {
+            LOGGER.info("Found path with " + path.length() + " nodes");
+        }
+    }
+    
     public void onDisable() {
-        getLogger().info("MyPlugin disabled!");
+        LOGGER.info("MyPlugin disabled!");
+        SchedulerAPI.cancel("myplugin:check");
     }
 }
 ```
 
-### build.gradle.kts
+### 4. build.gradle.kts
 
 ```kotlin
 plugins {
     java
+    id("com.gradleup.shadow") version "9.3.1"
 }
 
 group = "com.myplugin"
 version = "1.0.0"
 
 java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(25))
-    }
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+}
+
+repositories {
+    mavenCentral()
+    flatDir { dirs("libs") }
 }
 
 dependencies {
-    compileOnly(files("path/to/Rubidium-1.0.0.jar"))
+    // Add both JARs to your libs/ folder
+    compileOnly(files("libs/HytaleServer.jar"))
+    compileOnly(files("libs/Rubidium-1.0.0.jar"))
 }
 
-tasks.jar {
-    manifest {
-        attributes("Plugin-Main" to "myplugin.MyPlugin")
+tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
+    archiveBaseName.set("MyPlugin")
+    archiveClassifier.set("")
+}
+
+sourceSets {
+    main {
+        java { srcDirs("src") }
+        resources { srcDirs("resources") }
     }
 }
 ```
 
+### 5. Build and Install
+
+```bash
+./gradlew shadowJar
+cp build/libs/MyPlugin-1.0.0.jar /path/to/test-server/earlyplugins/
+```
+
+### 6. Restart Server
+
+The server will automatically load plugins from `earlyplugins/`.
+
+## Available Rubidium APIs
+
+| API | Description |
+|-----|-------------|
+| `PathfindingAPI` | A* pathfinding with async support |
+| `NPCAPI` | Create and manage NPCs with behaviors |
+| `AIBehaviorAPI` | Behavior trees and goal selectors |
+| `WorldQueryAPI` | Raycasting, line-of-sight, spatial queries |
+| `SchedulerAPI` | Task scheduling, cooldowns, task chains |
+| `ScoreboardAPI` | Dynamic scoreboards and teams |
+| `HologramAPI` | Floating text and item displays |
+| `TeleportAPI` | Warps, TPA requests, back command |
+| `BossBarAPI` | Custom boss bars |
+| `InventoryAPI` | Custom GUI menus with click handlers |
+| `ConfigAPI` | YAML configuration loading/saving |
+| `MessageAPI` | Colors, placeholders, localization |
+
 ## API Examples
 
-### Register Custom Items
+### Pathfinding
 
 ```java
-// Simple material
-ItemAPI.register(ItemAPI.material("mymod:crystal"));
-
-// Food item
-ItemAPI.register(ItemAPI.food("mymod:apple", 6, 0.6f));
-
-// Custom weapon
-ItemAPI.register(ToolAPI.sword("mymod:crystal_sword", ToolAPI.ToolTier.DIAMOND));
-```
-
-### Register Custom Entities
-
-```java
-// Hostile mob
-EntityAPI.register(EntityAPI.monster("mymod:shadow", 40, 8));
-
-// Passive animal
-EntityAPI.register(EntityAPI.animal("mymod:bunny", 10));
-
-// Boss entity
-EntityAPI.register(EntityAPI.boss("mymod:dragon", 500, 25));
-```
-
-### Register Crafting Recipes
-
-```java
-// Shaped recipe
-RecipeAPI.register(
-    RecipeAPI.shaped("mymod:crystal_sword", "mymod:crystal_sword")
-        .pattern(" C ", " C ", " S ")
-        .key('C', "mymod:crystal")
-        .key('S', "stick")
-        .build()
+// Create a pathfinding context
+var context = PathfindingAPI.createContext(
+    pos -> world.isPassable(pos),
+    (from, to) -> world.getBlockCost(to)
 );
+
+// Find path synchronously
+var path = PathfindingAPI.findPath(start, goal, context);
+
+// Find path asynchronously
+PathfindingAPI.findPathAsync(start, goal, context)
+    .thenAccept(result -> {
+        if (result.success()) {
+            entity.followPath(result.path());
+        }
+    });
 ```
 
-### Create Custom UI
+### NPCs with AI
 
 ```java
-UIScreen shop = UIAPI.createScreen("shop", "Item Shop");
-shop.add(UIAPI.label("title", "Welcome to the Shop").centered());
-shop.add(UIAPI.button("buy", "Buy Item").on("click", e -> {
-    // Handle purchase
-}));
-UIAPI.open(player, shop);
+// Create NPC definition
+var shopkeeper = NPCAPI.create("mymod:shopkeeper")
+    .displayName("&6Shopkeeper")
+    .type(NPCDefinition.NPCType.MERCHANT)
+    .behavior("idle")
+    .interactable(true)
+    .dialog(
+        DialogNode.withOptions("greeting", "Hello! Would you like to trade?",
+            DialogOption.of("Yes, show me your wares", "trade"),
+            DialogOption.of("No thanks", null)
+        )
+    )
+    .build();
+
+// Spawn NPC
+var npc = NPCAPI.spawn(shopkeeper, location);
+
+// Set patrol points
+npc.setPatrolPoints(List.of(
+    Vec3i.of(0, 64, 0),
+    Vec3i.of(10, 64, 0),
+    Vec3i.of(10, 64, 10),
+    Vec3i.of(0, 64, 10)
+));
+npc.setBehavior("patrol");
 ```
 
-### Economy System
+### AI Behavior Trees
 
 ```java
-// Give player money
-EconomyAPI.deposit(playerId, 100.0);
+var tree = AIBehaviorAPI.createTree("guard_ai")
+    .root(AIBehaviorAPI.selector(
+        // If enemy nearby, attack
+        AIBehaviorAPI.condition(
+            ctx -> ctx.target() != null,
+            AIBehaviorAPI.sequence(
+                AIBehaviorAPI.moveToTarget(),
+                AIBehaviorAPI.attack()
+            )
+        ),
+        // Otherwise patrol
+        AIBehaviorAPI.patrol(patrolPoints)
+    ))
+    .build();
 
-// Check balance
-double balance = EconomyAPI.getBalance(playerId);
-
-// Transfer money
-EconomyAPI.transfer(fromId, toId, 50.0);
+AIBehaviorAPI.registerTree(tree);
 ```
 
-## Debugging Tips
+### Custom Inventories
 
-1. **Enable Debug Mode**: Set `debug-mode=true` in server.properties
-2. **Check Logs**: View `test-server/logs/latest.log`
-3. **Hot Reload**: Use `/reload` to reload configuration without restart
-4. **Force Rebuild**: Run `./run-server.sh --rebuild`
+```java
+var menu = InventoryAPI.create("Shop", 3);
+menu.setSlot(13, "diamond", ctx -> {
+    // Handle click
+    player.sendMessage("You clicked the diamond!");
+});
+menu.onClose(playerId -> {
+    // Handle close
+});
+InventoryAPI.open(playerId, menu);
+```
+
+### Boss Bars
+
+```java
+var bar = BossBarAPI.create("boss_health")
+    .title("&4Dragon Boss")
+    .color(BossBarAPI.BarColor.RED)
+    .progress(1.0f)
+    .build();
+
+BossBarAPI.register(bar);
+BossBarAPI.showTo("boss_health", playerId);
+
+// Update progress
+bar.setProgress(boss.getHealth() / boss.getMaxHealth());
+```
+
+## Server Configuration
+
+Edit `test-server/config/server.properties`:
+
+```properties
+# Server Settings
+server-name=Rubidium Test Server
+server-port=5520
+max-players=20
+
+# Performance
+view-distance=8
+
+# Authentication
+auth-mode=offline
+
+# Features
+enable-command-block=true
+spawn-protection=0
+allow-flight=true
+pvp=true
+```
 
 ## JVM Arguments
 
-For better performance or debugging, modify `run-server.sh`:
+The `start.sh` script includes optimized JVM flags. For debugging:
 
 ```bash
-# Debug mode
-java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 -jar rubidium.jar
+# Remote debugging
+java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 \
+    -jar HytaleServer.jar --accept-early-plugins
 
 # More memory
-java -Xms1G -Xmx4G -jar rubidium.jar
+java -Xms2G -Xmx8G -jar HytaleServer.jar --accept-early-plugins
 
-# GC tuning
-java -XX:+UseZGC -Xms2G -Xmx2G -jar rubidium.jar
+# AOT compilation (faster startup)
+java -XX:AOTCache=HytaleServer.aot -jar HytaleServer.jar --accept-early-plugins
 ```
+
+## Troubleshooting
+
+1. **Plugin not loading**: Check `earlyplugins/` folder and manifest.json
+2. **Port in use**: Change port in server.properties or use `--bind 0.0.0.0:5521`
+3. **Out of memory**: Increase `-Xmx` in start.sh
+4. **Authentication errors**: Use `--auth-mode offline` for local testing
