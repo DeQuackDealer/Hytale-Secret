@@ -123,6 +123,31 @@ tasks.register("copyToPlugins") {
     }
 }
 
+tasks.register<Jar>("launcherJar") {
+    archiveBaseName.set("TestServerLauncher")
+    archiveClassifier.set("")
+    archiveVersion.set("")
+    
+    from(sourceSets.main.get().output) {
+        include("launcher/**")
+    }
+    
+    manifest {
+        attributes("Main-Class" to "launcher.TestServerLauncher")
+    }
+    
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.register("buildAll") {
+    dependsOn(tasks.named("shadowJar"), tasks.named("launcherJar"))
+    doLast {
+        println("Built artifacts:")
+        println("  - build/libs/Rubidium-${version}.jar (Framework)")
+        println("  - build/libs/TestServerLauncher.jar (Launcher GUI)")
+    }
+}
+
 sourceSets {
     main {
         java {
