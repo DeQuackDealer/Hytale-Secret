@@ -29,7 +29,15 @@ import rubidium.voicechat.VoiceChatModule;
 import rubidium.ui.components.UIContainer;
 
 import java.util.*;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 import java.util.logging.Logger;
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+
+import rubidium.core.tier.FeatureRegistry;
+import rubidium.core.tier.ProductTier;
 
 public class RubidiumHytaleEntry extends JavaPlugin {
     
@@ -37,6 +45,7 @@ public class RubidiumHytaleEntry extends JavaPlugin {
     private static final Logger LOGGER = Logger.getLogger("Rubidium");
     private static boolean isServer = true;
     private static boolean initialized = false;
+    private static ProductTier detectedTier = ProductTier.FREE;
     
     private AdminUIModule adminModule;
     private MinimapModule minimapModule;
@@ -62,6 +71,12 @@ public class RubidiumHytaleEntry extends JavaPlugin {
         LOGGER.info("[Rubidium] Framework initializing...");
         LOGGER.info("[Rubidium] Mode: " + (isServer ? "Server/Singleplayer" : "Client"));
         
+        detectedTier = detectProductTier();
+        LOGGER.info("[Rubidium] Detected edition: " + detectedTier.getDisplayName());
+        
+        FeatureRegistry.initialize(detectedTier);
+        LOGGER.info("[Rubidium] Feature registry initialized with " + FeatureRegistry.getAllFeatures().size() + " features");
+        
         initModules();
         registerCommands();
         registerSettingsTab();
@@ -76,20 +91,83 @@ public class RubidiumHytaleEntry extends JavaPlugin {
         logAvailableFeatures();
     }
     
+    private ProductTier detectProductTier() {
+        try {
+            File jarFile = new File(getClass().getProtectionDomain().getCodeSource().getLocation().toURI());
+            
+            if (jarFile.isFile() && jarFile.getName().endsWith(".jar")) {
+                try (JarFile jar = new JarFile(jarFile)) {
+                    Manifest manifest = jar.getManifest();
+                    if (manifest != null) {
+                        String tierValue = manifest.getMainAttributes().getValue("Rubidium-Tier");
+                        String premiumValue = manifest.getMainAttributes().getValue("Rubidium-Premium");
+                        
+                        LOGGER.info("[Rubidium] Manifest: Tier=" + tierValue + ", Premium=" + premiumValue);
+                        
+                        if ("PLUS".equalsIgnoreCase(tierValue) || "true".equalsIgnoreCase(premiumValue)) {
+                            LOGGER.info("[Rubidium] Premium manifest detected - enabling Plus edition");
+                            return ProductTier.PLUS;
+                        }
+                    }
+                }
+            }
+            
+            boolean hasNpcApi = false;
+            try {
+                Class.forName("rubidium.api.npc.NPCAPI");
+                hasNpcApi = true;
+            } catch (ClassNotFoundException e) {
+            }
+            
+            boolean hasAiApi = false;
+            try {
+                Class.forName("rubidium.api.ai.AIBehaviorAPI");
+                hasAiApi = true;
+            } catch (ClassNotFoundException e) {
+            }
+            
+            if (hasNpcApi && hasAiApi) {
+                LOGGER.info("[Rubidium] Premium APIs detected via classloader - enabling Plus edition");
+                return ProductTier.PLUS;
+            }
+            
+        } catch (URISyntaxException | IOException e) {
+            LOGGER.warning("[Rubidium] Could not detect tier from manifest: " + e.getMessage());
+        }
+        
+        LOGGER.info("[Rubidium] Defaulting to Free edition");
+        return ProductTier.FREE;
+    }
+    
     private void initModules() {
         statsModule = new PerformanceStatsModule();
-        statsModule.onEnable();
+        FeatureRegistry.withFeature("feature.statistics", () -> {
+            statsModule.onEnable();
+            LOGGER.info("[Rubidium] Performance Statistics module enabled");
+        });
         
         minimapModule = new MinimapModule();
-        minimapModule.onEnable();
+        FeatureRegistry.withFeature("feature.minimap", () -> {
+            minimapModule.onEnable();
+            LOGGER.info("[Rubidium] Minimap module enabled");
+        });
         
         voiceChatModule = new VoiceChatModule();
-        voiceChatModule.onEnable();
+        FeatureRegistry.withFeature("feature.voicechat", () -> {
+            voiceChatModule.onEnable();
+            LOGGER.info("[Rubidium] Voice Chat module enabled");
+        });
         
         adminModule = new AdminUIModule();
-        adminModule.onEnable();
+        FeatureRegistry.withFeature("feature.adminpanel", () -> {
+            adminModule.onEnable();
+            LOGGER.info("[Rubidium] Admin Panel module enabled");
+        });
         
-        LOGGER.info("[Rubidium] All modules initialized");
+        int enabledCount = (int) FeatureRegistry.getAllFeatures().stream()
+            .filter(FeatureRegistry.Feature::isEnabled)
+            .count();
+        LOGGER.info("[Rubidium] Modules initialized (" + enabledCount + " features enabled)");
     }
     
     private void registerSettingsTab() {
@@ -436,13 +514,41 @@ public class RubidiumHytaleEntry extends JavaPlugin {
     }
     
     private void logAvailableFeatures() {
-        LOGGER.info("[Rubidium] Features:");
-        LOGGER.info("[Rubidium]   - Minimap with integrated waypoints");
-        LOGGER.info("[Rubidium]   - Voice Chat with PTT support");
-        LOGGER.info("[Rubidium]   - Performance Statistics (FPS/DPS/RAM)");
-        LOGGER.info("[Rubidium]   - HUD Editor for custom layouts");
-        LOGGER.info("[Rubidium]   - Admin Panel with 8 management panels");
-        LOGGER.info("[Rubidium]   - Settings Tab integration");
+        ProductTier tier = FeatureRegistry.getCurrentTier();
+        int total = FeatureRegistry.getAllFeatures().size();
+        long enabled = FeatureRegistry.getAllFeatures().stream()
+            .filter(FeatureRegistry.Feature::isEnabled)
+            .count();
+        
+        LOGGER.info("[Rubidium] ==========================================");
+        LOGGER.info("[Rubidium]  Edition: " + tier.getDisplayName());
+        LOGGER.info("[Rubidium]  Features: " + enabled + "/" + total + " enabled");
+        LOGGER.info("[Rubidium] ==========================================");
+        
+        if (tier.isPremium()) {
+            LOGGER.info("[Rubidium] Premium Features Enabled:");
+            LOGGER.info("[Rubidium]   + Minimap with integrated waypoints");
+            LOGGER.info("[Rubidium]   + Voice Chat with PTT support");
+            LOGGER.info("[Rubidium]   + Performance Statistics (FPS/DPS/RAM)");
+            LOGGER.info("[Rubidium]   + HUD Editor for custom layouts");
+            LOGGER.info("[Rubidium]   + Admin Panel with 8 management panels");
+            LOGGER.info("[Rubidium]   + NPC API with AI behaviors");
+            LOGGER.info("[Rubidium]   + Pathfinding, Economy, Particles APIs");
+            LOGGER.info("[Rubidium]   + Hytale UI Integration");
+        } else {
+            LOGGER.info("[Rubidium] Free Features Enabled:");
+            LOGGER.info("[Rubidium]   + Core optimizations (Memory, Network, Threading)");
+            LOGGER.info("[Rubidium]   + Command, Chat, Event, Config APIs");
+            LOGGER.info("[Rubidium]   + Plugin System");
+            LOGGER.info("[Rubidium]   + Player API");
+            LOGGER.info("[Rubidium] ");
+            LOGGER.info("[Rubidium] Upgrade to Rubidium Plus for:");
+            LOGGER.info("[Rubidium]   - Minimap, Voice Chat, HUD Editor");
+            LOGGER.info("[Rubidium]   - NPC, AI, Pathfinding APIs");
+            LOGGER.info("[Rubidium]   - Admin Panel, and more!");
+            LOGGER.info("[Rubidium]   Visit: rubidium.dev/plus");
+        }
+        
         LOGGER.info("[Rubidium] ");
         LOGGER.info("[Rubidium] Commands: /rubidium, /settings, /toggle, /hud, /waypoint");
         LOGGER.info("[Rubidium] Admin: /admin, /giveadmin, /removeadmin, /toggleopti");
