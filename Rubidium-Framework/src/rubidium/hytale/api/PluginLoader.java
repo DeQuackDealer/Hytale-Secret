@@ -12,18 +12,46 @@ import java.util.logging.Logger;
  */
 public class PluginLoader {
     
+    public enum Environment {
+        HYTALE_SERVER,
+        STANDALONE,
+        SINGLEPLAYER;
+        
+        public static Environment detect() {
+            try {
+                Class.forName("com.hypixel.hytale.server.HytaleServer");
+                return HYTALE_SERVER;
+            } catch (ClassNotFoundException e) {
+                String mode = System.getProperty("rubidium.mode", "");
+                if ("standalone".equalsIgnoreCase(mode)) {
+                    return STANDALONE;
+                } else if ("singleplayer".equalsIgnoreCase(mode)) {
+                    return SINGLEPLAYER;
+                }
+                return STANDALONE;
+            }
+        }
+    }
+    
     private static final Logger logger = Logger.getLogger("Rubidium-PluginLoader");
     
     private final Path pluginsDirectory;
     private final List<JavaPlugin> loadedPlugins;
     private final List<com.hypixel.hytale.server.core.plugin.JavaPlugin> loadedHytalePlugins;
     private final Map<String, Object> pluginsByName;
+    private final Environment environment;
     
     public PluginLoader(Path pluginsDirectory) {
+        this(pluginsDirectory, Environment.detect());
+    }
+    
+    public PluginLoader(Path pluginsDirectory, Environment environment) {
         this.pluginsDirectory = pluginsDirectory;
         this.loadedPlugins = new ArrayList<>();
         this.loadedHytalePlugins = new ArrayList<>();
         this.pluginsByName = new HashMap<>();
+        this.environment = environment;
+        logger.info("PluginLoader initialized in " + environment + " mode");
     }
     
     public void loadPlugins() throws IOException {
@@ -104,9 +132,9 @@ public class PluginLoader {
         String json = new String(in.readAllBytes());
         String name = extractJsonString(json, "Name");
         String version = extractJsonString(json, "Version");
-        String standaloneMain = extractJsonString(json, "StandaloneMain");
-        String mainClass = standaloneMain != null ? standaloneMain : extractJsonString(json, "Main");
         String description = extractJsonString(json, "Description");
+        
+        String mainClass = resolveEntryPoint(json);
         
         return new PluginMetadata(
             name != null ? name : "Unknown",
@@ -114,6 +142,28 @@ public class PluginLoader {
             mainClass != null ? mainClass : "",
             description != null ? description : ""
         );
+    }
+    
+    private String resolveEntryPoint(String json) {
+        String entryPointsEnvKey = switch (environment) {
+            case HYTALE_SERVER -> "hytale-server";
+            case STANDALONE -> "rubidium-standalone";
+            case SINGLEPLAYER -> "singleplayer";
+        };
+        
+        String entryPointPattern = "\"" + entryPointsEnvKey + "\"\\s*:\\s*\"([^\"]+)\"";
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile(entryPointPattern).matcher(json);
+        if (m.find()) {
+            logger.fine("Using EntryPoints[" + entryPointsEnvKey + "]: " + m.group(1));
+            return m.group(1);
+        }
+        
+        if (environment == Environment.HYTALE_SERVER) {
+            return extractJsonString(json, "Main");
+        } else {
+            String standaloneMain = extractJsonString(json, "StandaloneMain");
+            return standaloneMain != null ? standaloneMain : extractJsonString(json, "Main");
+        }
     }
     
     private PluginMetadata parsePluginJson(InputStream in) throws IOException {
