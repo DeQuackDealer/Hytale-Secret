@@ -5,7 +5,11 @@ import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.command.CommandSender;
 import com.hypixel.hytale.server.core.command.PluginCommand;
 
+import com.hypixel.hytale.server.core.entity.entities.player.pages.PageManager;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+
 import rubidium.admin.AdminUIModule;
+import rubidium.hytale.adapter.HytalePlayerBridge;
 import rubidium.api.npc.NPCAPI;
 import rubidium.api.player.Player;
 import rubidium.api.scheduler.SchedulerAPI;
@@ -13,6 +17,8 @@ import rubidium.api.server.Server;
 import rubidium.command.RubidiumCommandAPI;
 import rubidium.hud.HUDEditorUI;
 import rubidium.hud.HUDRegistry;
+import rubidium.hytale.ui.RubidiumHudManager;
+import rubidium.hytale.ui.RubidiumSettingsPage;
 import rubidium.minimap.MinimapModule;
 import rubidium.settings.PlayerSettings;
 import rubidium.settings.RubidiumSettingsTab;
@@ -130,15 +136,26 @@ public class RubidiumHytaleEntry extends JavaPlugin {
                     return true;
                 }
                 
-                Player player = Server.getPlayer(sender.getUniqueId()).orElse(null);
-                if (player == null) {
-                    sender.sendMessage("&cCould not find player data");
-                    return true;
-                }
+                UUID playerId = sender.getUniqueId();
+                HytalePlayerBridge bridge = HytalePlayerBridge.get();
                 
-                UIContainer settingsUI = RubidiumSettingsTab.create(player);
-                player.sendPacket(settingsUI);
-                sender.sendMessage("&aOpening Rubidium Settings...");
+                var playerRefOpt = bridge.getPlayerRef(playerId);
+                var pageManagerOpt = bridge.getPageManager(playerId);
+                
+                if (playerRefOpt.isPresent() && pageManagerOpt.isPresent()) {
+                    RubidiumSettingsPage settingsPage = new RubidiumSettingsPage(playerRefOpt.get(), playerId);
+                    pageManagerOpt.get().openPage(settingsPage);
+                    sender.sendMessage("&aOpening Rubidium Settings...");
+                } else {
+                    Player player = Server.getPlayer(playerId).orElse(null);
+                    if (player != null) {
+                        UIContainer settingsUI = RubidiumSettingsTab.create(player);
+                        player.sendPacket(settingsUI);
+                        sender.sendMessage("&aOpening Rubidium Settings...");
+                    } else {
+                        sender.sendMessage("&cCould not open settings page");
+                    }
+                }
                 return true;
             }
         });

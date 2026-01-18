@@ -16,6 +16,7 @@ public class PlayerSettings {
     private float minimapZoom = 1.0f;
     private int minimapSize = 150;
     private boolean minimapRotate = true;
+    private boolean minimapCompass = true;
     
     private float voiceChatVolume = 1.0f;
     private String pushToTalkKey = "V";
@@ -57,6 +58,27 @@ public class PlayerSettings {
     
     public boolean isMinimapRotate() { return minimapRotate; }
     public void setMinimapRotate(boolean rotate) { this.minimapRotate = rotate; }
+    
+    public boolean isMinimapRotateEnabled() { return minimapRotate; }
+    public void setMinimapRotateEnabled(boolean rotate) { this.minimapRotate = rotate; }
+    
+    public boolean isMinimapCompassEnabled() { return minimapCompass; }
+    public void setMinimapCompassEnabled(boolean compass) { this.minimapCompass = compass; }
+    
+    public void resetToDefaults() {
+        this.minimapEnabled = true;
+        this.statisticsEnabled = false;
+        this.voiceChatEnabled = true;
+        this.waypointsEnabled = true;
+        this.minimapZoom = 1.0f;
+        this.minimapSize = 150;
+        this.minimapRotate = true;
+        this.minimapCompass = true;
+        this.voiceChatVolume = 1.0f;
+        this.pushToTalkKey = "V";
+        this.voiceChatPTTMode = true;
+        initDefaults();
+    }
     
     public float getVoiceChatVolume() { return voiceChatVolume; }
     public void setVoiceChatVolume(float volume) { this.voiceChatVolume = Math.max(0f, Math.min(2.0f, volume)); }
