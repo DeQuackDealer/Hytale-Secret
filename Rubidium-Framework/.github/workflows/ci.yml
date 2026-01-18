@@ -30,19 +30,32 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew build --no-daemon
     
-    - name: Build Shadow JAR
-      run: ./gradlew shadowJar --no-daemon
+    - name: Build Free Edition (rubidium.jar)
+      run: ./gradlew rubidiumFreeJar --no-daemon
+    
+    - name: Build Plus Edition (rubidium_plus.jar)
+      run: ./gradlew rubidiumPlusJar --no-daemon
     
     - name: Run tests
       run: ./gradlew test --no-daemon
       continue-on-error: true
     
-    - name: Upload build artifacts
+    - name: List build artifacts
+      run: ls -la build/libs/
+    
+    - name: Upload Free Edition
       uses: actions/upload-artifact@v4
       with:
-        name: Rubidium-${{ matrix.java }}
-        path: build/libs/*.jar
-        retention-days: 14
+        name: rubidium-free-jdk${{ matrix.java }}
+        path: build/libs/rubidium.jar
+        retention-days: 30
+    
+    - name: Upload Plus Edition
+      uses: actions/upload-artifact@v4
+      with:
+        name: rubidium-plus-jdk${{ matrix.java }}
+        path: build/libs/rubidium_plus.jar
+        retention-days: 30
 
   validate:
     runs-on: ubuntu-latest
@@ -61,12 +74,79 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     
-    - name: Validate JAR structure
+    - name: Build both editions
+      run: ./gradlew buildAllEditions --no-daemon
+    
+    - name: Validate Free Edition structure
       run: |
-        ./gradlew shadowJar --no-daemon
-        echo "Checking JAR contents..."
-        jar tf build/libs/Rubidium-*.jar | grep -E "^rubidium/" | head -30
-        echo "Verifying core classes exist..."
-        jar tf build/libs/Rubidium-*.jar | grep -q "rubidium/api/chat/ChatAPI.class" && echo "ChatAPI found"
-        jar tf build/libs/Rubidium-*.jar | grep -q "rubidium/api/command/CommandAPI.class" && echo "CommandAPI found"
-        jar tf build/libs/Rubidium-*.jar | grep -q "rubidium/api/npc/NPCAPI.class" && echo "NPCAPI found"
+        echo "=== Rubidium Free Edition ==="
+        echo "Checking rubidium.jar contents..."
+        jar tf build/libs/rubidium.jar | grep -E "^rubidium/" | head -30
+        echo ""
+        echo "Verifying FREE APIs exist..."
+        jar tf build/libs/rubidium.jar | grep -q "rubidium/api/chat/ChatAPI.class" && echo "✓ ChatAPI"
+        jar tf build/libs/rubidium.jar | grep -q "rubidium/api/command/CommandAPI.class" && echo "✓ CommandAPI"
+        jar tf build/libs/rubidium.jar | grep -q "rubidium/api/event/EventAPI.class" && echo "✓ EventAPI"
+        jar tf build/libs/rubidium.jar | grep -q "rubidium/api/config/ConfigAPI.class" && echo "✓ ConfigAPI"
+        jar tf build/libs/rubidium.jar | grep -q "rubidium/core/tier/FeatureRegistry.class" && echo "✓ FeatureRegistry"
+        echo ""
+        echo "Verifying Plus-only APIs are EXCLUDED..."
+        ! jar tf build/libs/rubidium.jar | grep -q "rubidium/api/npc/NPCAPI.class" && echo "✓ NPCAPI excluded"
+        ! jar tf build/libs/rubidium.jar | grep -q "rubidium/feature/voicechat" && echo "✓ VoiceChat excluded"
+        echo ""
+        echo "Free edition size: $(du -h build/libs/rubidium.jar | cut -f1)"
+    
+    - name: Validate Plus Edition structure
+      run: |
+        echo "=== Rubidium Plus Edition ==="
+        echo "Checking rubidium_plus.jar contents..."
+        jar tf build/libs/rubidium_plus.jar | grep -E "^rubidium/" | head -40
+        echo ""
+        echo "Verifying ALL APIs exist..."
+        jar tf build/libs/rubidium_plus.jar | grep -q "rubidium/api/chat/ChatAPI.class" && echo "✓ ChatAPI"
+        jar tf build/libs/rubidium_plus.jar | grep -q "rubidium/api/command/CommandAPI.class" && echo "✓ CommandAPI"
+        jar tf build/libs/rubidium_plus.jar | grep -q "rubidium/api/npc/NPCAPI.class" && echo "✓ NPCAPI"
+        jar tf build/libs/rubidium_plus.jar | grep -q "rubidium/api/ai/AIBehaviorAPI.class" && echo "✓ AIBehaviorAPI"
+        jar tf build/libs/rubidium_plus.jar | grep -q "rubidium/api/pathfinding/PathfindingAPI.class" && echo "✓ PathfindingAPI"
+        jar tf build/libs/rubidium_plus.jar | grep -q "rubidium/core/tier/FeatureRegistry.class" && echo "✓ FeatureRegistry"
+        echo ""
+        echo "Plus edition size: $(du -h build/libs/rubidium_plus.jar | cut -f1)"
+    
+    - name: Compare editions
+      run: |
+        echo "=== Edition Comparison ==="
+        FREE_SIZE=$(stat -f%z build/libs/rubidium.jar 2>/dev/null || stat -c%s build/libs/rubidium.jar)
+        PLUS_SIZE=$(stat -f%z build/libs/rubidium_plus.jar 2>/dev/null || stat -c%s build/libs/rubidium_plus.jar)
+        echo "Free edition: $FREE_SIZE bytes"
+        echo "Plus edition: $PLUS_SIZE bytes"
+        echo "Difference: $((PLUS_SIZE - FREE_SIZE)) bytes"
+
+  release:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs: validate
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+    
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    
+    - name: Build release artifacts
+      run: ./gradlew buildAllEditions --no-daemon
+    
+    - name: Upload release artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: rubidium-release
+        path: |
+          build/libs/rubidium.jar
+          build/libs/rubidium_plus.jar
+        retention-days: 90

@@ -73,10 +73,8 @@ tasks.jar {
     }
 }
 
-tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
-    archiveBaseName.set("Rubidium")
-    archiveClassifier.set("")
-    
+// Common shadow configuration for both editions
+fun com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar.configureCommon(tier: String, isPremium: Boolean) {
     // CRITICAL: Exclude development stubs - they would conflict with real Hytale classes at runtime
     exclude("com/hypixel/**")
     
@@ -101,8 +99,71 @@ tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJ
         attributes(
             "Implementation-Title" to "Rubidium Framework",
             "Implementation-Version" to project.version,
-            "Rubidium-Version" to "1.0.0"
+            "Rubidium-Version" to "1.0.0",
+            "Rubidium-Tier" to tier,
+            "Rubidium-Premium" to isPremium.toString()
         )
+    }
+}
+
+// FREE Edition - rubidium.jar
+// Includes: Optimization, Plugin system, Command/Chat/Event/Config APIs
+tasks.register<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("rubidiumFreeJar") {
+    archiveBaseName.set("rubidium")
+    archiveClassifier.set("")
+    archiveVersion.set("")
+    from(sourceSets.main.get().output)
+    configurations = listOf(project.configurations.runtimeClasspath.get())
+    
+    configureCommon("FREE", false)
+    
+    // Exclude Plus-only features from FREE edition
+    exclude("rubidium/feature/voicechat/**")
+    exclude("rubidium/feature/minimap/**")
+    exclude("rubidium/feature/statistics/**")
+    exclude("rubidium/feature/hudeditor/**")
+    exclude("rubidium/feature/adminpanel/**")
+    exclude("rubidium/replay/**")
+    exclude("rubidium/api/npc/**")
+    exclude("rubidium/api/ai/**")
+    exclude("rubidium/api/pathfinding/**")
+    exclude("rubidium/api/worldgen/**")
+    exclude("rubidium/api/inventory/**")
+    exclude("rubidium/api/economy/**")
+    exclude("rubidium/api/particles/**")
+    exclude("rubidium/api/bossbar/**")
+    exclude("rubidium/api/scoreboard/**")
+    exclude("rubidium/hytale/ui/**")
+    exclude("rubidium/hytale/adapter/**")
+}
+
+// PLUS Edition - rubidium_plus.jar
+// Includes: Everything
+tasks.register<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("rubidiumPlusJar") {
+    archiveBaseName.set("rubidium_plus")
+    archiveClassifier.set("")
+    archiveVersion.set("")
+    from(sourceSets.main.get().output)
+    configurations = listOf(project.configurations.runtimeClasspath.get())
+    
+    configureCommon("PLUS", true)
+}
+
+// Default shadowJar builds Plus edition
+tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
+    archiveBaseName.set("Rubidium")
+    archiveClassifier.set("")
+    
+    configureCommon("PLUS", true)
+}
+
+// Build both editions
+tasks.register("buildAllEditions") {
+    dependsOn("rubidiumFreeJar", "rubidiumPlusJar")
+    doLast {
+        println("Built both Rubidium editions:")
+        println("  - build/libs/rubidium.jar (Free Edition)")
+        println("  - build/libs/rubidium_plus.jar (Plus Edition)")
     }
 }
 
