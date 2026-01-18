@@ -168,87 +168,203 @@ public class MinimapModule implements RubidiumModule {
             int x = ctx.resolveX(position);
             int y = ctx.resolveY(position);
             int size = position.getWidth();
+            int mapViewSize = size - 10;
+            int mapAreaSize = size - 35;
             
             PlayerSettings settings = SettingsRegistry.get().getPlayerSettings(playerId);
+            float zoom = settings.getMinimapZoom();
+            boolean rotate = settings.isMinimapRotate();
+            
+            Player player = rubidium.api.server.Server.getPlayer(playerId).orElse(null);
+            double playerX = player != null ? player.getX() : 0;
+            double playerY = player != null ? player.getY() : 0;
+            double playerZ = player != null ? player.getZ() : 0;
             
             UIContainer mapPanel = new UIContainer("minimap_hud")
                 .setPosition(x, y)
-                .setSize(size, size)
-                .setBackground(0x1E1E23DD);
+                .setSize(size, size + 25)
+                .setBackground(0x1E1E23EE);
+            
+            UIContainer mapFrame = new UIContainer("map_frame")
+                .setPosition(5, 5)
+                .setSize(mapViewSize, mapViewSize)
+                .setBackground(0x14141ABB);
             
             UIContainer mapView = new UIContainer("map_view")
-                .setPosition(5, 5)
-                .setSize(size - 10, size - 30)
-                .setBackground(0x2D4F2D);
+                .setPosition(2, 2)
+                .setSize(mapAreaSize, mapAreaSize)
+                .setBackground(0x2A4A35);
             
-            mapView.addChild(new UIText("map_center")
-                .setText("+")
-                .setFontSize(16)
-                .setColor(0xFFFFFF)
-                .setPosition((size - 10) / 2 - 5, (size - 30) / 2 - 8));
+            mapView.addChild(new UIContainer("map_grid_h1")
+                .setPosition(0, mapAreaSize / 3)
+                .setSize(mapAreaSize, 1)
+                .setBackground(0x1A3A2540));
+            mapView.addChild(new UIContainer("map_grid_h2")
+                .setPosition(0, 2 * mapAreaSize / 3)
+                .setSize(mapAreaSize, 1)
+                .setBackground(0x1A3A2540));
+            mapView.addChild(new UIContainer("map_grid_v1")
+                .setPosition(mapAreaSize / 3, 0)
+                .setSize(1, mapAreaSize)
+                .setBackground(0x1A3A2540));
+            mapView.addChild(new UIContainer("map_grid_v2")
+                .setPosition(2 * mapAreaSize / 3, 0)
+                .setSize(1, mapAreaSize)
+                .setBackground(0x1A3A2540));
+            
+            int centerX = mapAreaSize / 2;
+            int centerY = mapAreaSize / 2;
+            
+            mapView.addChild(new UIText("player_marker")
+                .setText("\u25B2")
+                .setFontSize(14)
+                .setColor(0x4A90D9)
+                .setPosition(centerX - 5, centerY - 7));
+            
+            mapView.addChild(new UIContainer("player_dot")
+                .setPosition(centerX - 2, centerY - 2)
+                .setSize(4, 4)
+                .setBackground(0xFFFFFF));
             
             List<Waypoint> waypoints = getWaypoints(playerId);
-            int wpY = 10;
+            double viewRadius = 100.0 / zoom;
+            int wpIndex = 0;
+            
             for (Waypoint wp : waypoints) {
                 if (!wp.isVisible()) continue;
                 
-                int wpX = (int) ((wp.getX() % 100) + 50);
-                int wpZ = (int) ((wp.getZ() % 100) + 50);
+                double relX = wp.getX() - playerX;
+                double relZ = wp.getZ() - playerZ;
+                double dist = Math.sqrt(relX * relX + relZ * relZ);
                 
-                wpX = Math.max(5, Math.min(size - 25, wpX));
-                wpZ = Math.max(5, Math.min(size - 45, wpZ));
+                double normX = relX / viewRadius;
+                double normZ = relZ / viewRadius;
                 
-                mapView.addChild(new UIText("wp_" + wp.getId())
-                    .setText("*")
-                    .setFontSize(14)
+                boolean isOnMap = Math.abs(normX) <= 1.0 && Math.abs(normZ) <= 1.0;
+                
+                if (!isOnMap) {
+                    double angle = Math.atan2(normZ, normX);
+                    normX = Math.cos(angle) * 0.9;
+                    normZ = Math.sin(angle) * 0.9;
+                }
+                
+                int wpScreenX = centerX + (int)(normX * (mapAreaSize / 2 - 10));
+                int wpScreenY = centerY + (int)(normZ * (mapAreaSize / 2 - 10));
+                
+                wpScreenX = Math.max(8, Math.min(mapAreaSize - 12, wpScreenX));
+                wpScreenY = Math.max(8, Math.min(mapAreaSize - 12, wpScreenY));
+                
+                String wpIcon = isOnMap ? "\u25C6" : "\u25C7";
+                mapView.addChild(new UIText("wp_icon_" + wpIndex)
+                    .setText(wpIcon)
+                    .setFontSize(isOnMap ? 10 : 8)
                     .setColor(wp.getColor())
-                    .setPosition(wpX, wpZ));
+                    .setPosition(wpScreenX - 4, wpScreenY - 5));
+                
+                if (isOnMap && dist < viewRadius * 0.5) {
+                    mapView.addChild(new UIText("wp_name_" + wpIndex)
+                        .setText(wp.getName())
+                        .setFontSize(8)
+                        .setColor(0xD0D0D5)
+                        .setPosition(wpScreenX + 6, wpScreenY - 4));
+                }
+                
+                wpIndex++;
             }
             
-            mapPanel.addChild(mapView);
+            mapFrame.addChild(mapView);
+            
+            int compassSize = 16;
+            mapFrame.addChild(new UIText("compass_n")
+                .setText("N")
+                .setFontSize(10)
+                .setColor(0xFF6B6B)
+                .setPosition(mapViewSize / 2 - 3, 4));
+            mapFrame.addChild(new UIText("compass_s")
+                .setText("S")
+                .setFontSize(9)
+                .setColor(0xA0A0AA)
+                .setPosition(mapViewSize / 2 - 3, mapViewSize - 12));
+            mapFrame.addChild(new UIText("compass_e")
+                .setText("E")
+                .setFontSize(9)
+                .setColor(0xA0A0AA)
+                .setPosition(mapViewSize - 10, mapViewSize / 2 - 4));
+            mapFrame.addChild(new UIText("compass_w")
+                .setText("W")
+                .setFontSize(9)
+                .setColor(0xA0A0AA)
+                .setPosition(4, mapViewSize / 2 - 4));
+            
+            mapPanel.addChild(mapFrame);
             
             UIContainer controls = new UIContainer("map_controls")
-                .setPosition(5, size - 25)
-                .setSize(size - 10, 20)
-                .setBackground(0x14141A);
+                .setPosition(5, size - 5)
+                .setSize(mapViewSize, 22)
+                .setBackground(0x14141ACC);
             
             controls.addChild(new UIButton("zoom_in")
                 .setText("+")
                 .setSize(20, 18)
-                .setPosition(2, 1)
-                .setBackground(0x505060)
-                .onClick(() -> {
-                    settings.setMinimapZoom(settings.getMinimapZoom() + 0.25f);
-                }));
+                .setPosition(2, 2)
+                .setBackground(0x404050)
+                .onClick(() -> settings.setMinimapZoom(zoom + 0.25f)));
             
             controls.addChild(new UIButton("zoom_out")
                 .setText("-")
                 .setSize(20, 18)
-                .setPosition(24, 1)
-                .setBackground(0x505060)
-                .onClick(() -> {
-                    settings.setMinimapZoom(settings.getMinimapZoom() - 0.25f);
-                }));
+                .setPosition(24, 2)
+                .setBackground(0x404050)
+                .onClick(() -> settings.setMinimapZoom(zoom - 0.25f)));
             
             controls.addChild(new UIText("zoom_level")
-                .setText(String.format("%.1fx", settings.getMinimapZoom()))
-                .setFontSize(10)
-                .setColor(0xA0A0AA)
-                .setPosition(50, 4));
-            
-            controls.addChild(new UIText("coords")
-                .setText("0, 0, 0")
+                .setText(String.format("%.1fx", zoom))
                 .setFontSize(9)
-                .setColor(0x808090)
-                .setPosition(85, 4));
+                .setColor(0xA0A0AA)
+                .setPosition(48, 6));
+            
+            String rotateIcon = rotate ? "\u21BB" : "\u2191";
+            controls.addChild(new UIButton("rotate_toggle")
+                .setText(rotateIcon)
+                .setSize(18, 18)
+                .setPosition(mapViewSize - 22, 2)
+                .setBackground(rotate ? 0x4A90D9 : 0x404050)
+                .onClick(() -> settings.setMinimapRotate(!rotate)));
             
             mapPanel.addChild(controls);
+            
+            String coordsText = String.format("%.0f, %.0f, %.0f", playerX, playerY, playerZ);
+            mapPanel.addChild(new UIText("coordinates")
+                .setText(coordsText)
+                .setFontSize(9)
+                .setColor(0x808090)
+                .setPosition(8, size + 5));
+            
+            if (!waypoints.isEmpty()) {
+                Waypoint nearest = null;
+                double nearestDist = Double.MAX_VALUE;
+                for (Waypoint wp : waypoints) {
+                    double d = wp.distanceTo(playerX, playerY, playerZ);
+                    if (d < nearestDist) {
+                        nearestDist = d;
+                        nearest = wp;
+                    }
+                }
+                if (nearest != null) {
+                    String distText = String.format("%s: %.0fm", nearest.getName(), nearestDist);
+                    mapPanel.addChild(new UIText("nearest_wp")
+                        .setText(distText)
+                        .setFontSize(8)
+                        .setColor(nearest.getColor())
+                        .setPosition(8, size + 15));
+                }
+            }
         }
         
         @Override
-        public int getDefaultWidth() { return 150; }
+        public int getDefaultWidth() { return 160; }
         
         @Override
-        public int getDefaultHeight() { return 150; }
+        public int getDefaultHeight() { return 185; }
     }
 }
