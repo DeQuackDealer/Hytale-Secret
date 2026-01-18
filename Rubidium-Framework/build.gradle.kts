@@ -236,6 +236,39 @@ sourceSets {
     }
 }
 
+// Development JAR with stubs included (for testing outside of Hytale)
+tasks.register<Jar>("rubidiumDevJar") {
+    archiveBaseName.set("rubidium-dev")
+    archiveClassifier.set("")
+    
+    from(sourceSets.main.get().output)
+    
+    // Include ALL classes including stubs for dev testing
+    manifest {
+        attributes(
+            "Implementation-Title" to "Rubidium Framework (Dev)",
+            "Implementation-Version" to version,
+            "Main-Class" to "rubidium.test.RubidiumTestHarness",
+            "Rubidium-Tier" to "PLUS",
+            "Rubidium-Premium" to "true"
+        )
+    }
+    
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+// Task to run the test harness
+tasks.register<JavaExec>("runTestHarness") {
+    group = "verification"
+    description = "Run Rubidium test harness to verify plugin initialization"
+    
+    classpath = sourceSets.main.get().runtimeClasspath
+    mainClass.set("rubidium.test.RubidiumTestHarness")
+    
+    // JVM args for better output
+    jvmArgs = listOf("-Xmx512m")
+}
+
 publishing {
     publications {
         create<MavenPublication>("maven") {
