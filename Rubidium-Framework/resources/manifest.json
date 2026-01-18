@@ -4,6 +4,7 @@
   "Version": "1.0.0",
   "Description": "API Library for Hytale Plugin Development - Provides PathfindingAPI, NPCAPI, AIBehaviorAPI, and more",
   "Main": "rubidium.RubidiumHytaleEntry",
+  "StandaloneMain": "rubidium.RubidiumStandaloneEntry",
   "Authors": [
     {
       "Name": "Yellow Tale Team",
@@ -15,5 +16,10 @@
   "Dependencies": {},
   "OptionalDependencies": {},
   "DisabledByDefault": false,
-  "IncludesAssetPack": false
+  "IncludesAssetPack": false,
+  "EntryPoints": {
+    "hytale-server": "rubidium.RubidiumHytaleEntry",
+    "rubidium-standalone": "rubidium.RubidiumStandaloneEntry",
+    "singleplayer": "rubidium.RubidiumStandaloneEntry"
+  }
 }

@@ -54,19 +54,20 @@ else
 fi
 
 # Build Rubidium
-echo "[4/6] Building Rubidium Framework..."
+echo "[4/6] Building Rubidium Framework (Plus Edition)..."
 cd "$SCRIPT_DIR"
-if ./gradlew shadowJar --quiet 2>/dev/null; then
-    echo "  ✓ Rubidium built successfully"
+if ./gradlew rubidiumPlusJar --quiet 2>/dev/null; then
+    echo "  ✓ Rubidium Plus built successfully"
 else
     echo "  ⚠ Build had warnings (continuing...)"
 fi
 
 # Copy Rubidium to plugins
 echo "[5/6] Installing Rubidium plugin..."
-if [ -f "$SCRIPT_DIR/build/libs/Rubidium-1.0.0.jar" ]; then
-    cp "$SCRIPT_DIR/build/libs/Rubidium-1.0.0.jar" "$PLUGINS_DIR/"
-    echo "  ✓ Rubidium-1.0.0.jar installed to earlyplugins/"
+if [ -f "$SCRIPT_DIR/build/libs/rubidium_plus.jar" ]; then
+    rm -f "$PLUGINS_DIR/Rubidium-*.jar" "$PLUGINS_DIR/rubidium*.jar" 2>/dev/null
+    cp "$SCRIPT_DIR/build/libs/rubidium_plus.jar" "$PLUGINS_DIR/"
+    echo "  ✓ rubidium_plus.jar installed to earlyplugins/"
 else
     echo "  ✗ Rubidium JAR not found in build/libs/"
     exit 1

@@ -2,6 +2,7 @@ package rubidium.test;
 
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import rubidium.RubidiumHytaleEntry;
+import rubidium.core.RubidiumBootstrap;
 import rubidium.core.tier.FeatureRegistry;
 import rubidium.core.tier.ProductTier;
 
@@ -16,31 +17,41 @@ public class RubidiumTestHarness {
         System.out.println("========================================");
         System.out.println();
         
+        boolean useStandalone = args.length > 0 && args[0].equals("--standalone");
+        
         try {
-            System.out.println("[Test] Creating JavaPluginInit...");
-            JavaPluginInit init = new JavaPluginInit() {
-                @Override
-                public Path getDataFolder() {
-                    return Paths.get("plugins", "Rubidium");
-                }
+            if (useStandalone) {
+                System.out.println("[Test] Testing STANDALONE mode (Rubidium PluginLoader)");
+                System.out.println("[Test] Calling RubidiumBootstrap.initialize()...");
+                System.out.println();
+                RubidiumBootstrap.initialize(RubidiumTestHarness.class, true);
+            } else {
+                System.out.println("[Test] Testing HYTALE SERVER mode (Hytale JavaPlugin)");
+                System.out.println("[Test] Creating JavaPluginInit...");
+                JavaPluginInit init = new JavaPluginInit() {
+                    @Override
+                    public Path getDataFolder() {
+                        return Paths.get("plugins", "Rubidium");
+                    }
+                    
+                    @Override
+                    public String getName() {
+                        return "Rubidium";
+                    }
+                    
+                    @Override
+                    public String getVersion() {
+                        return "1.0.0";
+                    }
+                };
                 
-                @Override
-                public String getName() {
-                    return "Rubidium";
-                }
+                System.out.println("[Test] Creating RubidiumHytaleEntry...");
+                RubidiumHytaleEntry plugin = new RubidiumHytaleEntry(init);
                 
-                @Override
-                public String getVersion() {
-                    return "1.0.0";
-                }
-            };
-            
-            System.out.println("[Test] Creating RubidiumHytaleEntry...");
-            RubidiumHytaleEntry plugin = new RubidiumHytaleEntry(init);
-            
-            System.out.println("[Test] Calling onEnable()...");
-            System.out.println();
-            plugin.onEnable();
+                System.out.println("[Test] Calling onEnable()...");
+                System.out.println();
+                plugin.onEnable();
+            }
             
             System.out.println();
             System.out.println("========================================");
@@ -64,12 +75,12 @@ public class RubidiumTestHarness {
                 .forEach(f -> System.out.println("  - " + f.name() + " (" + f.id() + ") [Requires: " + f.tier().getDisplayName() + "]"));
             
             System.out.println();
-            System.out.println("[Test] Plugin initialized: " + RubidiumHytaleEntry.isInitialized());
-            System.out.println("[Test] Version: " + RubidiumHytaleEntry.getVersion());
+            System.out.println("[Test] Plugin initialized: " + RubidiumBootstrap.isInitialized());
+            System.out.println("[Test] Version: " + RubidiumBootstrap.getVersion());
             
             System.out.println();
-            System.out.println("[Test] Calling onDisable()...");
-            plugin.onDisable();
+            System.out.println("[Test] Calling shutdown...");
+            RubidiumBootstrap.shutdown();
             
             System.out.println();
             System.out.println("========================================");

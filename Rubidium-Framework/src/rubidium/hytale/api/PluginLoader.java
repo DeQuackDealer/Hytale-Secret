@@ -16,11 +16,13 @@ public class PluginLoader {
     
     private final Path pluginsDirectory;
     private final List<JavaPlugin> loadedPlugins;
-    private final Map<String, JavaPlugin> pluginsByName;
+    private final List<com.hypixel.hytale.server.core.plugin.JavaPlugin> loadedHytalePlugins;
+    private final Map<String, Object> pluginsByName;
     
     public PluginLoader(Path pluginsDirectory) {
         this.pluginsDirectory = pluginsDirectory;
         this.loadedPlugins = new ArrayList<>();
+        this.loadedHytalePlugins = new ArrayList<>();
         this.pluginsByName = new HashMap<>();
     }
     
@@ -47,13 +49,27 @@ public class PluginLoader {
             ClassLoader loader = new PluginClassLoader(jarPath, getClass().getClassLoader());
             Class<?> mainClass = loader.loadClass(meta.mainClass());
             
-            if (!JavaPlugin.class.isAssignableFrom(mainClass)) {
-                logger.warning("Main class does not extend JavaPlugin: " + meta.mainClass());
+            Object pluginInstance;
+            if (JavaPlugin.class.isAssignableFrom(mainClass)) {
+                JavaPlugin plugin = (JavaPlugin) mainClass.getDeclaredConstructor().newInstance();
+                plugin.initializeMetadata(meta);
+                pluginInstance = plugin;
+            } else if (com.hypixel.hytale.server.core.plugin.JavaPlugin.class.isAssignableFrom(mainClass)) {
+                logger.info("Loading Hytale-native plugin: " + meta.mainClass());
+                com.hypixel.hytale.server.core.plugin.JavaPlugin hytalePlugin = 
+                    (com.hypixel.hytale.server.core.plugin.JavaPlugin) mainClass
+                        .getDeclaredConstructor(com.hypixel.hytale.server.core.plugin.JavaPluginInit.class)
+                        .newInstance((Object) null);
+                loadedHytalePlugins.add(hytalePlugin);
+                pluginsByName.put(meta.name(), hytalePlugin);
+                logger.info("Loaded Hytale plugin: " + meta.name() + " v" + meta.version());
+                return;
+            } else {
+                logger.warning("Main class does not extend a recognized plugin type: " + meta.mainClass());
                 return;
             }
             
-            JavaPlugin plugin = (JavaPlugin) mainClass.getDeclaredConstructor().newInstance();
-            plugin.initializeMetadata(meta);
+            JavaPlugin plugin = (JavaPlugin) pluginInstance;
             
             loadedPlugins.add(plugin);
             pluginsByName.put(meta.name(), plugin);
@@ -66,6 +82,11 @@ public class PluginLoader {
     }
     
     private PluginMetadata readPluginDescriptor(JarFile jar) throws IOException {
+        JarEntry manifestEntry = jar.getJarEntry("manifest.json");
+        if (manifestEntry != null) {
+            return parseManifestJson(jar.getInputStream(manifestEntry));
+        }
+        
         JarEntry jsonEntry = jar.getJarEntry("plugin.json");
         if (jsonEntry != null) {
             return parsePluginJson(jar.getInputStream(jsonEntry));
@@ -77,6 +98,22 @@ public class PluginLoader {
         }
         
         return null;
+    }
+    
+    private PluginMetadata parseManifestJson(InputStream in) throws IOException {
+        String json = new String(in.readAllBytes());
+        String name = extractJsonString(json, "Name");
+        String version = extractJsonString(json, "Version");
+        String standaloneMain = extractJsonString(json, "StandaloneMain");
+        String mainClass = standaloneMain != null ? standaloneMain : extractJsonString(json, "Main");
+        String description = extractJsonString(json, "Description");
+        
+        return new PluginMetadata(
+            name != null ? name : "Unknown",
+            version != null ? version : "1.0.0",
+            mainClass != null ? mainClass : "",
+            description != null ? description : ""
+        );
     }
     
     private PluginMetadata parsePluginJson(InputStream in) throws IOException {
@@ -144,6 +181,15 @@ public class PluginLoader {
                 logger.severe("Error enabling " + plugin.getName() + ": " + e.getMessage());
             }
         }
+        
+        for (com.hypixel.hytale.server.core.plugin.JavaPlugin plugin : loadedHytalePlugins) {
+            try {
+                plugin.onEnable();
+                logger.info("Enabled Hytale plugin: " + plugin.getClass().getSimpleName());
+            } catch (Exception e) {
+                logger.severe("Error enabling Hytale plugin: " + e.getMessage());
+            }
+        }
     }
     
     public void disablePlugins() {
@@ -157,14 +203,28 @@ public class PluginLoader {
                 logger.severe("Error disabling " + plugin.getName() + ": " + e.getMessage());
             }
         }
+        
+        for (int i = loadedHytalePlugins.size() - 1; i >= 0; i--) {
+            com.hypixel.hytale.server.core.plugin.JavaPlugin plugin = loadedHytalePlugins.get(i);
+            try {
+                plugin.onDisable();
+                logger.info("Disabled Hytale plugin: " + plugin.getClass().getSimpleName());
+            } catch (Exception e) {
+                logger.severe("Error disabling Hytale plugin: " + e.getMessage());
+            }
+        }
     }
     
-    public Optional<JavaPlugin> getPlugin(String name) {
+    public Optional<Object> getPlugin(String name) {
         return Optional.ofNullable(pluginsByName.get(name));
     }
     
     public List<JavaPlugin> getLoadedPlugins() {
         return Collections.unmodifiableList(loadedPlugins);
+    }
+    
+    public List<com.hypixel.hytale.server.core.plugin.JavaPlugin> getLoadedHytalePlugins() {
+        return Collections.unmodifiableList(loadedHytalePlugins);
     }
     
     private static class PluginClassLoader extends ClassLoader {
