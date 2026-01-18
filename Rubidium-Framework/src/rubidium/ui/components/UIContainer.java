@@ -11,6 +11,7 @@ public class UIContainer extends UIComponent {
     private int background = 0x2D2D35;
     private boolean centered = false;
     private boolean scrollable = false;
+    private int cornerRadius = 0;
     private final List<UIComponent> children = new ArrayList<>();
     
     public UIContainer(String id) {
@@ -43,6 +44,11 @@ public class UIContainer extends UIComponent {
         return this;
     }
     
+    public UIContainer setCornerRadius(int radius) {
+        this.cornerRadius = radius;
+        return this;
+    }
+    
     @Override
     public UIContainer setPosition(int x, int y) {
         super.setPosition(x, y);
@@ -64,4 +70,5 @@ public class UIContainer extends UIComponent {
     public int getBackground() { return background; }
     public boolean isCentered() { return centered; }
     public boolean isScrollable() { return scrollable; }
+    public int getCornerRadius() { return cornerRadius; }
 }

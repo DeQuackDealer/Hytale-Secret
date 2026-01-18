@@ -31,11 +31,29 @@ public class RubidiumSettingsTab {
             .setBackground(BG_COLOR)
             .setCentered(true);
         
+        container.addChild(new UIContainer("status_indicator")
+            .setPosition(470, 15)
+            .setSize(12, 12)
+            .setBackground(0x32CD32)
+            .setCornerRadius(6));
+        
+        container.addChild(new UIText("status_tooltip")
+            .setText("Online")
+            .setFontSize(9)
+            .setColor(0x32CD32)
+            .setPosition(435, 17));
+        
         container.addChild(new UIText("header")
             .setText("Rubidium Settings")
             .setFontSize(24)
             .setColor(ACCENT_COLOR)
             .setPosition(20, 20));
+        
+        container.addChild(new UIText("version_label")
+            .setText("v1.0.0")
+            .setFontSize(10)
+            .setColor(TEXT_DIM)
+            .setPosition(210, 28));
         
         container.addChild(new UIText("subtitle")
             .setText("Configure your Rubidium experience")
