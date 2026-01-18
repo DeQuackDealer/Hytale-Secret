@@ -1,0 +1,13 @@
+{
+    "Id": "com.example.jokemod",
+    "Name": "Joke Mod",
+    "Version": "1.0.0",
+    "Description": "A simple example mod that adds a /joke command",
+    "Author": "Example Developer",
+    "Website": "https://example.com",
+    "Main": "com.example.jokemod.JokeModPlugin",
+    "Dependencies": [
+        "rubidium"
+    ],
+    "MinimumApiVersion": "1.0.0"
+}

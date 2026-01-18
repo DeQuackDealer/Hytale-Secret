@@ -1,4 +1,4 @@
-name: Build Rubidium
+name: Build Rubidium Framework
 
 on:
   push:
@@ -23,32 +23,56 @@ jobs:
     - name: Set up JDK 25
       uses: actions/setup-java@v4
       with:
-        java-version: '25'
+        java-version: '25-ea'
         distribution: 'temurin'
         cache: 'gradle'
     
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     
-    - name: Build all artifacts
-      run: ./gradlew buildAll --info --no-daemon
+    - name: Build Rubidium Framework
+      run: ./gradlew clean shadowJar --no-daemon
     
-    - name: Make scripts executable
-      run: chmod +x build/libs/rubidium-test-gui.sh || echo "Script not found"
+    - name: Build SDK artifacts
+      run: ./gradlew buildAll --no-daemon
+    
+    - name: Build Example Mod (Joke Mod)
+      run: |
+        cd examples/joke-mod
+        ../../gradlew jar --no-daemon
+    
+    - name: Run Tests
+      run: ./gradlew test --no-daemon
+      continue-on-error: true
     
     - name: List build artifacts
       run: |
-        echo "=== Build output ==="
+        echo "=== Rubidium Framework ==="
         ls -la build/libs/ || echo "build/libs does not exist"
-        echo "=== Scripts directory ==="
-        ls -la scripts/ || echo "scripts does not exist"
+        echo "=== Example Mods ==="
+        ls -la examples/joke-mod/build/libs/ || echo "Example mod not built"
     
-    - name: Upload Rubidium Plugin
+    - name: Upload Rubidium Framework JAR
       uses: actions/upload-artifact@v4
       with:
-        name: Rubidium-Plugin
+        name: Rubidium-Framework
         path: build/libs/Rubidium-1.0.0.jar
         if-no-files-found: error
+    
+    - name: Upload SDK JARs
+      uses: actions/upload-artifact@v4
+      with:
+        name: Rubidium-SDK
+        path: |
+          build/libs/rubidium-java-sdk-*.jar
+        if-no-files-found: warn
+    
+    - name: Upload Example Joke Mod
+      uses: actions/upload-artifact@v4
+      with:
+        name: Example-JokeMod
+        path: examples/joke-mod/build/libs/JokeMod-*.jar
+        if-no-files-found: warn
     
     - name: Upload Test Launcher
       uses: actions/upload-artifact@v4
@@ -63,3 +87,25 @@ jobs:
         name: rubidium-test-gui
         path: build/libs/rubidium-test-gui.sh
         if-no-files-found: warn
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        draft: true
+        files: |
+          artifacts/Rubidium-Framework/*.jar
+          artifacts/Rubidium-SDK/*.jar
+          artifacts/Example-JokeMod/*.jar
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

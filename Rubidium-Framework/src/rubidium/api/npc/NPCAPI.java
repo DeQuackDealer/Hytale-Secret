@@ -300,6 +300,14 @@ public final class NPCAPI {
             return v != null ? (T) v : defaultValue;
         }
         
+        public void speak(String message) {
+            rubidium.api.chat.ChatAPI.sendAsNPC(this, message);
+        }
+        
+        public void say(String message) {
+            speak(message);
+        }
+        
         public Vec3i getNextPatrolPoint() {
             if (patrolPoints.isEmpty()) return homeLocation;
             Vec3i point = patrolPoints.get(patrolIndex);
