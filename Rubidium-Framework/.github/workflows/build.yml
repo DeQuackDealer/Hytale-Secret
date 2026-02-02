@@ -87,18 +87,13 @@ jobs:
         echo "=== Example Mods ==="
         ls -la examples/*/build/libs/ 2>/dev/null || echo "No example mods built"
     
-    - name: Upload Rubidium Free Edition
+    - name: Upload Rubidium Framework (Both Editions)
       uses: actions/upload-artifact@v4
       with:
-        name: rubidium-free
-        path: Rubidium-Framework/build/libs/rubidium.jar
-        if-no-files-found: error
-    
-    - name: Upload Rubidium Plus Edition
-      uses: actions/upload-artifact@v4
-      with:
-        name: rubidium-plus
-        path: Rubidium-Framework/build/libs/rubidium_plus.jar
+        name: rubidium-framework
+        path: |
+          Rubidium-Framework/build/libs/rubidium.jar
+          Rubidium-Framework/build/libs/rubidium_plus.jar
         if-no-files-found: error
     
     - name: Upload Example Mods
@@ -128,8 +123,8 @@ jobs:
         draft: true
         generate_release_notes: true
         files: |
-          artifacts/rubidium-free/rubidium.jar
-          artifacts/rubidium-plus/rubidium_plus.jar
+          artifacts/rubidium-framework/rubidium.jar
+          artifacts/rubidium-framework/rubidium_plus.jar
           artifacts/example-mods/*.jar
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
