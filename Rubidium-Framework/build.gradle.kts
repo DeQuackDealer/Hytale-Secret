@@ -9,15 +9,15 @@ group = "com.rubidium"
 version = "1.0"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
     withJavadocJar()
     withSourcesJar()
 }
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
-    options.release.set(21)
+    options.release.set(17)
     options.compilerArgs.addAll(listOf(
         "-Xlint:all",
         "-Xlint:-processing"
@@ -177,6 +177,52 @@ tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJ
     archiveClassifier.set("")
     
     configureCommon("PLUS", true)
+}
+
+// LITE Edition - rubidium_lite.jar (no bundled dependencies, like Nitrado's mod)
+tasks.register<Jar>("rubidiumLiteJar") {
+    archiveBaseName.set("rubidium_lite")
+    archiveClassifier.set("")
+    archiveVersion.set("")
+    
+    from(sourceSets.main.get().output)
+    
+    // Include manifest.json at root for Hytale mod loading
+    from("resources/manifest.json")
+    
+    // Exclude development stubs
+    exclude("com/hypixel/**")
+    
+    // Exclude Plus-only features
+    exclude("rubidium/feature/voicechat/**")
+    exclude("rubidium/feature/minimap/**")
+    exclude("rubidium/feature/statistics/**")
+    exclude("rubidium/feature/hudeditor/**")
+    exclude("rubidium/feature/adminpanel/**")
+    exclude("rubidium/replay/**")
+    exclude("rubidium/api/npc/**")
+    exclude("rubidium/api/ai/**")
+    exclude("rubidium/api/pathfinding/**")
+    exclude("rubidium/api/worldgen/**")
+    exclude("rubidium/api/inventory/**")
+    exclude("rubidium/api/economy/**")
+    exclude("rubidium/api/particles/**")
+    exclude("rubidium/api/bossbar/**")
+    exclude("rubidium/api/scoreboard/**")
+    exclude("rubidium/hytale/ui/**")
+    exclude("rubidium/hytale/adapter/**")
+    
+    manifest {
+        attributes(
+            "Implementation-Title" to "Rubidium Framework",
+            "Implementation-Version" to project.version,
+            "Rubidium-Version" to "1.0",
+            "Rubidium-Tier" to "LITE",
+            "Multi-Release" to "true"
+        )
+    }
+    
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 // Build both editions
