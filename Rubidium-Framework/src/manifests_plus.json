@@ -1,4 +1,4 @@
-[{
+{
   "Group": "com.rubidium",
   "Name": "Rubidium Plus",
   "Version": "1.0.0",
@@ -14,8 +14,8 @@
   "ServerVersion": "*",
   "Dependencies": {},
   "OptionalDependencies": {},
-  "LoadBefore": {},
+  "LoadBefore": [],
   "SubPlugins": [],
   "DisabledByDefault": false,
-  "IncludesAssetPack": true
-}]
+  "IncludesAssetPack": false
+}

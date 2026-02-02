@@ -78,13 +78,14 @@ fun com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar.configureCommon(t
     // CRITICAL: Exclude development stubs - they would conflict with real Hytale classes at runtime
     exclude("com/hypixel/**")
     
-    // Relocate all bundled dependencies to avoid conflicts with server/other plugins
-    relocate("com.google.gson", "rubidium.libs.gson")
+    // Relocate ALL bundled dependencies to avoid conflicts with server/other plugins
+    relocate("com.google", "rubidium.libs.google")
     relocate("org.yaml.snakeyaml", "rubidium.libs.snakeyaml")
-    relocate("com.google.common", "rubidium.libs.guava")
     relocate("com.moandjiezana.toml", "rubidium.libs.toml")
     relocate("io.netty", "rubidium.libs.netty")
     relocate("org.slf4j", "rubidium.libs.slf4j")
+    relocate("org.checkerframework", "rubidium.libs.checkerframework")
+    relocate("javax.annotation", "rubidium.libs.javax.annotation")
     
     // Exclude compile-only annotations (not needed at runtime)
     dependencies {
