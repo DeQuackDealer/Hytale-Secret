@@ -87,18 +87,16 @@ jobs:
         echo "=== Example Mods ==="
         ls -la examples/*/build/libs/ 2>/dev/null || echo "No example mods built"
     
-    - name: Upload Rubidium Framework (Both Editions)
+    - name: Upload Rubidium Free Edition
       uses: actions/upload-artifact@v4
       with:
-        name: rubidium-framework
-        path: |
-          Rubidium-Framework/build/libs/rubidium.jar
-          Rubidium-Framework/build/libs/rubidium_plus.jar
+        name: rubidium-free
+        path: Rubidium-Framework/build/libs/rubidium.jar
         if-no-files-found: error
     
-    - name: Upload Example Mods
+    - name: Upload Rubidium Plus Edition
       uses: actions/upload-artifact@v4
       with:
-        name: example-mods
-        path: Rubidium-Framework/examples/*/build/libs/*.jar
-        if-no-files-found: warn
+        name: rubidium-plus
+        path: Rubidium-Framework/build/libs/rubidium_plus.jar
+        if-no-files-found: error
