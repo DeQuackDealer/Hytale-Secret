@@ -1,0 +1,54 @@
+name: Build Rubidium Plus Edition
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-plus:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Rubidium-Framework
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up JDK 25
+      uses: actions/setup-java@v4
+      with:
+        java-version: '25'
+        distribution: 'temurin'
+        cache: 'gradle'
+    
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    
+    - name: Build Plus Edition
+      run: ./gradlew clean rubidiumPlusJar --no-daemon
+    
+    - name: Verify Build
+      run: |
+        echo "=== Checking Build Output ==="
+        ls -la build/libs/
+        if [ ! -f "build/libs/rubidium_plus.jar" ]; then
+          echo "ERROR: rubidium_plus.jar not found!"
+          exit 1
+        fi
+        echo "Build successful!"
+    
+    - name: Verify Manifest
+      run: |
+        echo "=== Manifest Content ==="
+        unzip -p build/libs/rubidium_plus.jar manifests.json
+    
+    - name: Upload Rubidium Plus
+      uses: actions/upload-artifact@v4
+      with:
+        name: rubidium_plus
+        path: Rubidium-Framework/build/libs/rubidium_plus.jar
+        if-no-files-found: error
