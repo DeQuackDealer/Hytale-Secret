@@ -9,15 +9,15 @@ group = "com.rubidium"
 version = "1.0"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
     withJavadocJar()
     withSourcesJar()
 }
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
-    options.release.set(17)
+    options.release.set(25)
     options.compilerArgs.addAll(listOf(
         "-Xlint:all",
         "-Xlint:-processing"
