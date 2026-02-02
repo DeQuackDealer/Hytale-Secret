@@ -9,15 +9,15 @@ group = "com.rubidium"
 version = "1.0"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_25
-    targetCompatibility = JavaVersion.VERSION_25
+    sourceCompatibility = JavaVersion.VERSION_19
+    targetCompatibility = JavaVersion.VERSION_19
     withJavadocJar()
     withSourcesJar()
 }
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
-    options.release.set(25)
+    options.release.set(19)
     options.compilerArgs.addAll(listOf(
         "-Xlint:all",
         "-Xlint:-processing"
@@ -118,14 +118,15 @@ tasks.register<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("rubi
     
     configureCommon("FREE", false)
     
-    // Include manifests.json at root for Hytale mod loading
-    from("src/manifests.json")
+    // Include manifest.json at root for Hytale mod loading (singular, not plural!)
+    from("resources/manifest.json")
     
     // Exclude old files and Plus-specific manifest
-    exclude("manifest.json")
+    exclude("manifests.json")
+    exclude("manifests_plus.json")
+    exclude("manifest_plus.json")
     exclude("plugin.json")
     exclude("plugin_plus.json")
-    exclude("manifests_plus.json")
     
     // Exclude Plus-only features from FREE edition
     exclude("rubidium/feature/voicechat/**")
@@ -158,16 +159,16 @@ tasks.register<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("rubi
     
     configureCommon("PLUS", true)
     
-    // Include manifests.json at root for Hytale mod loading (renamed from manifests_plus.json)
-    from("src/manifests_plus.json") {
-        rename("manifests_plus.json", "manifests.json")
+    // Include manifest.json at root for Hytale mod loading (singular, not plural!)
+    from("resources/manifest_plus.json") {
+        rename("manifest_plus.json", "manifest.json")
     }
     
     // Exclude old files and non-plus manifest
-    exclude("manifest.json")
+    exclude("manifests.json")
+    exclude("manifests_plus.json")
     exclude("plugin.json")
     exclude("plugin_plus.json")
-    exclude("manifests.json")
 }
 
 // Default shadowJar builds Plus edition

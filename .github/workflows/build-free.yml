@@ -18,10 +18,10 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
     
-    - name: Set up JDK 25
+    - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
-        java-version: '25'
+        java-version: '21'
         distribution: 'temurin'
         cache: 'gradle'
     
@@ -44,7 +44,7 @@ jobs:
     - name: Verify Manifest
       run: |
         echo "=== Manifest Content ==="
-        unzip -p build/libs/rubidium.jar manifests.json
+        unzip -p build/libs/rubidium.jar manifest.json
     
     - name: Upload Rubidium Free
       uses: actions/upload-artifact@v4

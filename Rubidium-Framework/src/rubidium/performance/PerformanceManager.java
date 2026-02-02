@@ -4,7 +4,8 @@ import java.util.*;
 import java.util.concurrent.*;
 
 /**
- * Performance optimization system with tick budgeting, entity culling, and caching.
+ * Performance optimization system with TPS monitoring, GC monitoring, 
+ * chunk optimization, view radius adjustment, tick budgeting, and caching.
  */
 public class PerformanceManager {
     
@@ -13,6 +14,11 @@ public class PerformanceManager {
     private final Map<String, PerformanceMetric> metrics;
     private final Map<String, ObjectPool<?>> objectPools;
     private final ScheduledExecutorService scheduler;
+    
+    private final TpsMonitor tpsMonitor;
+    private final GcMonitor gcMonitor;
+    private final ChunkOptimizer chunkOptimizer;
+    private final ViewRadiusOptimizer viewRadiusOptimizer;
     
     private long tickBudgetNanos = 50_000_000;
     private long lastTickTime = 0;
@@ -23,10 +29,17 @@ public class PerformanceManager {
     private boolean memoryOptimizationEnabled = true;
     private boolean entityCullingEnabled = true;
     private boolean asyncChunkLoadingEnabled = true;
+    private boolean viewRadiusOptimizationEnabled = true;
+    private boolean chunkOptimizationEnabled = true;
     
     private PerformanceManager() {
         this.metrics = new ConcurrentHashMap<>();
         this.objectPools = new ConcurrentHashMap<>();
+        this.tpsMonitor = new TpsMonitor();
+        this.gcMonitor = new GcMonitor();
+        this.chunkOptimizer = new ChunkOptimizer();
+        this.viewRadiusOptimizer = new ViewRadiusOptimizer(tpsMonitor);
+        
         this.scheduler = Executors.newScheduledThreadPool(2, r -> {
             Thread t = new Thread(r, "Rubidium-Perf");
             t.setDaemon(true);
@@ -35,6 +48,7 @@ public class PerformanceManager {
         
         scheduler.scheduleAtFixedRate(this::updateTps, 0, 50, TimeUnit.MILLISECONDS);
         scheduler.scheduleAtFixedRate(this::collectGarbageIfNeeded, 30, 30, TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(this::performOptimizations, 1, 1, TimeUnit.SECONDS);
     }
     
     public static PerformanceManager getInstance() {
@@ -159,6 +173,66 @@ public class PerformanceManager {
     
     public boolean isAsyncChunkLoadingEnabled() { return asyncChunkLoadingEnabled; }
     public void setAsyncChunkLoadingEnabled(boolean enabled) { this.asyncChunkLoadingEnabled = enabled; }
+    
+    public boolean isViewRadiusOptimizationEnabled() { return viewRadiusOptimizationEnabled; }
+    public void setViewRadiusOptimizationEnabled(boolean enabled) { this.viewRadiusOptimizationEnabled = enabled; }
+    
+    public boolean isChunkOptimizationEnabled() { return chunkOptimizationEnabled; }
+    public void setChunkOptimizationEnabled(boolean enabled) { this.chunkOptimizationEnabled = enabled; }
+    
+    public TpsMonitor getTpsMonitor() { return tpsMonitor; }
+    public GcMonitor getGcMonitor() { return gcMonitor; }
+    public ChunkOptimizer getChunkOptimizer() { return chunkOptimizer; }
+    public ViewRadiusOptimizer getViewRadiusOptimizer() { return viewRadiusOptimizer; }
+    
+    private void performOptimizations() {
+        try {
+            tpsMonitor.recordTick();
+            
+            if (viewRadiusOptimizationEnabled) {
+                viewRadiusOptimizer.getOptimalViewRadius();
+            }
+            
+            if (chunkOptimizationEnabled && gcMonitor.isMemoryPressureHigh()) {
+                chunkOptimizer.getChunksToUnload();
+            }
+        } catch (Exception e) {
+            // Silently handle to prevent crashing
+        }
+    }
+    
+    public PerformanceSnapshot getSnapshot() {
+        return new PerformanceSnapshot(
+            tpsMonitor.getCurrentTps(),
+            tpsMonitor.getAverageTickTime(),
+            tpsMonitor.getPerformanceLevel(),
+            gcMonitor.getMemoryStats(),
+            gcMonitor.getGcStats(),
+            chunkOptimizer.getLoadedChunkCount(),
+            viewRadiusOptimizer.getCurrentViewRadius()
+        );
+    }
+    
+    public record PerformanceSnapshot(
+        double tps,
+        double averageTickTime,
+        TpsMonitor.PerformanceLevel performanceLevel,
+        GcMonitor.MemoryStats memoryStats,
+        GcMonitor.GcStats gcStats,
+        int loadedChunks,
+        int viewRadius
+    ) {
+        @Override
+        public String toString() {
+            return String.format(
+                "TPS: %.1f (%s) | Tick: %.1fms | Memory: %s/%s (%.0f%%) | Chunks: %d | View: %d",
+                tps, performanceLevel, averageTickTime,
+                memoryStats.formatHeapUsed(), memoryStats.formatHeapMax(),
+                memoryStats.getHeapUsageRatio() * 100,
+                loadedChunks, viewRadius
+            );
+        }
+    }
     
     public void shutdown() {
         scheduler.shutdown();
