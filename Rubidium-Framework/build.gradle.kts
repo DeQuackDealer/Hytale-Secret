@@ -6,18 +6,18 @@ plugins {
 }
 
 group = "com.rubidium"
-version = "1.0.0"
+version = "1.0"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_19
-    targetCompatibility = JavaVersion.VERSION_19
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
     withJavadocJar()
     withSourcesJar()
 }
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
-    options.release.set(19)
+    options.release.set(25)
     options.compilerArgs.addAll(listOf(
         "-Xlint:all",
         "-Xlint:-processing"
@@ -58,7 +58,7 @@ tasks.test {
 
 tasks.withType<Javadoc> {
     val opts = options as StandardJavadocDocletOptions
-    opts.addStringOption("source", "19")
+    opts.addStringOption("source", "21")
     opts.addStringOption("Xdoclint:none", "-quiet")
     isFailOnError = false
 }
@@ -68,7 +68,7 @@ tasks.jar {
         attributes(
             "Implementation-Title" to "Rubidium Framework",
             "Implementation-Version" to version,
-            "Rubidium-Version" to "1.0.0"
+            "Rubidium-Version" to "1.0"
         )
     }
 }
@@ -99,7 +99,7 @@ fun com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar.configureCommon(t
         attributes(
             "Implementation-Title" to "Rubidium Framework",
             "Implementation-Version" to project.version,
-            "Rubidium-Version" to "1.0.0",
+            "Rubidium-Version" to "1.0",
             "Rubidium-Tier" to tier,
             "Rubidium-Premium" to isPremium.toString()
         )
@@ -116,6 +116,15 @@ tasks.register<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("rubi
     configurations = listOf(project.configurations.runtimeClasspath.get())
     
     configureCommon("FREE", false)
+    
+    // Include manifests.json at root for Hytale mod loading
+    from("src/manifests.json")
+    
+    // Exclude old files and Plus-specific manifest
+    exclude("manifest.json")
+    exclude("plugin.json")
+    exclude("plugin_plus.json")
+    exclude("manifests_plus.json")
     
     // Exclude Plus-only features from FREE edition
     exclude("rubidium/feature/voicechat/**")
@@ -147,6 +156,17 @@ tasks.register<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("rubi
     configurations = listOf(project.configurations.runtimeClasspath.get())
     
     configureCommon("PLUS", true)
+    
+    // Include manifests.json at root for Hytale mod loading (renamed from manifests_plus.json)
+    from("src/manifests_plus.json") {
+        rename("manifests_plus.json", "manifests.json")
+    }
+    
+    // Exclude old files and non-plus manifest
+    exclude("manifest.json")
+    exclude("plugin.json")
+    exclude("plugin_plus.json")
+    exclude("manifests.json")
 }
 
 // Default shadowJar builds Plus edition
@@ -266,6 +286,17 @@ tasks.register<JavaExec>("runTestHarness") {
     mainClass.set("rubidium.test.RubidiumTestHarness")
     
     // JVM args for better output
+    jvmArgs = listOf("-Xmx512m")
+}
+
+// Task to run the UI launcher
+tasks.register<JavaExec>("runLauncher") {
+    group = "application"
+    description = "Launch Rubidium with visual UI (Settings, Minimap, Admin Panel)"
+    
+    classpath = sourceSets.main.get().runtimeClasspath
+    mainClass.set("rubidium.RubidiumLauncher")
+    
     jvmArgs = listOf("-Xmx512m")
 }
 

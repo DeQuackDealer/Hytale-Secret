@@ -1,0 +1,53 @@
+$C = "../Common.ui";
+
+// Voice chat indicator overlay - positioned bottom-left
+Group #VoiceChatOverlay {
+    Anchor: (Width: 200, Height: 150, Left: 10, Bottom: 10);
+    
+    // Speaking players list
+    $C.@Container #SpeakersContainer {
+        Anchor: (Width: 200, Height: 150);
+        LayoutMode: Bottom;
+        
+        // Template for speaker entry (cloned per speaker)
+        Group #SpeakerEntry {
+            Anchor: (Width: 190, Height: 30);
+            LayoutMode: Left;
+            
+            // Speaking indicator icon
+            Group #SpeakingIcon {
+                Background: "voice_speaking.png";
+                Anchor: (Width: 24, Height: 24);
+            }
+            
+            // Player name
+            $C.@Label #SpeakerName {
+                @Text = "PlayerName";
+                @Anchor = Anchor(Width: 140, Height: 24);
+            }
+            
+            // Volume level indicator
+            Group #VolumeBar {
+                Background: "volume_bar.png";
+                Anchor: (Width: 20, Height: 16);
+            }
+        }
+    }
+    
+    // PTT indicator (shows when push-to-talk is active)
+    Group #PTTIndicator {
+        Anchor: (Width: 150, Height: 30, Bottom: -35);
+        LayoutMode: Center;
+        Visible: false;
+        
+        Group #PTTBackground {
+            Background: "ptt_active.png";
+            Anchor: (Width: 150, Height: 30);
+        }
+        
+        $C.@Label #PTTLabel {
+            @Text = "Transmitting...";
+            @Anchor = Anchor(Width: 120, Height: 20);
+        }
+    }
+}

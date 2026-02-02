@@ -1,0 +1,8 @@
+{
+  "name": "JokeMod",
+  "version": "1.0.0",
+  "main": "com.example.jokemod.JokeModPlugin",
+  "description": "A simple joke mod that makes a bot say 67",
+  "author": "Example Developer",
+  "website": "https://github.com/yellow-tale/rubidium"
+}

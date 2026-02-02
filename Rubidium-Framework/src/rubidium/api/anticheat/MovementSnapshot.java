@@ -103,6 +103,11 @@ public class MovementSnapshot {
             return this;
         }
         
+        public Builder timestamp(long timestamp) {
+            this.timestamp = timestamp;
+            return this;
+        }
+        
         public MovementSnapshot build() {
             return new MovementSnapshot(this);
         }

@@ -1,7 +1,7 @@
 {
   "Group": "com.rubidium",
   "Name": "Rubidium",
-  "Version": "1.0.0",
+  "Version": "1.0",
   "Description": "API Library for Hytale Plugin Development - Provides PathfindingAPI, NPCAPI, AIBehaviorAPI, and more",
   "Main": "rubidium.RubidiumHytaleEntry",
   "StandaloneMain": "rubidium.RubidiumStandaloneEntry",
@@ -16,7 +16,7 @@
   "Dependencies": {},
   "OptionalDependencies": {},
   "DisabledByDefault": false,
-  "IncludesAssetPack": false,
+  "IncludesAssetPack": true,
   "EntryPoints": {
     "hytale-server": "rubidium.RubidiumHytaleEntry",
     "rubidium-standalone": "rubidium.RubidiumStandaloneEntry",

@@ -2,12 +2,18 @@ package rubidium.api.teleport;
 
 import rubidium.api.pathfinding.PathfindingAPI.Vec3i;
 import rubidium.api.event.EventAPI;
+import rubidium.api.server.Server;
+import rubidium.api.player.Player;
+import rubidium.core.HytaleRuntimeBridge;
 
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
+import java.util.logging.Logger;
 
 public final class TeleportAPI {
+    
+    private static final Logger LOGGER = Logger.getLogger("Rubidium-Teleport");
     
     private static final Map<String, Warp> warps = new ConcurrentHashMap<>();
     private static final Map<UUID, TeleportRequest> pendingRequests = new ConcurrentHashMap<>();
@@ -44,12 +50,48 @@ public final class TeleportAPI {
     }
     
     private static void performTeleport(UUID playerId, Vec3i destination) {
+        saveLastLocation(playerId, getPlayerPosition(playerId));
+        
+        boolean success = HytaleRuntimeBridge.get().teleportPlayer(
+            playerId, 
+            destination.x(), 
+            destination.y(), 
+            destination.z()
+        );
+        
+        if (success) {
+            LOGGER.info("Teleported player " + playerId + " to " + destination);
+        } else {
+            Server.getPlayer(playerId).ifPresent(p -> 
+                p.teleport(destination.x(), destination.y(), destination.z()));
+            LOGGER.info("Teleported player " + playerId + " to " + destination + " (fallback)");
+        }
     }
     
     public static void teleportToPlayer(UUID playerId, UUID targetId) {
+        Optional<Player> target = Server.getPlayer(targetId);
+        if (target.isEmpty()) {
+            LOGGER.warning("Cannot teleport to player - target not found: " + targetId);
+            return;
+        }
+        
+        Player.Location loc = target.get().getLocation();
+        teleport(playerId, new Vec3i((int) loc.x(), (int) loc.y(), (int) loc.z()));
     }
     
     public static void teleportPlayerHere(UUID targetId, UUID playerId) {
+        Optional<Player> source = Server.getPlayer(playerId);
+        if (source.isEmpty()) {
+            LOGGER.warning("Cannot teleport player here - source not found: " + playerId);
+            return;
+        }
+        
+        Player.Location loc = source.get().getLocation();
+        teleport(targetId, new Vec3i((int) loc.x(), (int) loc.y(), (int) loc.z()));
+    }
+    
+    private static Vec3i getPlayerPosition(UUID playerId) {
+        return HytaleRuntimeBridge.get().getPlayerPosition(playerId);
     }
     
     public static TeleportRequest sendRequest(UUID fromId, UUID toId, RequestType type) {

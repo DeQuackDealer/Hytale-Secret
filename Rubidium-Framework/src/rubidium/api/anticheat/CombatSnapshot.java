@@ -77,6 +77,11 @@ public class CombatSnapshot {
             return this;
         }
         
+        public Builder timestamp(long timestamp) {
+            this.timestamp = timestamp;
+            return this;
+        }
+        
         public CombatSnapshot build() {
             return new CombatSnapshot(this);
         }

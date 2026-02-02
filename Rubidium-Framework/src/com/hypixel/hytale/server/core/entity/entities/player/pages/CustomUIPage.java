@@ -46,6 +46,17 @@ public abstract class CustomUIPage {
     protected void close() {
     }
     
+    protected void dismiss() {
+    }
+    
+    public String getUIPath() {
+        return null;
+    }
+    
+    public PlayerRef getPlayerRef() {
+        return playerRef;
+    }
+    
     public void onDismiss(Ref<EntityStore> ref, Store<EntityStore> store) {
     }
 }

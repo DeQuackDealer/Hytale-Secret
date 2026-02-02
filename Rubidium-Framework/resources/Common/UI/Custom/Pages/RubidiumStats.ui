@@ -1,0 +1,61 @@
+$C = "../Common.ui";
+
+// Performance stats overlay - positioned top-left under minimap
+Group #StatsOverlay {
+    Anchor: (Width: 150, Height: 80, Left: 10, Top: 10);
+    Background: "stats_bg.png";
+    
+    Group #StatsContent {
+        Anchor: (Width: 140, Height: 70);
+        LayoutMode: Top;
+        Padding: (All: 5);
+        
+        // FPS counter
+        Group #FPSRow {
+            Anchor: (Height: 20);
+            LayoutMode: Left;
+            
+            $C.@Label #FPSLabel {
+                @Text = "FPS:";
+                @Anchor = Anchor(Width: 50, Height: 18);
+            }
+            
+            $C.@Label #FPSValue {
+                @Text = "60";
+                @Anchor = Anchor(Width: 60, Height: 18);
+            }
+        }
+        
+        // Ping counter
+        Group #PingRow {
+            Anchor: (Height: 20, Top: 2);
+            LayoutMode: Left;
+            
+            $C.@Label #PingLabel {
+                @Text = "Ping:";
+                @Anchor = Anchor(Width: 50, Height: 18);
+            }
+            
+            $C.@Label #PingValue {
+                @Text = "45ms";
+                @Anchor = Anchor(Width: 60, Height: 18);
+            }
+        }
+        
+        // Memory usage
+        Group #MemoryRow {
+            Anchor: (Height: 20, Top: 2);
+            LayoutMode: Left;
+            
+            $C.@Label #MemoryLabel {
+                @Text = "RAM:";
+                @Anchor = Anchor(Width: 50, Height: 18);
+            }
+            
+            $C.@Label #MemoryValue {
+                @Text = "1.2GB";
+                @Anchor = Anchor(Width: 60, Height: 18);
+            }
+        }
+    }
+}

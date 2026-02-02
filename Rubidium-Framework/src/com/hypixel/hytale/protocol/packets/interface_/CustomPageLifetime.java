@@ -3,5 +3,7 @@ package com.hypixel.hytale.protocol.packets.interface_;
 public enum CustomPageLifetime {
     UNTIL_DISMISSED,
     UNTIL_CLOSED,
-    PERSISTENT
+    PERSISTENT,
+    ALWAYS,
+    CLOSE_ON_DISCONNECT
 }

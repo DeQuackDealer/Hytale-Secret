@@ -1,0 +1,21 @@
+[{
+  "Group": "com.rubidium",
+  "Name": "Rubidium",
+  "Version": "1.0.0",
+  "Description": "Free API Library for Hytale Plugin Development - Includes Command, Chat, Event, Config, World, Title, Scoreboard, and Inventory APIs",
+  "Main": "rubidium.RubidiumHytaleEntry",
+  "Authors": [
+    {
+      "Name": "Yellow Tale Team",
+      "Url": "https://github.com/yellow-tale/rubidium"
+    }
+  ],
+  "Website": "https://github.com/yellow-tale/rubidium",
+  "ServerVersion": "*",
+  "Dependencies": {},
+  "OptionalDependencies": {},
+  "LoadBefore": {},
+  "SubPlugins": [],
+  "DisabledByDefault": false,
+  "IncludesAssetPack": true
+}]

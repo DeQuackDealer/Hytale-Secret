@@ -1,0 +1,141 @@
+$C = "../Common.ui";
+
+$C.@PageOverlay {
+    $C.@DecoratedContainer {
+        Anchor: (Width: 500, Height: 520);
+
+        #Title {
+            Group {
+                $C.@Title {
+                    @Text = "Rubidium";
+                }
+            }
+        }
+
+        #Content {
+            LayoutMode: Top;
+            Padding: (Left: 25, Right: 25, Bottom: 25, Top: 10);
+
+            // Logo
+            Group {
+                LayoutMode: Center;
+                Anchor: (Height: 80);
+
+                Group {
+                    Background: "rubidium_logo.png";
+                    Anchor: (Width: 320, Height: 70);
+                }
+            }
+
+            // Version info
+            Group {
+                LayoutMode: Center;
+                Anchor: (Height: 30);
+                
+                $C.@Label #VersionLabel {
+                    @Text = "Rubidium Plus v1.0";
+                    @Anchor = Anchor(Width: 200, Height: 20);
+                }
+            }
+
+            // Row 1: Settings & Minimap
+            Group {
+                LayoutMode: Center;
+                Anchor: (Height: 55);
+
+                Group {
+                    LayoutMode: Left;
+
+                    $C.@TextButton #SettingsButton {
+                        @Text = "Settings";
+                        @Anchor = Anchor(Width: 200);
+                    }
+
+                    Group { Anchor: (Width: 15); }
+
+                    $C.@TextButton #MinimapButton {
+                        @Text = "Minimap";
+                        @Anchor = Anchor(Width: 200);
+                    }
+                }
+            }
+
+            // Row 2: Voice Chat & HUD
+            Group {
+                LayoutMode: Center;
+                Anchor: (Height: 55, Top: 10);
+
+                Group {
+                    LayoutMode: Left;
+
+                    $C.@TextButton #VoiceChatButton {
+                        @Text = "Voice Chat";
+                        @Anchor = Anchor(Width: 200);
+                    }
+
+                    Group { Anchor: (Width: 15); }
+
+                    $C.@TextButton #HUDButton {
+                        @Text = "HUD Editor";
+                        @Anchor = Anchor(Width: 200);
+                    }
+                }
+            }
+
+            // Row 3: Admin Panel & Stats
+            Group {
+                LayoutMode: Center;
+                Anchor: (Height: 55, Top: 10);
+
+                Group {
+                    LayoutMode: Left;
+
+                    $C.@TextButton #AdminButton {
+                        @Text = "Admin Panel";
+                        @Anchor = Anchor(Width: 200);
+                    }
+
+                    Group { Anchor: (Width: 15); }
+
+                    $C.@TextButton #StatsButton {
+                        @Text = "Performance";
+                        @Anchor = Anchor(Width: 200);
+                    }
+                }
+            }
+
+            // Row 4: Waypoints & Profiles
+            Group {
+                LayoutMode: Center;
+                Anchor: (Height: 55, Top: 10);
+
+                Group {
+                    LayoutMode: Left;
+
+                    $C.@TextButton #WaypointsButton {
+                        @Text = "Waypoints";
+                        @Anchor = Anchor(Width: 200);
+                    }
+
+                    Group { Anchor: (Width: 15); }
+
+                    $C.@TextButton #ProfilesButton {
+                        @Text = "Profiles";
+                        @Anchor = Anchor(Width: 200);
+                    }
+                }
+            }
+
+            // Close button
+            Group {
+                LayoutMode: Center;
+                Anchor: (Height: 50, Top: 20);
+
+                $C.@TextButton #CloseButton {
+                    @Text = "Close";
+                    @Anchor = Anchor(Width: 120);
+                }
+            }
+        }
+    }
+}

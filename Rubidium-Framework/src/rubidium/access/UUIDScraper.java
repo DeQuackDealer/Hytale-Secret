@@ -10,6 +10,10 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.regex.*;
 
+/**
+ * Player resolver for Hytale.
+ * Resolves player information from Hytale's player database.
+ */
 public final class UUIDScraper {
     
     private static final Pattern UUID_PATTERN = Pattern.compile(
@@ -25,10 +29,8 @@ public final class UUIDScraper {
     );
     
     public enum Provider {
-        MOJANG_API("https://api.mojang.com/users/profiles/minecraft/"),
-        PLAYERDB("https://playerdb.co/api/player/minecraft/"),
-        MCUUID("https://mcuuid.net/?q="),
-        ASHCON("https://api.ashcon.app/mojang/v2/user/");
+        HYTALE_API("https://api.hytale.com/players/"),
+        LOCAL_CACHE("local://players/");
         
         private final String baseUrl;
         
@@ -51,7 +53,7 @@ public final class UUIDScraper {
         this.httpClient = httpClient;
         this.logger = logger;
         this.rateLimiter = new Semaphore(10);
-        this.providers = List.of(Provider.MOJANG_API, Provider.ASHCON, Provider.PLAYERDB);
+        this.providers = List.of(Provider.HYTALE_API, Provider.LOCAL_CACHE);
     }
     
     public CompletableFuture<ResolvedPlayer> resolveUsername(String username) {
@@ -69,6 +71,10 @@ public final class UUIDScraper {
         }
         
         var provider = providers.get(providerIndex);
+        
+        if (provider == Provider.LOCAL_CACHE) {
+            return CompletableFuture.completedFuture(null);
+        }
         
         return fetchFromProvider(provider, username)
             .thenCompose(result -> {
@@ -92,7 +98,7 @@ public final class UUIDScraper {
                     var url = provider.getBaseUrl() + username;
                     var request = HttpRequest.newBuilder()
                         .uri(URI.create(url))
-                        .header("User-Agent", "Rubidium-Server/1.0")
+                        .header("User-Agent", "Rubidium-Framework/1.0")
                         .timeout(Duration.ofSeconds(5))
                         .GET()
                         .build();
@@ -115,10 +121,8 @@ public final class UUIDScraper {
     private ResolvedPlayer parseResponse(Provider provider, String body, String username) {
         try {
             return switch (provider) {
-                case MOJANG_API -> parseMojangResponse(body);
-                case ASHCON -> parseAshconResponse(body);
-                case PLAYERDB -> parsePlayerDBResponse(body);
-                default -> null;
+                case HYTALE_API -> parseHytaleResponse(body);
+                case LOCAL_CACHE -> null;
             };
         } catch (Exception e) {
             logger.warn("Failed to parse response from " + provider + ": " + e.getMessage());
@@ -126,7 +130,7 @@ public final class UUIDScraper {
         }
     }
     
-    private ResolvedPlayer parseMojangResponse(String body) {
+    private ResolvedPlayer parseHytaleResponse(String body) {
         var uuidMatcher = UUID_NO_DASHES_PATTERN.matcher(body);
         var nameMatcher = USERNAME_PATTERN.matcher(body);
         
@@ -134,25 +138,10 @@ public final class UUIDScraper {
             var uuidStr = insertDashes(uuidMatcher.group(1));
             return new ResolvedPlayer(UUID.fromString(uuidStr), nameMatcher.group(1));
         }
-        return null;
-    }
-    
-    private ResolvedPlayer parseAshconResponse(String body) {
-        var uuidMatcher = UUID_PATTERN.matcher(body);
-        var nameMatcher = USERNAME_PATTERN.matcher(body);
         
-        if (uuidMatcher.find() && nameMatcher.find()) {
-            return new ResolvedPlayer(UUID.fromString(uuidMatcher.group(1)), nameMatcher.group(1));
-        }
-        return null;
-    }
-    
-    private ResolvedPlayer parsePlayerDBResponse(String body) {
-        var uuidMatcher = Pattern.compile("\"raw_id\"\\s*:\\s*\"([0-9a-fA-F-]{36})\"").matcher(body);
-        var nameMatcher = Pattern.compile("\"username\"\\s*:\\s*\"([^\"]+)\"").matcher(body);
-        
-        if (uuidMatcher.find() && nameMatcher.find()) {
-            return new ResolvedPlayer(UUID.fromString(uuidMatcher.group(1)), nameMatcher.group(1));
+        var fullUuidMatcher = UUID_PATTERN.matcher(body);
+        if (fullUuidMatcher.find() && nameMatcher.find()) {
+            return new ResolvedPlayer(UUID.fromString(fullUuidMatcher.group(1)), nameMatcher.group(1));
         }
         return null;
     }
@@ -174,7 +163,7 @@ public final class UUIDScraper {
             try {
                 var request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
-                    .header("User-Agent", "Rubidium-Server/1.0")
+                    .header("User-Agent", "Rubidium-Framework/1.0")
                     .timeout(Duration.ofSeconds(30))
                     .GET()
                     .build();

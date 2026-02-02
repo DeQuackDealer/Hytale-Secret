@@ -1,0 +1,221 @@
+$C = "../Common.ui";
+
+$C.@PageOverlay {
+    $C.@DecoratedContainer {
+        Anchor: (Width: 480, Height: 550);
+
+        #Title {
+            Group {
+                $C.@Title {
+                    @Text = "Rubidium Settings";
+                }
+            }
+        }
+
+        #Content {
+            LayoutMode: Top;
+            Padding: (Left: 25, Right: 25, Bottom: 25, Top: 15);
+
+            // Display Settings Section
+            Group {
+                LayoutMode: Top;
+                Anchor: (Height: 30);
+                
+                $C.@Label #DisplayHeader {
+                    @Text = "Display Features";
+                    @Anchor = Anchor(Width: 200, Height: 25);
+                }
+            }
+
+            // Minimap Toggle
+            Group {
+                LayoutMode: Center;
+                Anchor: (Height: 45);
+
+                Group {
+                    LayoutMode: Left;
+
+                    $C.@Label #MinimapLabel {
+                        @Text = "Show Minimap";
+                        @Anchor = Anchor(Width: 250, Height: 30);
+                    }
+
+                    $C.@Toggle #MinimapToggle {
+                        @Anchor = Anchor(Width: 60);
+                    }
+                }
+            }
+
+            // Waypoints Toggle
+            Group {
+                LayoutMode: Center;
+                Anchor: (Height: 45);
+
+                Group {
+                    LayoutMode: Left;
+
+                    $C.@Label #WaypointsLabel {
+                        @Text = "Show Waypoints";
+                        @Anchor = Anchor(Width: 250, Height: 30);
+                    }
+
+                    $C.@Toggle #WaypointsToggle {
+                        @Anchor = Anchor(Width: 60);
+                    }
+                }
+            }
+
+            // Stats Toggle
+            Group {
+                LayoutMode: Center;
+                Anchor: (Height: 45);
+
+                Group {
+                    LayoutMode: Left;
+
+                    $C.@Label #StatsLabel {
+                        @Text = "Show Performance Stats";
+                        @Anchor = Anchor(Width: 250, Height: 30);
+                    }
+
+                    $C.@Toggle #StatsToggle {
+                        @Anchor = Anchor(Width: 60);
+                    }
+                }
+            }
+
+            // Voice Chat Section
+            Group {
+                LayoutMode: Top;
+                Anchor: (Height: 40, Top: 10);
+                
+                $C.@Label #VoiceHeader {
+                    @Text = "Voice Chat";
+                    @Anchor = Anchor(Width: 200, Height: 25);
+                }
+            }
+
+            // Voice Chat Toggle
+            Group {
+                LayoutMode: Center;
+                Anchor: (Height: 45);
+
+                Group {
+                    LayoutMode: Left;
+
+                    $C.@Label #VoiceChatLabel {
+                        @Text = "Enable Voice Chat";
+                        @Anchor = Anchor(Width: 250, Height: 30);
+                    }
+
+                    $C.@Toggle #VoiceChatToggle {
+                        @Anchor = Anchor(Width: 60);
+                    }
+                }
+            }
+
+            // Volume Slider
+            Group {
+                LayoutMode: Center;
+                Anchor: (Height: 45);
+
+                Group {
+                    LayoutMode: Left;
+
+                    $C.@Label #VolumeLabel {
+                        @Text = "Voice Volume";
+                        @Anchor = Anchor(Width: 150, Height: 30);
+                    }
+
+                    $C.@Slider #VolumeSlider {
+                        @Anchor = Anchor(Width: 200);
+                        @Min = 0;
+                        @Max = 100;
+                        @Value = 100;
+                    }
+                }
+            }
+
+            // Minimap Settings Section
+            Group {
+                LayoutMode: Top;
+                Anchor: (Height: 40, Top: 10);
+                
+                $C.@Label #MinimapHeader {
+                    @Text = "Minimap";
+                    @Anchor = Anchor(Width: 200, Height: 25);
+                }
+            }
+
+            // Zoom Slider
+            Group {
+                LayoutMode: Center;
+                Anchor: (Height: 45);
+
+                Group {
+                    LayoutMode: Left;
+
+                    $C.@Label #ZoomLabel {
+                        @Text = "Zoom Level";
+                        @Anchor = Anchor(Width: 150, Height: 30);
+                    }
+
+                    $C.@Slider #ZoomSlider {
+                        @Anchor = Anchor(Width: 200);
+                        @Min = 10;
+                        @Max = 50;
+                        @Value = 20;
+                    }
+                }
+            }
+
+            // Rotate Toggle
+            Group {
+                LayoutMode: Center;
+                Anchor: (Height: 45);
+
+                Group {
+                    LayoutMode: Left;
+
+                    $C.@Label #RotateLabel {
+                        @Text = "Rotate with Player";
+                        @Anchor = Anchor(Width: 250, Height: 30);
+                    }
+
+                    $C.@Toggle #RotateToggle {
+                        @Anchor = Anchor(Width: 60);
+                    }
+                }
+            }
+
+            // Buttons
+            Group {
+                LayoutMode: Center;
+                Anchor: (Height: 50, Top: 15);
+
+                Group {
+                    LayoutMode: Left;
+
+                    $C.@TextButton #SaveButton {
+                        @Text = "Save";
+                        @Anchor = Anchor(Width: 120);
+                    }
+
+                    Group { Anchor: (Width: 15); }
+
+                    $C.@TextButton #ResetButton {
+                        @Text = "Reset";
+                        @Anchor = Anchor(Width: 120);
+                    }
+
+                    Group { Anchor: (Width: 15); }
+
+                    $C.@TextButton #BackButton {
+                        @Text = "Back";
+                        @Anchor = Anchor(Width: 120);
+                    }
+                }
+            }
+        }
+    }
+}

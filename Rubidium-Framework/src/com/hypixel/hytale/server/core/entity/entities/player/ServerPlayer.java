@@ -1,13 +1,13 @@
 package com.hypixel.hytale.server.core.entity.entities.player;
 
 import com.hypixel.hytale.server.core.entity.ServerEntity;
+import com.hypixel.hytale.server.core.entity.entities.player.pages.PageManager;
+import com.hypixel.hytale.server.core.entity.entities.player.hud.HudManager;
+import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
+import com.hypixel.hytale.protocol.packets.interface_.CustomUICommand;
 
 import java.util.UUID;
 
-/**
- * Stub interface for server players.
- * Replaced by real implementation at runtime.
- */
 public interface ServerPlayer extends ServerEntity {
     
     String getUsername();
@@ -41,4 +41,20 @@ public interface ServerPlayer extends ServerEntity {
     void playSound(String sound, float volume, float pitch);
     
     void sendPacket(Object packet);
+    
+    PageManager getPageManager();
+    
+    HudManager getHudManager();
+    
+    void sendCustomPageOpen(String pageId, String uiPath, CustomPageLifetime lifetime, CustomUICommand[] commands);
+    
+    void sendCustomPageClose(String pageId);
+    
+    void sendCustomUICommands(String pageId, CustomUICommand[] commands);
+    
+    void teleport(double x, double y, double z);
+    
+    void teleport(double x, double y, double z, float yaw, float pitch);
+    
+    String getWorldName();
 }

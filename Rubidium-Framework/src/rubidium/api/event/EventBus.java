@@ -58,12 +58,33 @@ public class EventBus {
     }
     
     public <T extends Event> T callEvent(T event) {
-        List<RegisteredListener> handlers = listeners.get(event.getClass());
-        if (handlers == null || handlers.isEmpty()) {
+        List<RegisteredListener> allHandlers = new ArrayList<>();
+        
+        allHandlers.addAll(listeners.getOrDefault(event.getClass(), Collections.emptyList()));
+        
+        for (Class<?> iface : event.getClass().getInterfaces()) {
+            if (Event.class.isAssignableFrom(iface)) {
+                @SuppressWarnings("unchecked")
+                Class<? extends Event> eventIface = (Class<? extends Event>) iface;
+                allHandlers.addAll(listeners.getOrDefault(eventIface, Collections.emptyList()));
+            }
+        }
+        
+        Class<?> superClass = event.getClass().getSuperclass();
+        while (superClass != null && Event.class.isAssignableFrom(superClass)) {
+            @SuppressWarnings("unchecked")
+            Class<? extends Event> eventSuper = (Class<? extends Event>) superClass;
+            allHandlers.addAll(listeners.getOrDefault(eventSuper, Collections.emptyList()));
+            superClass = superClass.getSuperclass();
+        }
+        
+        if (allHandlers.isEmpty()) {
             return event;
         }
         
-        for (RegisteredListener listener : handlers) {
+        allHandlers.sort(Comparator.comparingInt(l -> l.getPriority().getSlot()));
+        
+        for (RegisteredListener listener : allHandlers) {
             if (event instanceof Cancellable) {
                 if (((Cancellable) event).isCancelled() && listener.isIgnoreCancelled()) {
                     continue;

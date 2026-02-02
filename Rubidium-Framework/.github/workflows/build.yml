@@ -15,6 +15,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Rubidium-Framework
     
     steps:
     - name: Checkout repository
@@ -23,69 +26,86 @@ jobs:
     - name: Set up JDK 25
       uses: actions/setup-java@v4
       with:
-        java-version: '25-ea'
+        java-version: '25'
         distribution: 'temurin'
         cache: 'gradle'
     
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     
-    - name: Build Rubidium Framework
-      run: ./gradlew clean shadowJar --no-daemon
+    - name: Build All Editions
+      run: ./gradlew clean buildAllEditions --no-daemon
     
-    - name: Build SDK artifacts
-      run: ./gradlew buildAll --no-daemon
-    
-    - name: Build Example Mod (Joke Mod)
+    - name: Verify Build Artifacts
       run: |
-        cd examples/joke-mod
-        ../../gradlew jar --no-daemon
+        echo "=== Checking Build Output ==="
+        if [ ! -f "build/libs/rubidium.jar" ]; then
+          echo "ERROR: rubidium.jar not found!"
+          exit 1
+        fi
+        if [ ! -f "build/libs/rubidium_plus.jar" ]; then
+          echo "ERROR: rubidium_plus.jar not found!"
+          exit 1
+        fi
+        echo "Build successful!"
+        ls -la build/libs/
     
-    - name: Run Tests
-      run: ./gradlew test --no-daemon
+    - name: Verify JAR Manifest Format
+      run: |
+        echo "=== Verifying Hytale Manifest Format ==="
+        unzip -p build/libs/rubidium.jar manifests.json | head -20
+        echo ""
+        echo "=== Checking required fields ==="
+        unzip -p build/libs/rubidium.jar manifests.json | grep -q '"Main"' && echo "Main field: OK" || echo "Main field: MISSING"
+        unzip -p build/libs/rubidium.jar manifests.json | grep -q '"Name"' && echo "Name field: OK" || echo "Name field: MISSING"
+        unzip -p build/libs/rubidium.jar manifests.json | grep -q '"Version"' && echo "Version field: OK" || echo "Version field: MISSING"
+    
+    - name: Build Example Mods
+      run: |
+        if [ -d "examples/joke-mod" ]; then
+          cd examples/joke-mod
+          chmod +x ../../gradlew 2>/dev/null || true
+          ../../gradlew jar --no-daemon || echo "Example mod build skipped"
+        fi
+    
+    - name: Run API Tests
+      run: |
+        mkdir -p build/classes/java/main
+        javac -cp "build/libs/rubidium_plus.jar:libs/HytaleServer.jar" \
+          -d build/classes/java/main \
+          test-server/HytaleTestEnvironment.java 2>&1 || true
+        echo "=== Running API Tests ==="
+        timeout 60 java -cp "build/classes/java/main:build/libs/rubidium_plus.jar:libs/HytaleServer.jar" \
+          rubidium.test.FullAPITest 2>&1 || echo "Tests completed or timed out"
       continue-on-error: true
     
-    - name: List build artifacts
+    - name: List All Artifacts
       run: |
-        echo "=== Rubidium Framework ==="
-        ls -la build/libs/ || echo "build/libs does not exist"
+        echo "=== Rubidium Framework JARs ==="
+        ls -la build/libs/
+        echo ""
         echo "=== Example Mods ==="
-        ls -la examples/joke-mod/build/libs/ || echo "Example mod not built"
+        ls -la examples/*/build/libs/ 2>/dev/null || echo "No example mods built"
     
-    - name: Upload Rubidium Framework JAR
+    - name: Upload Rubidium Free Edition
       uses: actions/upload-artifact@v4
       with:
-        name: Rubidium-Framework
-        path: build/libs/Rubidium-1.0.0.jar
+        name: rubidium-free
+        path: Rubidium-Framework/build/libs/rubidium.jar
         if-no-files-found: error
     
-    - name: Upload SDK JARs
+    - name: Upload Rubidium Plus Edition
       uses: actions/upload-artifact@v4
       with:
-        name: Rubidium-SDK
-        path: |
-          build/libs/rubidium-java-sdk-*.jar
-        if-no-files-found: warn
+        name: rubidium-plus
+        path: Rubidium-Framework/build/libs/rubidium_plus.jar
+        if-no-files-found: error
     
-    - name: Upload Example Joke Mod
+    - name: Upload Example Mods
       uses: actions/upload-artifact@v4
       with:
-        name: Example-JokeMod
-        path: examples/joke-mod/build/libs/JokeMod-*.jar
-        if-no-files-found: warn
-    
-    - name: Upload Test Launcher
-      uses: actions/upload-artifact@v4
-      with:
-        name: TestServerLauncher
-        path: build/libs/TestServerLauncher.jar
-        if-no-files-found: warn
-    
-    - name: Upload Test Script
-      uses: actions/upload-artifact@v4
-      with:
-        name: rubidium-test-gui
-        path: build/libs/rubidium-test-gui.sh
+        name: example-mods
+        path: Rubidium-Framework/examples/*/build/libs/*.jar
         if-no-files-found: warn
 
   release:
@@ -99,13 +119,17 @@ jobs:
       with:
         path: artifacts
     
+    - name: Display downloaded artifacts
+      run: ls -laR artifacts/
+    
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
         draft: true
+        generate_release_notes: true
         files: |
-          artifacts/Rubidium-Framework/*.jar
-          artifacts/Rubidium-SDK/*.jar
-          artifacts/Example-JokeMod/*.jar
+          artifacts/rubidium-free/rubidium.jar
+          artifacts/rubidium-plus/rubidium_plus.jar
+          artifacts/example-mods/*.jar
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

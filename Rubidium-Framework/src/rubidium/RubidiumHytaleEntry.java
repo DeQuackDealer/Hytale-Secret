@@ -9,6 +9,7 @@ import com.hypixel.hytale.server.core.entity.entities.player.pages.PageManager;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 
 import rubidium.admin.AdminUIModule;
+import rubidium.command.CommandBridge;
 import rubidium.core.RubidiumBootstrap;
 import rubidium.core.tier.FeatureRegistry;
 import rubidium.hytale.adapter.HytalePlayerBridge;
@@ -38,44 +39,104 @@ public class RubidiumHytaleEntry extends JavaPlugin {
         super(init);
         instance = this;
         isServer = (init != null);
-        LOGGER.info("[Rubidium] Framework v1.0.0 loading...");
+        LOGGER.info("[Rubidium] Framework v1.0 loading...");
         LOGGER.info("[Rubidium] Environment: " + (isServer ? "Server" : "Singleplayer"));
     }
     
+    /**
+     * Hytale lifecycle: SETUP phase
+     * Register events, commands, and configs here.
+     */
     @Override
-    public void onEnable() {
+    protected void setup() {
+        LOGGER.info("[Rubidium] Setup phase - registering events and commands...");
+        
+        CommandBridge.initialize(this);
+        
+        rubidium.hytale.adapter.PlayerEventHandler.get().registerEvents(getEventRegistry());
+        
+        registerCommands();
+        
+        CommandBridge.registerAllPending();
+    }
+    
+    /**
+     * Hytale lifecycle: START phase  
+     * Initialize systems that depend on other plugins.
+     */
+    @Override
+    protected void start() {
+        LOGGER.info("[Rubidium] Start phase - initializing modules...");
+        
         if (!RubidiumBootstrap.initialize(getClass(), isServer)) {
             return;
         }
+    }
+    
+    
+    /**
+     * Register event handlers with the Hytale event registry.
+     * Uses getEventRegistry() which returns the real Hytale registry at runtime.
+     */
+    private void registerHytaleEvents() {
+        LOGGER.info("[Rubidium] Registering Hytale event handlers via plugin registry...");
         
-        registerCommands();
+        getEventRegistry().register(
+            com.hypixel.hytale.server.core.event.events.player.AddPlayerToWorldEvent.class,
+            this::onPlayerJoin
+        );
+        
+        getEventRegistry().register(
+            com.hypixel.hytale.server.core.event.events.player.DrainPlayerFromWorldEvent.class,
+            this::onPlayerQuit
+        );
+        
+        LOGGER.info("[Rubidium] Hytale event handlers registered");
+    }
+    
+    private void onPlayerJoin(com.hypixel.hytale.server.core.event.events.player.AddPlayerToWorldEvent event) {
+        try {
+            rubidium.hytale.adapter.PlayerEventHandler.get().handlePlayerJoin(event);
+        } catch (Exception e) {
+            LOGGER.severe("[Rubidium] Error handling player join: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    private void onPlayerQuit(com.hypixel.hytale.server.core.event.events.player.DrainPlayerFromWorldEvent event) {
+        try {
+            rubidium.hytale.adapter.PlayerEventHandler.get().handlePlayerQuit(event);
+        } catch (Exception e) {
+            LOGGER.severe("[Rubidium] Error handling player quit: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     
     private void registerCommands() {
         registerCommand(new PluginCommand("rubidium", "Show Rubidium framework info", null, "rb") {
             @Override
             public boolean execute(CommandSender sender, String label, String[] args) {
-                sender.sendMessage("&6=== Rubidium Framework v1.0.0 ===");
-                sender.sendMessage("&7A comprehensive API library for Hytale");
+                sender.sendMessage("=== Rubidium Framework v1.0 ===");
+                sender.sendMessage("A comprehensive API library for Hytale");
                 sender.sendMessage("");
-                sender.sendMessage("&eEdition: &f" + FeatureRegistry.getCurrentTier().getDisplayName());
-                sender.sendMessage("&eFeatures: &f" + FeatureRegistry.getAllFeatures().stream()
+                sender.sendMessage("Edition: " + FeatureRegistry.getCurrentTier().getDisplayName());
+                sender.sendMessage("Features: " + FeatureRegistry.getAllFeatures().stream()
                     .filter(FeatureRegistry.Feature::isEnabled).count() + " enabled");
                 sender.sendMessage("");
-                sender.sendMessage("&ePlayer Commands:");
-                sender.sendMessage("&f  /rubidium &7- Show this info");
-                sender.sendMessage("&f  /settings &7- Open Rubidium settings");
-                sender.sendMessage("&f  /toggle <feature> &7- Toggle HUD features");
-                sender.sendMessage("&f  /waypoint <name> &7- Create a waypoint");
-                sender.sendMessage("&f  /hud &7- Open HUD editor");
+                sender.sendMessage("Player Commands:");
+                sender.sendMessage("  /rubidium - Show this info");
+                sender.sendMessage("  /settings - Open Rubidium settings");
+                sender.sendMessage("  /toggle <feature> - Toggle HUD features");
+                sender.sendMessage("  /waypoint <name> - Create a waypoint");
+                sender.sendMessage("  /hud - Open HUD editor");
                 sender.sendMessage("");
-                sender.sendMessage("&eAdmin Commands:");
-                sender.sendMessage("&f  /admin &7- Open admin panel");
-                sender.sendMessage("&f  /giveadmin <player> &7- Give admin to player");
-                sender.sendMessage("&f  /removeadmin <player> &7- Remove admin from player");
-                sender.sendMessage("&f  /toggleopti &7- Toggle optimizations (owner only)");
+                sender.sendMessage("Admin Commands:");
+                sender.sendMessage("  /admin - Open admin panel");
+                sender.sendMessage("  /giveadmin <player> - Give admin to player");
+                sender.sendMessage("  /removeadmin <player> - Remove admin from player");
+                sender.sendMessage("  /toggleopti - Toggle optimizations (owner only)");
                 sender.sendMessage("");
-                sender.sendMessage("&7Status: &aEnabled | Mode: " + (isServer ? "Server" : "Singleplayer"));
+                sender.sendMessage("Status: Enabled | Mode: " + (isServer ? "Server" : "Singleplayer"));
                 return true;
             }
         });
@@ -84,7 +145,7 @@ public class RubidiumHytaleEntry extends JavaPlugin {
             @Override
             public boolean execute(CommandSender sender, String label, String[] args) {
                 if (!sender.isPlayer()) {
-                    sender.sendMessage("&cThis command can only be used by players");
+                    sender.sendMessage("This command can only be used by players");
                     return true;
                 }
                 
@@ -97,15 +158,15 @@ public class RubidiumHytaleEntry extends JavaPlugin {
                 if (playerRefOpt.isPresent() && pageManagerOpt.isPresent()) {
                     RubidiumSettingsPage settingsPage = new RubidiumSettingsPage(playerRefOpt.get(), playerId);
                     pageManagerOpt.get().openPage(settingsPage);
-                    sender.sendMessage("&aOpening Rubidium Settings...");
+                    sender.sendMessage("Opening Rubidium Settings...");
                 } else {
                     Player player = Server.getPlayer(playerId).orElse(null);
                     if (player != null) {
                         UIContainer settingsUI = RubidiumSettingsTab.create(player);
                         player.sendPacket(settingsUI);
-                        sender.sendMessage("&aOpening Rubidium Settings...");
+                        sender.sendMessage("Opening Rubidium Settings...");
                     } else {
-                        sender.sendMessage("&cCould not open settings page");
+                        sender.sendMessage("Could not open settings page");
                     }
                 }
                 return true;
@@ -116,13 +177,13 @@ public class RubidiumHytaleEntry extends JavaPlugin {
             @Override
             public boolean execute(CommandSender sender, String label, String[] args) {
                 if (!sender.isPlayer()) {
-                    sender.sendMessage("&cThis command can only be used by players");
+                    sender.sendMessage("This command can only be used by players");
                     return true;
                 }
                 
                 if (args.length == 0) {
-                    sender.sendMessage("&eUsage: /toggle <feature>");
-                    sender.sendMessage("&7Features: minimap, statistics, voicechat, waypoints");
+                    sender.sendMessage("Usage: /toggle <feature>");
+                    sender.sendMessage("Features: minimap, statistics, voicechat, waypoints");
                     return true;
                 }
                 
@@ -133,21 +194,21 @@ public class RubidiumHytaleEntry extends JavaPlugin {
                 switch (feature) {
                     case "minimap", "map" -> {
                         settings.setMinimapEnabled(!settings.isMinimapEnabled());
-                        sender.sendMessage("&7Minimap: " + (settings.isMinimapEnabled() ? "&aEnabled" : "&cDisabled"));
+                        sender.sendMessage("Minimap: " + (settings.isMinimapEnabled() ? "Enabled" : "Disabled"));
                     }
                     case "statistics", "stats", "fps" -> {
                         settings.setStatisticsEnabled(!settings.isStatisticsEnabled());
-                        sender.sendMessage("&7Statistics: " + (settings.isStatisticsEnabled() ? "&aEnabled" : "&cDisabled"));
+                        sender.sendMessage("Statistics: " + (settings.isStatisticsEnabled() ? "Enabled" : "Disabled"));
                     }
                     case "voicechat", "vc", "voice" -> {
                         settings.setVoiceChatEnabled(!settings.isVoiceChatEnabled());
-                        sender.sendMessage("&7Voice Chat: " + (settings.isVoiceChatEnabled() ? "&aEnabled" : "&cDisabled"));
+                        sender.sendMessage("Voice Chat: " + (settings.isVoiceChatEnabled() ? "Enabled" : "Disabled"));
                     }
                     case "waypoints", "wp" -> {
                         settings.setWaypointsEnabled(!settings.isWaypointsEnabled());
-                        sender.sendMessage("&7Waypoints: " + (settings.isWaypointsEnabled() ? "&aEnabled" : "&cDisabled"));
+                        sender.sendMessage("Waypoints: " + (settings.isWaypointsEnabled() ? "Enabled" : "Disabled"));
                     }
-                    default -> sender.sendMessage("&cUnknown feature: " + feature);
+                    default -> sender.sendMessage("Unknown feature: " + feature);
                 }
                 
                 settings.save();
@@ -167,18 +228,18 @@ public class RubidiumHytaleEntry extends JavaPlugin {
             @Override
             public boolean execute(CommandSender sender, String label, String[] args) {
                 if (!sender.isPlayer()) {
-                    sender.sendMessage("&cThis command can only be used by players");
+                    sender.sendMessage("This command can only be used by players");
                     return true;
                 }
                 
                 if (!FeatureRegistry.isEnabled("feature.hudeditor")) {
-                    sender.sendMessage("&cHUD Editor requires Rubidium Plus. Upgrade at rubidium.dev/plus");
+                    sender.sendMessage("HUD Editor requires Rubidium Plus. Upgrade at rubidium.dev/plus");
                     return true;
                 }
                 
                 Player player = Server.getPlayer(sender.getUniqueId()).orElse(null);
                 if (player == null) {
-                    sender.sendMessage("&cCould not find player data");
+                    sender.sendMessage("Could not find player data");
                     return true;
                 }
                 
@@ -191,21 +252,21 @@ public class RubidiumHytaleEntry extends JavaPlugin {
             @Override
             public boolean execute(CommandSender sender, String label, String[] args) {
                 if (!sender.isPlayer()) {
-                    sender.sendMessage("&cThis command can only be used by players");
+                    sender.sendMessage("This command can only be used by players");
                     return true;
                 }
                 
                 if (!FeatureRegistry.isEnabled("feature.minimap")) {
-                    sender.sendMessage("&cWaypoints require Rubidium Plus. Upgrade at rubidium.dev/plus");
+                    sender.sendMessage("Waypoints require Rubidium Plus. Upgrade at rubidium.dev/plus");
                     return true;
                 }
                 
                 if (args.length == 0) {
-                    sender.sendMessage("&eWaypoint Commands:");
-                    sender.sendMessage("&f  /waypoint add <name> &7- Create waypoint at your location");
-                    sender.sendMessage("&f  /waypoint remove <name> &7- Remove a waypoint");
-                    sender.sendMessage("&f  /waypoint list &7- List all waypoints");
-                    sender.sendMessage("&f  /waypoint tp <name> &7- Teleport to waypoint");
+                    sender.sendMessage("Waypoint Commands:");
+                    sender.sendMessage("  /waypoint add <name> - Create waypoint at your location");
+                    sender.sendMessage("  /waypoint remove <name> - Remove a waypoint");
+                    sender.sendMessage("  /waypoint list - List all waypoints");
+                    sender.sendMessage("  /waypoint tp <name> - Teleport to waypoint");
                     return true;
                 }
                 
@@ -213,33 +274,33 @@ public class RubidiumHytaleEntry extends JavaPlugin {
                 switch (subCmd) {
                     case "add", "create", "set" -> {
                         if (args.length < 2) {
-                            sender.sendMessage("&cUsage: /waypoint add <name>");
+                            sender.sendMessage("Usage: /waypoint add <name>");
                             return true;
                         }
                         String name = args[1];
-                        sender.sendMessage("&aWaypoint '" + name + "' created at your location!");
+                        sender.sendMessage("Waypoint '" + name + "' created at your location!");
                     }
                     case "remove", "delete", "del" -> {
                         if (args.length < 2) {
-                            sender.sendMessage("&cUsage: /waypoint remove <name>");
+                            sender.sendMessage("Usage: /waypoint remove <name>");
                             return true;
                         }
                         String name = args[1];
-                        sender.sendMessage("&cWaypoint '" + name + "' removed!");
+                        sender.sendMessage("Waypoint '" + name + "' removed!");
                     }
                     case "list" -> {
-                        sender.sendMessage("&eYour Waypoints:");
-                        sender.sendMessage("&7  (No waypoints set)");
+                        sender.sendMessage("Your Waypoints:");
+                        sender.sendMessage("  (No waypoints set)");
                     }
                     case "tp", "teleport", "goto" -> {
                         if (args.length < 2) {
-                            sender.sendMessage("&cUsage: /waypoint tp <name>");
+                            sender.sendMessage("Usage: /waypoint tp <name>");
                             return true;
                         }
                         String name = args[1];
-                        sender.sendMessage("&aTeleporting to waypoint '" + name + "'...");
+                        sender.sendMessage("Teleporting to waypoint '" + name + "'...");
                     }
-                    default -> sender.sendMessage("&cUnknown subcommand: " + subCmd);
+                    default -> sender.sendMessage("Unknown subcommand: " + subCmd);
                 }
                 return true;
             }
@@ -249,12 +310,12 @@ public class RubidiumHytaleEntry extends JavaPlugin {
             @Override
             public boolean execute(CommandSender sender, String label, String[] args) {
                 if (!sender.isPlayer()) {
-                    sender.sendMessage("&cThis command can only be used by players");
+                    sender.sendMessage("This command can only be used by players");
                     return true;
                 }
                 
                 if (!FeatureRegistry.isEnabled("feature.adminpanel")) {
-                    sender.sendMessage("&cAdmin Panel requires Rubidium Plus. Upgrade at rubidium.dev/plus");
+                    sender.sendMessage("Admin Panel requires Rubidium Plus. Upgrade at rubidium.dev/plus");
                     return true;
                 }
                 
@@ -262,7 +323,7 @@ public class RubidiumHytaleEntry extends JavaPlugin {
                 SettingsRegistry.PermissionLevel perm = serverSettings.getPermissionLevel(sender.getUniqueId());
                 
                 if (perm == SettingsRegistry.PermissionLevel.PLAYER) {
-                    sender.sendMessage("&cYou don't have permission to access the admin panel");
+                    sender.sendMessage("You don't have permission to access the admin panel");
                     return true;
                 }
                 
@@ -271,7 +332,7 @@ public class RubidiumHytaleEntry extends JavaPlugin {
                 if (player != null && adminModule != null) {
                     adminModule.openMainMenu(player);
                 }
-                sender.sendMessage("&aOpening Admin Panel...");
+                sender.sendMessage("Opening Admin Panel...");
                 return true;
             }
         });
@@ -280,13 +341,13 @@ public class RubidiumHytaleEntry extends JavaPlugin {
             @Override
             public boolean execute(CommandSender sender, String label, String[] args) {
                 if (!sender.isPlayer()) {
-                    sender.sendMessage("&cThis command can only be used by players");
+                    sender.sendMessage("This command can only be used by players");
                     return true;
                 }
-                sender.sendMessage("&aYou have been given an Admin Stick!");
-                sender.sendMessage("&7Right-click: Open Admin Menu");
-                sender.sendMessage("&7Left-click: Quick Action (Players panel)");
-                sender.sendMessage("&7Shift+Right-click: Configure Shortcuts");
+                sender.sendMessage("You have been given an Admin Stick!");
+                sender.sendMessage("Right-click: Open Admin Menu");
+                sender.sendMessage("Left-click: Quick Action (Players panel)");
+                sender.sendMessage("Shift+Right-click: Configure Shortcuts");
                 return true;
             }
         });
@@ -298,12 +359,12 @@ public class RubidiumHytaleEntry extends JavaPlugin {
                 SettingsRegistry.PermissionLevel senderPerm = serverSettings.getPermissionLevel(sender.getUniqueId());
                 
                 if (senderPerm != SettingsRegistry.PermissionLevel.OWNER && !sender.isConsole()) {
-                    sender.sendMessage("&cOnly server owners can use this command");
+                    sender.sendMessage("Only server owners can use this command");
                     return true;
                 }
                 
                 if (args.length == 0) {
-                    sender.sendMessage("&cUsage: /giveadmin <player>");
+                    sender.sendMessage("Usage: /giveadmin <player>");
                     return true;
                 }
                 
@@ -311,15 +372,15 @@ public class RubidiumHytaleEntry extends JavaPlugin {
                 Player target = Server.getPlayerByName(playerName);
                 
                 if (target == null) {
-                    sender.sendMessage("&cPlayer not found: " + playerName);
+                    sender.sendMessage("Player not found: " + playerName);
                     return true;
                 }
                 
                 serverSettings.addAdmin(target.getUniqueId());
                 serverSettings.save();
                 
-                sender.sendMessage("&a" + playerName + " is now a Rubidium admin!");
-                target.sendMessage("&aYou have been given Rubidium admin permissions!");
+                sender.sendMessage("" + playerName + " is now a Rubidium admin!");
+                target.sendMessage("You have been given Rubidium admin permissions!");
                 return true;
             }
         });
@@ -331,12 +392,12 @@ public class RubidiumHytaleEntry extends JavaPlugin {
                 SettingsRegistry.PermissionLevel senderPerm = serverSettings.getPermissionLevel(sender.getUniqueId());
                 
                 if (senderPerm != SettingsRegistry.PermissionLevel.OWNER && !sender.isConsole()) {
-                    sender.sendMessage("&cOnly server owners can use this command");
+                    sender.sendMessage("Only server owners can use this command");
                     return true;
                 }
                 
                 if (args.length == 0) {
-                    sender.sendMessage("&cUsage: /removeadmin <player>");
+                    sender.sendMessage("Usage: /removeadmin <player>");
                     return true;
                 }
                 
@@ -344,15 +405,15 @@ public class RubidiumHytaleEntry extends JavaPlugin {
                 Player target = Server.getPlayerByName(playerName);
                 
                 if (target == null) {
-                    sender.sendMessage("&cPlayer not found: " + playerName);
+                    sender.sendMessage("Player not found: " + playerName);
                     return true;
                 }
                 
                 serverSettings.removeAdmin(target.getUniqueId());
                 serverSettings.save();
                 
-                sender.sendMessage("&c" + playerName + " is no longer a Rubidium admin.");
-                target.sendMessage("&cYour Rubidium admin permissions have been removed.");
+                sender.sendMessage("" + playerName + " is no longer a Rubidium admin.");
+                target.sendMessage("Your Rubidium admin permissions have been removed.");
                 return true;
             }
         });
@@ -364,20 +425,20 @@ public class RubidiumHytaleEntry extends JavaPlugin {
                 SettingsRegistry.PermissionLevel senderPerm = serverSettings.getPermissionLevel(sender.getUniqueId());
                 
                 if (senderPerm != SettingsRegistry.PermissionLevel.OWNER && !sender.isConsole()) {
-                    sender.sendMessage("&cOnly server owners can use this command");
+                    sender.sendMessage("Only server owners can use this command");
                     return true;
                 }
                 
                 serverSettings.setOptimizationsEnabled(!serverSettings.isOptimizationsEnabled());
                 serverSettings.save();
                 
-                String status = serverSettings.isOptimizationsEnabled() ? "&aEnabled" : "&cDisabled";
-                sender.sendMessage("&7Rubidium optimizations: " + status);
+                String status = serverSettings.isOptimizationsEnabled() ? "Enabled" : "Disabled";
+                sender.sendMessage("Rubidium optimizations: " + status);
                 
                 if (serverSettings.isOptimizationsEnabled()) {
-                    sender.sendMessage("&7Performance improvements are now active.");
+                    sender.sendMessage("Performance improvements are now active.");
                 } else {
-                    sender.sendMessage("&7Performance improvements have been disabled.");
+                    sender.sendMessage("Performance improvements have been disabled.");
                 }
                 return true;
             }
@@ -386,8 +447,13 @@ public class RubidiumHytaleEntry extends JavaPlugin {
         LOGGER.info("[Rubidium] Registered all commands");
     }
     
+    /**
+     * Hytale lifecycle: SHUTDOWN phase
+     * Called when the plugin is being disabled.
+     */
     @Override
-    public void onDisable() {
+    protected void shutdown() {
+        LOGGER.info("[Rubidium] Shutdown phase - cleaning up...");
         RubidiumBootstrap.shutdown();
     }
     

@@ -1,0 +1,21 @@
+{
+  "group": "com.rubidium",
+  "name": "Rubidium Plus",
+  "version": "1.0.0",
+  "description": "Premium API Library for Hytale - Includes Voice Chat, Minimap, HUD Editor, Admin Panel, and more",
+  "main": "rubidium.RubidiumHytaleEntry",
+  "authors": [
+    {
+      "name": "Yellow Tale Team",
+      "url": "https://github.com/yellow-tale/rubidium"
+    }
+  ],
+  "website": "https://github.com/yellow-tale/rubidium",
+  "serverVersion": ">=0.0.1",
+  "dependencies": {},
+  "optionalDependencies": {},
+  "loadBefore": {},
+  "subPlugins": [],
+  "disabledByDefault": false,
+  "includesAssetPack": true
+}

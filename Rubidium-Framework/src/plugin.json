@@ -1,0 +1,21 @@
+{
+  "group": "com.rubidium",
+  "name": "Rubidium",
+  "version": "1.0.0",
+  "description": "API Library for Hytale Plugin Development - Provides PathfindingAPI, NPCAPI, AIBehaviorAPI, and more",
+  "main": "rubidium.RubidiumHytaleEntry",
+  "authors": [
+    {
+      "name": "Yellow Tale Team",
+      "url": "https://github.com/yellow-tale/rubidium"
+    }
+  ],
+  "website": "https://github.com/yellow-tale/rubidium",
+  "serverVersion": ">=0.0.1",
+  "dependencies": {},
+  "optionalDependencies": {},
+  "loadBefore": {},
+  "subPlugins": [],
+  "disabledByDefault": false,
+  "includesAssetPack": true
+}

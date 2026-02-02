@@ -1,0 +1,82 @@
+$C = "../Common.ui";
+
+// Minimap overlay - positioned top-right corner
+Group #MinimapOverlay {
+    Anchor: (Width: 180, Height: 180, Right: 10, Top: 10);
+    
+    // Circular minimap container
+    Group #MinimapContainer {
+        Background: "minimap_frame.png";
+        Anchor: (Width: 180, Height: 180);
+        
+        // Actual map render area
+        Group #MapRenderArea {
+            Anchor: (Width: 160, Height: 160);
+            LayoutMode: Center;
+        }
+        
+        // Compass indicators
+        Group #CompassNorth {
+            Anchor: (Width: 20, Height: 20, Top: 5);
+            LayoutMode: Center;
+            
+            $C.@Label {
+                @Text = "N";
+                @Anchor = Anchor(Width: 20, Height: 20);
+            }
+        }
+        
+        Group #CompassSouth {
+            Anchor: (Width: 20, Height: 20, Bottom: 5);
+            LayoutMode: Center;
+            
+            $C.@Label {
+                @Text = "S";
+                @Anchor = Anchor(Width: 20, Height: 20);
+            }
+        }
+        
+        Group #CompassEast {
+            Anchor: (Width: 20, Height: 20, Right: 5);
+            LayoutMode: Center;
+            
+            $C.@Label {
+                @Text = "E";
+                @Anchor = Anchor(Width: 20, Height: 20);
+            }
+        }
+        
+        Group #CompassWest {
+            Anchor: (Width: 20, Height: 20, Left: 5);
+            LayoutMode: Center;
+            
+            $C.@Label {
+                @Text = "W";
+                @Anchor = Anchor(Width: 20, Height: 20);
+            }
+        }
+        
+        // Player indicator (center)
+        Group #PlayerIndicator {
+            Anchor: (Width: 10, Height: 10);
+            LayoutMode: Center;
+            Background: "player_arrow.png";
+        }
+    }
+    
+    // Zoom controls
+    Group #ZoomControls {
+        Anchor: (Width: 30, Height: 60, Right: -35, Top: 60);
+        LayoutMode: Top;
+        
+        $C.@IconButton #ZoomInButton {
+            @Icon = "zoom_in.png";
+            @Anchor = Anchor(Width: 25, Height: 25);
+        }
+        
+        $C.@IconButton #ZoomOutButton {
+            @Icon = "zoom_out.png";
+            @Anchor = Anchor(Width: 25, Height: 25);
+        }
+    }
+}

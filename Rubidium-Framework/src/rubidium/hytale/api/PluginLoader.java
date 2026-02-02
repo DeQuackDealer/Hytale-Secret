@@ -110,22 +110,88 @@ public class PluginLoader {
     }
     
     private PluginMetadata readPluginDescriptor(JarFile jar) throws IOException {
+        // Hytale-native: manifests.json (plural, array format)
+        JarEntry manifestsEntry = jar.getJarEntry("manifests.json");
+        if (manifestsEntry != null) {
+            return parseManifestsJson(jar.getInputStream(manifestsEntry));
+        }
+        
+        // Rubidium legacy: manifest.json (singular)
         JarEntry manifestEntry = jar.getJarEntry("manifest.json");
         if (manifestEntry != null) {
             return parseManifestJson(jar.getInputStream(manifestEntry));
         }
         
+        // Rubidium alternative: plugin.json
         JarEntry jsonEntry = jar.getJarEntry("plugin.json");
         if (jsonEntry != null) {
             return parsePluginJson(jar.getInputStream(jsonEntry));
         }
         
+        // Legacy Bukkit-style: plugin.yml
         JarEntry ymlEntry = jar.getJarEntry("plugin.yml");
         if (ymlEntry != null) {
             return parsePluginYml(jar.getInputStream(ymlEntry));
         }
         
         return null;
+    }
+    
+    /**
+     * Parse Hytale-native manifests.json (array format with PascalCase fields)
+     */
+    private PluginMetadata parseManifestsJson(InputStream in) throws IOException {
+        String json = new String(in.readAllBytes());
+        
+        // manifests.json is an array, get first plugin definition
+        // Remove array brackets and get first object
+        String trimmed = json.trim();
+        if (trimmed.startsWith("[")) {
+            // Find the first object in the array
+            int start = trimmed.indexOf("{");
+            int end = findMatchingBrace(trimmed, start);
+            if (start >= 0 && end > start) {
+                json = trimmed.substring(start, end + 1);
+            }
+        }
+        
+        String name = extractJsonString(json, "Name");
+        String version = extractJsonString(json, "Version");
+        String description = extractJsonString(json, "Description");
+        String mainClass = extractJsonString(json, "Main");
+        String group = extractJsonString(json, "Group");
+        
+        // Build qualified name if group is present
+        String qualifiedName = name;
+        if (group != null && name != null) {
+            qualifiedName = group + ":" + name;
+        }
+        
+        return new PluginMetadata(
+            name != null ? name : "Unknown",
+            version != null ? version : "1.0.0",
+            mainClass != null ? mainClass : "",
+            description != null ? description : ""
+        );
+    }
+    
+    private int findMatchingBrace(String json, int start) {
+        if (start < 0 || json.charAt(start) != '{') return -1;
+        int depth = 0;
+        boolean inString = false;
+        for (int i = start; i < json.length(); i++) {
+            char c = json.charAt(i);
+            if (c == '"' && (i == 0 || json.charAt(i - 1) != '\\')) {
+                inString = !inString;
+            } else if (!inString) {
+                if (c == '{') depth++;
+                else if (c == '}') {
+                    depth--;
+                    if (depth == 0) return i;
+                }
+            }
+        }
+        return -1;
     }
     
     private PluginMetadata parseManifestJson(InputStream in) throws IOException {
@@ -232,10 +298,14 @@ public class PluginLoader {
             }
         }
         
+        // Enable Hytale-native plugins using proper lifecycle (setup → start)
         for (com.hypixel.hytale.server.core.plugin.JavaPlugin plugin : loadedHytalePlugins) {
             try {
-                plugin.onEnable();
-                logger.info("Enabled Hytale plugin: " + plugin.getClass().getSimpleName());
+                // Hytale uses: preLoad → setup → start (not onEnable)
+                invokeLifecycleMethod(plugin, "preLoad");
+                invokeLifecycleMethod(plugin, "setup");
+                invokeLifecycleMethod(plugin, "start");
+                logger.info("Enabled Hytale plugin: " + plugin.getName());
             } catch (Exception e) {
                 logger.severe("Error enabling Hytale plugin: " + e.getMessage());
             }
@@ -254,14 +324,32 @@ public class PluginLoader {
             }
         }
         
+        // Disable Hytale-native plugins using proper lifecycle (shutdown)
         for (int i = loadedHytalePlugins.size() - 1; i >= 0; i--) {
             com.hypixel.hytale.server.core.plugin.JavaPlugin plugin = loadedHytalePlugins.get(i);
             try {
-                plugin.onDisable();
-                logger.info("Disabled Hytale plugin: " + plugin.getClass().getSimpleName());
+                // Hytale uses: shutdown (not onDisable)
+                invokeLifecycleMethod(plugin, "shutdown");
+                logger.info("Disabled Hytale plugin: " + plugin.getName());
             } catch (Exception e) {
                 logger.severe("Error disabling Hytale plugin: " + e.getMessage());
             }
+        }
+    }
+    
+    /**
+     * Invoke a lifecycle method on a plugin using reflection.
+     * Hytale lifecycle methods are protected, so we need reflection.
+     */
+    private void invokeLifecycleMethod(Object plugin, String methodName) {
+        try {
+            java.lang.reflect.Method method = plugin.getClass().getDeclaredMethod(methodName);
+            method.setAccessible(true);
+            method.invoke(plugin);
+        } catch (NoSuchMethodException e) {
+            // Method not overridden, skip
+        } catch (Exception e) {
+            logger.warning("Failed to invoke " + methodName + " on " + plugin.getClass().getSimpleName() + ": " + e.getMessage());
         }
     }
     

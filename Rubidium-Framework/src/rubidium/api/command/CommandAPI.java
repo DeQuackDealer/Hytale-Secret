@@ -1,14 +1,18 @@
 package rubidium.api.command;
 
+import rubidium.command.CommandBridge;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public final class CommandAPI {
     
     private static final Map<String, CommandDefinition> commands = new ConcurrentHashMap<>();
     private static final Map<String, List<String>> aliases = new ConcurrentHashMap<>();
+    private static final List<Consumer<CommandDefinition>> registerListeners = new ArrayList<>();
     
     private CommandAPI() {}
     
@@ -21,7 +25,20 @@ public final class CommandAPI {
         for (String alias : command.getAliases()) {
             aliases.computeIfAbsent(alias.toLowerCase(), k -> new ArrayList<>()).add(command.getName());
         }
+        
+        if (CommandBridge.isInitialized()) {
+            CommandBridge.registerWithHytale(command);
+        }
+        
+        for (Consumer<CommandDefinition> listener : registerListeners) {
+            listener.accept(command);
+        }
+        
         return command;
+    }
+    
+    public static void onRegister(Consumer<CommandDefinition> listener) {
+        registerListeners.add(listener);
     }
     
     public static CommandDefinition register(CommandDefinition.Builder builder) {

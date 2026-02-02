@@ -1,0 +1,101 @@
+$C = "../Common.ui";
+
+$C.@PageOverlay {
+    $C.@DecoratedContainer {
+        Anchor: (Width: 600, Height: 500);
+
+        #Title {
+            Group {
+                $C.@Title {
+                    @Text = "Admin Panel";
+                }
+            }
+        }
+
+        #Content {
+            LayoutMode: Top;
+            Padding: (Left: 20, Right: 20, Bottom: 20, Top: 10);
+
+            // Tab bar
+            Group {
+                LayoutMode: Center;
+                Anchor: (Height: 45);
+
+                Group {
+                    LayoutMode: Left;
+
+                    $C.@TabButton #PlayersTab {
+                        @Text = "Players";
+                        @Anchor = Anchor(Width: 85);
+                    }
+
+                    $C.@TabButton #WorldTab {
+                        @Text = "World";
+                        @Anchor = Anchor(Width: 85);
+                    }
+
+                    $C.@TabButton #PermsTab {
+                        @Text = "Perms";
+                        @Anchor = Anchor(Width: 85);
+                    }
+
+                    $C.@TabButton #ServerTab {
+                        @Text = "Server";
+                        @Anchor = Anchor(Width: 85);
+                    }
+
+                    $C.@TabButton #BansTab {
+                        @Text = "Bans";
+                        @Anchor = Anchor(Width: 85);
+                    }
+
+                    $C.@TabButton #TeleportTab {
+                        @Text = "Teleport";
+                        @Anchor = Anchor(Width: 85);
+                    }
+                }
+            }
+
+            // Content area
+            Group {
+                LayoutMode: Top;
+                Anchor: (Height: 320, Top: 10);
+                Background: "panel_bg.png";
+                
+                $C.@ScrollList #ContentList {
+                    @Anchor = Anchor(Width: 540, Height: 300);
+                    Padding: (All: 10);
+                }
+            }
+
+            // Action buttons
+            Group {
+                LayoutMode: Center;
+                Anchor: (Height: 50, Top: 15);
+
+                Group {
+                    LayoutMode: Left;
+
+                    $C.@TextButton #ActionButton1 {
+                        @Text = "Execute";
+                        @Anchor = Anchor(Width: 130);
+                    }
+
+                    Group { Anchor: (Width: 15); }
+
+                    $C.@TextButton #ActionButton2 {
+                        @Text = "Refresh";
+                        @Anchor = Anchor(Width: 130);
+                    }
+
+                    Group { Anchor: (Width: 15); }
+
+                    $C.@TextButton #CloseButton {
+                        @Text = "Close";
+                        @Anchor = Anchor(Width: 130);
+                    }
+                }
+            }
+        }
+    }
+}

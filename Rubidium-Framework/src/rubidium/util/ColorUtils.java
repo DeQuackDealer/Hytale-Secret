@@ -3,7 +3,8 @@ package rubidium.util;
 import java.awt.Color;
 
 /**
- * Color manipulation utilities.
+ * Color manipulation utilities for Hytale UI.
+ * Uses Hytale's native color formats (hex, ARGB) instead of legacy codes.
  */
 public final class ColorUtils {
     
@@ -36,44 +37,63 @@ public final class ColorUtils {
         return new Color(r, g, b);
     }
     
-    public static String toMinecraftColor(Color color) {
-        int r = color.getRed();
-        int g = color.getGreen();
-        int b = color.getBlue();
-        
-        return "§x§" + toHexChar(r >> 4) + "§" + toHexChar(r & 0xF) +
-               "§" + toHexChar(g >> 4) + "§" + toHexChar(g & 0xF) +
-               "§" + toHexChar(b >> 4) + "§" + toHexChar(b & 0xF);
+    /**
+     * Convert to Hytale color format (hex string for UI components).
+     */
+    public static String toHytaleColor(Color color) {
+        return toHex(color);
     }
     
-    private static char toHexChar(int value) {
-        return "0123456789abcdef".charAt(value & 0xF);
+    /**
+     * Convert to ARGB integer for Hytale rendering.
+     */
+    public static int toARGB(Color color) {
+        return (color.getAlpha() << 24) | (color.getRed() << 16) | (color.getGreen() << 8) | color.getBlue();
     }
     
-    public static String gradient(String text, Color startColor, Color endColor) {
-        StringBuilder result = new StringBuilder();
-        int length = text.length();
-        
-        for (int i = 0; i < length; i++) {
-            double ratio = length > 1 ? (double) i / (length - 1) : 0;
-            Color color = lerp(startColor, endColor, ratio);
-            result.append(toMinecraftColor(color)).append(text.charAt(i));
+    /**
+     * Convert to ARGB with specified alpha.
+     */
+    public static int toARGB(Color color, int alpha) {
+        return (alpha << 24) | (color.getRed() << 16) | (color.getGreen() << 8) | color.getBlue();
+    }
+    
+    /**
+     * Create color from ARGB integer.
+     */
+    public static Color fromARGB(int argb) {
+        return new Color(
+            (argb >> 16) & 0xFF,
+            (argb >> 8) & 0xFF,
+            argb & 0xFF,
+            (argb >> 24) & 0xFF
+        );
+    }
+    
+    /**
+     * Generate gradient colors for Hytale UI elements.
+     */
+    public static String[] gradientHex(Color startColor, Color endColor, int steps) {
+        String[] result = new String[steps];
+        for (int i = 0; i < steps; i++) {
+            double ratio = steps > 1 ? (double) i / (steps - 1) : 0;
+            result[i] = toHex(lerp(startColor, endColor, ratio));
         }
-        
-        return result.toString();
+        return result;
     }
     
-    public static String rainbow(String text) {
+    /**
+     * Generate rainbow gradient colors.
+     */
+    public static String[] rainbowHex(int steps) {
         Color[] colors = {
             Color.RED, new Color(255, 127, 0), Color.YELLOW,
             Color.GREEN, Color.CYAN, Color.BLUE, new Color(139, 0, 255)
         };
         
-        StringBuilder result = new StringBuilder();
-        int length = text.length();
-        
-        for (int i = 0; i < length; i++) {
-            double position = (double) i / length * (colors.length - 1);
+        String[] result = new String[steps];
+        for (int i = 0; i < steps; i++) {
+            double position = (double) i / steps * (colors.length - 1);
             int index = (int) position;
             double ratio = position - index;
             
@@ -83,11 +103,9 @@ public final class ColorUtils {
             } else {
                 color = lerp(colors[index], colors[index + 1], ratio);
             }
-            
-            result.append(toMinecraftColor(color)).append(text.charAt(i));
+            result[i] = toHex(color);
         }
-        
-        return result.toString();
+        return result;
     }
     
     public static Color darken(Color color, double amount) {
@@ -102,5 +120,9 @@ public final class ColorUtils {
         int g = (int) Math.min(255, color.getGreen() + (255 - color.getGreen()) * amount);
         int b = (int) Math.min(255, color.getBlue() + (255 - color.getBlue()) * amount);
         return new Color(r, g, b);
+    }
+    
+    public static Color withAlpha(Color color, int alpha) {
+        return new Color(color.getRed(), color.getGreen(), color.getBlue(), alpha);
     }
 }

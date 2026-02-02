@@ -3,13 +3,17 @@ package rubidium.core;
 import rubidium.admin.AdminUIModule;
 import rubidium.api.npc.NPCAPI;
 import rubidium.api.scheduler.SchedulerAPI;
+import rubidium.api.settings.SettingsTabAPI;
+import rubidium.api.ui.UIInitializer;
 import rubidium.core.tier.FeatureRegistry;
 import rubidium.core.tier.ProductTier;
 import rubidium.hud.HUDRegistry;
+import rubidium.hytale.adapter.PlayerEventHandler;
 import rubidium.minimap.MinimapModule;
 import rubidium.settings.SettingsRegistry;
 import rubidium.stats.PerformanceStatsModule;
 import rubidium.voicechat.VoiceChatModule;
+import rubidium.core.HytaleRuntimeBridge;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,9 +42,12 @@ public final class RubidiumBootstrap {
         }
         
         LOGGER.info("[Rubidium] ==========================================");
-        LOGGER.info("[Rubidium]  Rubidium Framework v1.0.0");
+        LOGGER.info("[Rubidium]  Rubidium Framework v1.0");
         LOGGER.info("[Rubidium] ==========================================");
         LOGGER.info("[Rubidium] Mode: " + (isServer ? "Server/Singleplayer" : "Client"));
+        
+        HytaleRuntimeBridge.get();
+        LOGGER.info("[Rubidium] Runtime bridge initialized");
         
         currentTier = detectProductTier(entryClass);
         LOGGER.info("[Rubidium] Detected edition: " + currentTier.getDisplayName());
@@ -53,12 +60,14 @@ public final class RubidiumBootstrap {
         
         if (isServer) {
             initServerFeatures();
+            // Event handlers are now registered by RubidiumHytaleEntry.setup() 
+            // using the real Hytale event registry from getEventRegistry()
         }
         
         initialized = true;
         logAvailableFeatures();
         
-        LOGGER.info("[Rubidium] Framework v1.0.0 enabled!");
+        LOGGER.info("[Rubidium] Framework v1.0 enabled!");
         return true;
     }
     
@@ -72,7 +81,10 @@ public final class RubidiumBootstrap {
         if (voiceChatModule != null) voiceChatModule.onDisable();
         if (adminModule != null) adminModule.onDisable();
         
+        PlayerEventHandler.get().shutdown();
+        UIInitializer.get().shutdown();
         SchedulerAPI.shutdown();
+        HytaleRuntimeBridge.get().shutdown();
         
         initialized = false;
         LOGGER.info("[Rubidium] Framework disabled.");
@@ -158,6 +170,8 @@ public final class RubidiumBootstrap {
     }
     
     private static void registerSettingsCategory() {
+        SettingsTabAPI.initialize();
+        
         SettingsRegistry.get().registerCategory(new SettingsRegistry.SettingCategory(
             "rubidium", "Rubidium", "rubidium_icon", SettingsRegistry.PermissionLevel.PLAYER
         ));
@@ -176,6 +190,18 @@ public final class RubidiumBootstrap {
                 statsModule.getMetrics().tick();
             }
         }, 1, 1);
+    }
+    
+    private static void registerEventHandlers() {
+        LOGGER.info("[Rubidium] Registering player event handlers...");
+        
+        try {
+            PlayerEventHandler.get().registerEvents();
+            LOGGER.info("[Rubidium] Player event handlers registered successfully");
+        } catch (Exception e) {
+            LOGGER.severe("[Rubidium] Failed to register event handlers: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     
     private static void logAvailableFeatures() {
@@ -228,7 +254,7 @@ public final class RubidiumBootstrap {
     }
     
     public static String getVersion() {
-        return "1.0.0";
+        return "1.0";
     }
     
     public static MinimapModule getMinimapModule() {
