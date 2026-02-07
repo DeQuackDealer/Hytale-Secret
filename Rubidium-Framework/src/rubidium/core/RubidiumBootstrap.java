@@ -139,28 +139,44 @@ public final class RubidiumBootstrap {
     }
     
     private static void initModules() {
-        statsModule = new PerformanceStatsModule();
         FeatureRegistry.withFeature("feature.statistics", () -> {
-            statsModule.onEnable();
-            LOGGER.info("[Rubidium] Performance Statistics module enabled");
+            try {
+                statsModule = new PerformanceStatsModule();
+                statsModule.onEnable();
+                LOGGER.info("[Rubidium] Performance Statistics module enabled");
+            } catch (Exception | NoClassDefFoundError e) {
+                LOGGER.warning("[Rubidium] Could not load Performance Statistics: " + e.getMessage());
+            }
         });
         
-        minimapModule = new MinimapModule();
         FeatureRegistry.withFeature("feature.minimap", () -> {
-            minimapModule.onEnable();
-            LOGGER.info("[Rubidium] Minimap module enabled");
+            try {
+                minimapModule = new MinimapModule();
+                minimapModule.onEnable();
+                LOGGER.info("[Rubidium] Minimap module enabled");
+            } catch (Exception | NoClassDefFoundError e) {
+                LOGGER.warning("[Rubidium] Could not load Minimap: " + e.getMessage());
+            }
         });
         
-        voiceChatModule = new VoiceChatModule();
         FeatureRegistry.withFeature("feature.voicechat", () -> {
-            voiceChatModule.onEnable();
-            LOGGER.info("[Rubidium] Voice Chat module enabled");
+            try {
+                voiceChatModule = new VoiceChatModule();
+                voiceChatModule.onEnable();
+                LOGGER.info("[Rubidium] Voice Chat module enabled");
+            } catch (Exception | NoClassDefFoundError e) {
+                LOGGER.warning("[Rubidium] Could not load Voice Chat: " + e.getMessage());
+            }
         });
         
-        adminModule = new AdminUIModule();
         FeatureRegistry.withFeature("feature.adminpanel", () -> {
-            adminModule.onEnable();
-            LOGGER.info("[Rubidium] Admin Panel module enabled");
+            try {
+                adminModule = new AdminUIModule();
+                adminModule.onEnable();
+                LOGGER.info("[Rubidium] Admin Panel module enabled");
+            } catch (Exception | NoClassDefFoundError e) {
+                LOGGER.warning("[Rubidium] Could not load Admin Panel: " + e.getMessage());
+            }
         });
         
         int enabledCount = (int) FeatureRegistry.getAllFeatures().stream()

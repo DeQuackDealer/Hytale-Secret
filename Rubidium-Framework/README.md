@@ -533,7 +533,7 @@ java -cp "build/classes/java/main:build/resources/main" rubidium.test.RubidiumTe
 
 ```bash
 # Clone the repository
-git clone https://github.com/yellowtale/rubidium-framework.git
+git clone https://github.com/DeQuackDealer/Hytale-Secret.git
 cd rubidium-framework
 
 # Build Free edition
@@ -663,7 +663,7 @@ Rubidium Framework is proprietary software.
 - **Free Edition**: Available for non-commercial use
 - **Plus Edition**: Requires valid license key
 
-For licensing inquiries, contact: licensing@yellowtale.com
+For licensing inquiries, contact DeQuackDealer via GitHub
 
 ---
 
@@ -671,7 +671,7 @@ For licensing inquiries, contact: licensing@yellowtale.com
 
 - **Documentation**: https://docs.rubidium.dev
 - **Discord**: https://discord.gg/rubidium
-- **Issues**: https://github.com/yellowtale/rubidium-framework/issues
+- **Issues**: https://github.com/DeQuackDealer/Hytale-Secret/issues
 
 ---
 
@@ -705,7 +705,7 @@ All features listed in this README are implemented and tested. The framework inc
 
 ## Credits
 
-Developed by Yellow Tale & Pond for the Hytale community.
+Developed by DeQuackDealer for the Hytale community.
 
 Special thanks to:
 - Hypixel Studios for creating Hytale

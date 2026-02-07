@@ -124,7 +124,7 @@ public class ProjectGenerator {
         String content = """
             plugins {
                 java
-                id("com.yellowtale.rubidium-plugin") version "1.0.0"
+                id("com.rubidium.rubidium-plugin") version "1.0.0"
             }
             
             group = "%s"
@@ -137,11 +137,11 @@ public class ProjectGenerator {
             
             repositories {
                 mavenCentral()
-                maven { url = uri("https://repo.yellowtale.com/maven") }
+                maven { url = uri("https://repo.rubidium.dev/maven") }
             }
             
             dependencies {
-                compileOnly("com.yellowtale:rubidium-api:1.0.0")
+                compileOnly("com.rubidium:rubidium-api:1.0.0")
             }
             
             rubidium {

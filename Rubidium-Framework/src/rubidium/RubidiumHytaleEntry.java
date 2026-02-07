@@ -52,15 +52,37 @@ public class RubidiumHytaleEntry extends JavaPlugin {
     protected void setup() {
         LOGGER.atInfo().log("Setup phase - registering events and commands...");
         
-        CommandBridge.initialize(this);
+        try {
+            CommandBridge.initialize(this);
+        } catch (Exception e) {
+            LOGGER.atSevere().log("Failed to initialize command bridge: " + e.getMessage());
+        }
         
-        rubidium.hytale.adapter.PlayerEventHandler.get().registerEvents(getEventRegistry());
+        try {
+            rubidium.hytale.adapter.PlayerEventHandler.get().registerEvents(getEventRegistry());
+        } catch (Exception | NoClassDefFoundError e) {
+            LOGGER.atWarning().log("Could not register player event adapter (non-critical): " + e.getMessage());
+        }
         
-        registerHytaleEvents();
+        try {
+            registerHytaleEvents();
+        } catch (Exception | NoClassDefFoundError e) {
+            LOGGER.atWarning().log("Could not register Hytale events (non-critical): " + e.getMessage());
+        }
         
-        registerCommands();
+        try {
+            registerCommands();
+        } catch (Exception e) {
+            LOGGER.atSevere().log("Failed to register commands: " + e.getMessage());
+        }
         
-        CommandBridge.registerAllPending();
+        try {
+            CommandBridge.registerAllPending();
+        } catch (Exception e) {
+            LOGGER.atWarning().log("Could not finalize command bridge: " + e.getMessage());
+        }
+        
+        LOGGER.atInfo().log("Setup phase complete");
     }
     
     /**
@@ -71,8 +93,13 @@ public class RubidiumHytaleEntry extends JavaPlugin {
     protected void start() {
         LOGGER.atInfo().log("Start phase - initializing modules...");
         
-        if (!RubidiumBootstrap.initialize(getClass(), isServer)) {
-            return;
+        try {
+            if (!RubidiumBootstrap.initialize(getClass(), isServer)) {
+                LOGGER.atWarning().log("RubidiumBootstrap already initialized or failed");
+            }
+        } catch (Exception | NoClassDefFoundError e) {
+            LOGGER.atSevere().log("Failed to initialize Rubidium framework: " + e.getMessage());
+            e.printStackTrace();
         }
     }
     

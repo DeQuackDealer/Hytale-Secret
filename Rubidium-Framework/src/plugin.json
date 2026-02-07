@@ -6,11 +6,11 @@
   "main": "rubidium.RubidiumHytaleEntry",
   "authors": [
     {
-      "name": "Yellow Tale Team",
-      "url": "https://github.com/yellow-tale/rubidium"
+      "name": "DeQuackDealer",
+      "url": "https://github.com/DeQuackDealer/Hytale-Secret"
     }
   ],
-  "website": "https://github.com/yellow-tale/rubidium",
+  "website": "https://github.com/DeQuackDealer/Hytale-Secret",
   "serverVersion": ">=0.0.1",
   "dependencies": {},
   "optionalDependencies": {},

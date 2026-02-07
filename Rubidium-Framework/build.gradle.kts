@@ -128,11 +128,12 @@ tasks.register<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("rubi
     exclude("plugin_plus.json")
     
     // Exclude Plus-only features from FREE edition
-    exclude("rubidium/feature/voicechat/**")
-    exclude("rubidium/feature/minimap/**")
-    exclude("rubidium/feature/statistics/**")
-    exclude("rubidium/feature/hudeditor/**")
-    exclude("rubidium/feature/adminpanel/**")
+    // Use correct package paths matching actual source structure
+    exclude("rubidium/voicechat/**")
+    exclude("rubidium/minimap/**")
+    exclude("rubidium/stats/**")
+    exclude("rubidium/hud/**")
+    exclude("rubidium/admin/**")
     exclude("rubidium/replay/**")
     exclude("rubidium/api/npc/**")
     exclude("rubidium/api/ai/**")
@@ -144,7 +145,8 @@ tasks.register<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("rubi
     exclude("rubidium/api/bossbar/**")
     exclude("rubidium/api/scoreboard/**")
     exclude("rubidium/hytale/ui/**")
-    exclude("rubidium/hytale/adapter/**")
+    // NOTE: Do NOT exclude rubidium/hytale/adapter/** - it contains PlayerEventHandler
+    // which is needed for core event handling in both editions
 }
 
 // PLUS Edition - rubidium_plus.jar
@@ -320,8 +322,8 @@ publishing {
                 
                 developers {
                     developer {
-                        id.set("yellowtale")
-                        name.set("Yellow Tale Team")
+                        id.set("dequackdealer")
+                        name.set("DeQuackDealer")
                     }
                 }
             }
