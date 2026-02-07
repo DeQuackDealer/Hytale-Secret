@@ -9,15 +9,12 @@ group = "com.rubidium"
 version = "1.0"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_25
-    targetCompatibility = JavaVersion.VERSION_25
     withJavadocJar()
     withSourcesJar()
 }
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
-    options.release.set(25)
     options.compilerArgs.addAll(listOf(
         "-Xlint:all",
         "-Xlint:-processing"
@@ -40,6 +37,7 @@ dependencies {
     }
     
     api("org.jetbrains:annotations:24.0.0")
+    compileOnly("com.google.code.findbugs:jsr305:3.0.2")
     api("com.google.code.gson:gson:2.11.0")
     api("org.yaml:snakeyaml:2.3")
     api("com.moandjiezana.toml:toml4j:0.7.2")
@@ -58,7 +56,7 @@ tasks.test {
 
 tasks.withType<Javadoc> {
     val opts = options as StandardJavadocDocletOptions
-    opts.addStringOption("source", "21")
+    opts.addStringOption("source", "25")
     opts.addStringOption("Xdoclint:none", "-quiet")
     isFailOnError = false
 }
@@ -85,11 +83,12 @@ fun com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar.configureCommon(t
     relocate("io.netty", "rubidium.libs.netty")
     relocate("org.slf4j", "rubidium.libs.slf4j")
     relocate("org.checkerframework", "rubidium.libs.checkerframework")
-    relocate("javax.annotation", "rubidium.libs.javax.annotation")
+    // javax.annotation is provided by HytaleServer.jar at runtime, don't relocate
     
     // Exclude compile-only annotations (not needed at runtime)
     dependencies {
         exclude(dependency("org.jetbrains:annotations"))
+        exclude(dependency("com.google.code.findbugs:jsr305"))
     }
     
     // Merge service files for proper SPI loading
@@ -177,52 +176,6 @@ tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJ
     archiveClassifier.set("")
     
     configureCommon("PLUS", true)
-}
-
-// LITE Edition - rubidium_lite.jar (no bundled dependencies, like Nitrado's mod)
-tasks.register<Jar>("rubidiumLiteJar") {
-    archiveBaseName.set("rubidium_lite")
-    archiveClassifier.set("")
-    archiveVersion.set("")
-    
-    from(sourceSets.main.get().output)
-    
-    // Include manifest.json at root for Hytale mod loading
-    from("resources/manifest.json")
-    
-    // Exclude development stubs
-    exclude("com/hypixel/**")
-    
-    // Exclude Plus-only features
-    exclude("rubidium/feature/voicechat/**")
-    exclude("rubidium/feature/minimap/**")
-    exclude("rubidium/feature/statistics/**")
-    exclude("rubidium/feature/hudeditor/**")
-    exclude("rubidium/feature/adminpanel/**")
-    exclude("rubidium/replay/**")
-    exclude("rubidium/api/npc/**")
-    exclude("rubidium/api/ai/**")
-    exclude("rubidium/api/pathfinding/**")
-    exclude("rubidium/api/worldgen/**")
-    exclude("rubidium/api/inventory/**")
-    exclude("rubidium/api/economy/**")
-    exclude("rubidium/api/particles/**")
-    exclude("rubidium/api/bossbar/**")
-    exclude("rubidium/api/scoreboard/**")
-    exclude("rubidium/hytale/ui/**")
-    exclude("rubidium/hytale/adapter/**")
-    
-    manifest {
-        attributes(
-            "Implementation-Title" to "Rubidium Framework",
-            "Implementation-Version" to project.version,
-            "Rubidium-Version" to "1.0",
-            "Rubidium-Tier" to "LITE",
-            "Multi-Release" to "true"
-        )
-    }
-    
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 // Build both editions

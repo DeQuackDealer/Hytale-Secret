@@ -1,5 +1,6 @@
 package rubidium;
 
+import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.command.CommandSender;
@@ -26,21 +27,21 @@ import rubidium.voicechat.VoiceChatModule;
 import rubidium.ui.components.UIContainer;
 import rubidium.hud.HUDEditorUI;
 
+import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.logging.Logger;
 
 public class RubidiumHytaleEntry extends JavaPlugin {
     
     private static RubidiumHytaleEntry instance;
-    private static final Logger LOGGER = Logger.getLogger("Rubidium");
+    private static final HytaleLogger LOGGER = HytaleLogger.forName("Rubidium");
     private static boolean isServer = true;
     
-    public RubidiumHytaleEntry(JavaPluginInit init) {
+    public RubidiumHytaleEntry(@Nonnull JavaPluginInit init) {
         super(init);
         instance = this;
         isServer = (init != null);
-        LOGGER.info("[Rubidium] Framework v1.0 loading...");
-        LOGGER.info("[Rubidium] Environment: " + (isServer ? "Server" : "Singleplayer"));
+        LOGGER.atInfo().log("Rubidium Framework v1.0 loading...");
+        LOGGER.atInfo().log("Hello from " + this.getName() + " version " + (this.getManifest() != null ? this.getManifest().getVersion() : "1.0.0"));
     }
     
     /**
@@ -49,7 +50,7 @@ public class RubidiumHytaleEntry extends JavaPlugin {
      */
     @Override
     protected void setup() {
-        LOGGER.info("[Rubidium] Setup phase - registering events and commands...");
+        LOGGER.atInfo().log("Setup phase - registering events and commands...");
         
         CommandBridge.initialize(this);
         
@@ -66,7 +67,7 @@ public class RubidiumHytaleEntry extends JavaPlugin {
      */
     @Override
     protected void start() {
-        LOGGER.info("[Rubidium] Start phase - initializing modules...");
+        LOGGER.atInfo().log("Start phase - initializing modules...");
         
         if (!RubidiumBootstrap.initialize(getClass(), isServer)) {
             return;
@@ -79,7 +80,7 @@ public class RubidiumHytaleEntry extends JavaPlugin {
      * Uses getEventRegistry() which returns the real Hytale registry at runtime.
      */
     private void registerHytaleEvents() {
-        LOGGER.info("[Rubidium] Registering Hytale event handlers via plugin registry...");
+        LOGGER.atInfo().log("Registering Hytale event handlers via plugin registry...");
         
         getEventRegistry().register(
             com.hypixel.hytale.server.core.event.events.player.AddPlayerToWorldEvent.class,
@@ -91,15 +92,14 @@ public class RubidiumHytaleEntry extends JavaPlugin {
             this::onPlayerQuit
         );
         
-        LOGGER.info("[Rubidium] Hytale event handlers registered");
+        LOGGER.atInfo().log("Hytale event handlers registered");
     }
     
     private void onPlayerJoin(com.hypixel.hytale.server.core.event.events.player.AddPlayerToWorldEvent event) {
         try {
             rubidium.hytale.adapter.PlayerEventHandler.get().handlePlayerJoin(event);
         } catch (Exception e) {
-            LOGGER.severe("[Rubidium] Error handling player join: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.atSevere().log("Error handling player join: " + e.getMessage());
         }
     }
     
@@ -107,8 +107,7 @@ public class RubidiumHytaleEntry extends JavaPlugin {
         try {
             rubidium.hytale.adapter.PlayerEventHandler.get().handlePlayerQuit(event);
         } catch (Exception e) {
-            LOGGER.severe("[Rubidium] Error handling player quit: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.atSevere().log("Error handling player quit: " + e.getMessage());
         }
     }
     
@@ -444,7 +443,7 @@ public class RubidiumHytaleEntry extends JavaPlugin {
             }
         });
         
-        LOGGER.info("[Rubidium] Registered all commands");
+        LOGGER.atInfo().log("Registered all commands");
     }
     
     /**
@@ -453,7 +452,7 @@ public class RubidiumHytaleEntry extends JavaPlugin {
      */
     @Override
     protected void shutdown() {
-        LOGGER.info("[Rubidium] Shutdown phase - cleaning up...");
+        LOGGER.atInfo().log("Shutdown phase - cleaning up...");
         RubidiumBootstrap.shutdown();
     }
     

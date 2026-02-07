@@ -1,14 +1,19 @@
 {
-  "Group": "com.rubidium",
-  "Name": "RubidiumPlus",
-  "Version": "1.0.0",
-  "Authors": [
-    {
-      "Name": "Yellow Tale Team",
-      "Url": "https://github.com/yellow-tale/rubidium"
-    }
-  ],
-  "Website": "https://github.com/yellow-tale/rubidium",
-  "Main": "rubidium.RubidiumHytaleEntry",
-  "ServerVersion": "*"
+    "Group": "com.rubidium",
+    "Name": "RubidiumPlus",
+    "Version": "1.0.0",
+    "Description": "Rubidium Plus - Full-featured API framework for Hytale with advanced tools",
+    "Authors": [
+        {
+            "Name": "Yellow Tale Team",
+            "Url": "https://github.com/yellow-tale/rubidium"
+        }
+    ],
+    "Website": "https://github.com/yellow-tale/rubidium",
+    "ServerVersion": "*",
+    "Dependencies": {},
+    "OptionalDependencies": {},
+    "DisabledByDefault": false,
+    "Main": "rubidium.RubidiumHytaleEntry",
+    "IncludesAssetPack": false
 }
