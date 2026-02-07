@@ -5,17 +5,18 @@ import com.hypixel.hytale.server.core.command.CommandManager;
 import com.hypixel.hytale.server.core.command.PluginCommand;
 import com.hypixel.hytale.server.core.event.EventRegistry;
 
+import com.hypixel.hytale.logger.HytaleLogger;
+
 import java.nio.file.Path;
-import java.util.logging.Logger;
 
 public abstract class JavaPlugin extends PluginBase {
     
     private final JavaPluginInit init;
-    private final Logger logger;
+    private final HytaleLogger logger;
     
     protected JavaPlugin(JavaPluginInit init) {
         this.init = init;
-        this.logger = Logger.getLogger(getClass().getSimpleName());
+        this.logger = HytaleLogger.forName(getClass().getSimpleName());
     }
     
     protected void preLoad() {
@@ -42,7 +43,7 @@ public abstract class JavaPlugin extends PluginBase {
         return init != null ? init.getManifest() : null;
     }
     
-    public Logger getLogger() {
+    public HytaleLogger getLogger() {
         return logger;
     }
     

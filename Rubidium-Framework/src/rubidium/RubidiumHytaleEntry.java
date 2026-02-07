@@ -56,6 +56,8 @@ public class RubidiumHytaleEntry extends JavaPlugin {
         
         rubidium.hytale.adapter.PlayerEventHandler.get().registerEvents(getEventRegistry());
         
+        registerHytaleEvents();
+        
         registerCommands();
         
         CommandBridge.registerAllPending();
