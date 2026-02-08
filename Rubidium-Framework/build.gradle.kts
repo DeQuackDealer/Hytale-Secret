@@ -311,7 +311,7 @@ publishing {
             pom {
                 name.set("Rubidium Framework")
                 description.set("Java SDK for Hytale server plugin development")
-                url.set("https://github.com/yellow-tale/rubidium")
+                url.set("https://github.com/DeQuackDealer/Hytale-Secret")
                 
                 licenses {
                     license {

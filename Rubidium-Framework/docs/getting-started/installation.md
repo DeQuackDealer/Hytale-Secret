@@ -86,7 +86,7 @@ The plugin template includes a Gradle wrapper. No separate installation needed.
 ### Method 1: Clone Template (Recommended)
 
 ```bash
-git clone https://github.com/yellow-tale/rubidium-plugin-template.git MyPlugin
+git clone https://github.com/DeQuackDealer/rubidium-plugin-template.git MyPlugin
 cd MyPlugin
 ```
 

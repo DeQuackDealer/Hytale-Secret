@@ -6,7 +6,6 @@ import rubidium.api.event.EventBus;
 import rubidium.api.logging.PluginLogger;
 import rubidium.api.scheduler.TaskScheduler;
 import rubidium.optimization.OptimizationContext;
-import rubidium.integration.YellowTaleAPI;
 
 import java.io.File;
 import java.io.InputStream;
@@ -23,7 +22,6 @@ public abstract class RubidiumPlugin {
     private CommandManager commandManager;
     private TaskScheduler scheduler;
     private OptimizationContext optimization;
-    private YellowTaleAPI yellowTale;
     
     public final void initialize(
             PluginDescriptor descriptor,
@@ -31,8 +29,7 @@ public abstract class RubidiumPlugin {
             EventBus eventBus,
             CommandManager commandManager,
             TaskScheduler scheduler,
-            OptimizationContext optimization,
-            YellowTaleAPI yellowTale
+            OptimizationContext optimization
     ) {
         this.descriptor = descriptor;
         this.dataFolder = dataFolder;
@@ -42,7 +39,6 @@ public abstract class RubidiumPlugin {
         this.commandManager = commandManager;
         this.scheduler = scheduler;
         this.optimization = optimization;
-        this.yellowTale = yellowTale;
     }
     
     public abstract void onEnable();
@@ -113,10 +109,6 @@ public abstract class RubidiumPlugin {
     
     public final OptimizationContext getOptimization() {
         return optimization;
-    }
-    
-    public final YellowTaleAPI getYellowTale() {
-        return yellowTale;
     }
     
     public final boolean isEnabled() {

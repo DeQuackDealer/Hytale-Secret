@@ -236,7 +236,7 @@ EventAPI.registerListener(new MyListener());
 ## Community
 
 - [Discord](https://discord.gg/rubidium) - Join our community
-- [GitHub](https://github.com/yellow-tale/rubidium) - Report issues and contribute
+- [GitHub](https://github.com/DeQuackDealer/Hytale-Secret) - Report issues and contribute
 - [Forums](https://forum.rubidium.dev) - Discuss and share
 
 ## License
